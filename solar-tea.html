@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>從綠能光電到送茶服務：公務體系那消失的800元與數位土地轉生 - 24hr-168 數位診斷室</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
             line-height: 1.6;
@@ -23,9 +21,7 @@
             padding: 25px 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .article-meta {
-            margin-bottom: 15px;
-        }
+        .article-meta { margin-bottom: 15px; }
         .tag {
             display: inline-block;
             font-size: 0.75em;
@@ -37,21 +33,9 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        h1 {
-            line-height: 1.3;
-            margin-top: 10px;
-            color: #1a237e;
-        }
-        h3 {
-            color: #0d47a1;
-            margin-top: 30px;
-            border-left: 4px solid #0d47a1;
-            padding-left: 10px;
-        }
-        p {
-            margin: 15px 0;
-            text-align: justify;
-        }
+        h1 { line-height: 1.3; margin-top: 10px; color: #1a237e; }
+        h3 { color: #0d47a1; margin-top: 30px; border-left: 4px solid #0d47a1; padding-left: 10px; }
+        p { margin: 15px 0; text-align: justify; }
         blockquote {
             background: #f5f5f5;
             border-left: 5px solid #d32f2f;
@@ -60,17 +44,63 @@
             font-style: italic;
             color: #444;
         }
-        .highlight {
-            background-color: #fff9c4;
-            padding: 2px 4px;
+        .highlight { background-color: #fff9c4; padding: 2px 4px; font-weight: bold; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        
+        /* 🔮 岫老師專屬：純代碼網頁結構化摘要圖卡與流向圖樣式（免圖片、防跑版） 🔮 */
+        .infographic-box {
+            background-color: #f8f9fa;
+            border: 2px solid #1a237e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .info-title {
+            font-size: 1.1em;
             font-weight: bold;
+            color: #1a237e;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
         }
-        ul {
-            padding-left: 20px;
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9em;
         }
-        li {
-            margin-bottom: 8px;
+        .compare-table th { background-color: #1a237e; color: white; padding: 10px; text-align: left; }
+        .compare-table td { padding: 12px 10px; border-bottom: 1px solid #e0e0e0; }
+        .row-scam { background-color: #ffebee; color: #c62828; font-weight: bold; }
+        .row-truth { background-color: #e8eaf6; color: #1a237e; font-weight: bold; }
+        
+        /* 純代碼流量劫持流向圖 */
+        .flowchart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 0.9em;
         }
+        .flow-node {
+            background: #ffffff;
+            border: 1px solid #ccceda;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+        .flow-arrow {
+            text-align: center;
+            color: #1a237e;
+            font-size: 1.2em;
+            line-height: 1;
+            margin: 2px 0;
+        }
+
         .verdict-box {
             background-color: #e8eaf6;
             padding: 20px;
@@ -84,20 +114,10 @@
             padding-top: 40px;
             color: #555;
         }
-        .english-section h1 {
-            color: #1a237e;
-        }
-        .english-section h3 {
-            color: #1a237e;
-            border-left: 4px solid #1a237e;
-        }
-        .english-section blockquote {
-            border-left: 5px solid #9fa8da;
-        }
-        .english-section .verdict-box {
-            border-top: 4px solid #5c6bc0;
-            background-color: #f5f5f5;
-        }
+        .english-section h1 { color: #1a237e; }
+        .english-section h3 { color: #1a237e; border-left: 4px solid #1a237e; padding-left: 10px; }
+        .english-section blockquote { border-left: 5px solid #9fa8da; }
+        .english-section .verdict-box { border-top: 4px solid #5c6bc0; background-color: #f5f5f5; }
     </style>
 </head>
 <body>
@@ -112,7 +132,7 @@
             <span class="tag" style="background: #e8f5e9; color: #2e7d32;">#數位轉型災難</span>
             <span class="tag">#綠能光電</span>
             <span class="tag">#時事觀察</span>
-            <span class="tag">#官僚體制</span>
+            <span class="tag">#資訊圖卡摘要</span>
         </div>
 
         <h1>
@@ -120,13 +140,53 @@
             公務體系那消失的 800 元與數位土地轉生
         </h1>
 
+        <div class="infographic-box">
+            <div class="info-title">📊 數位診斷焦點摘要：800元引起的邊界崩塌對照表 (Dashboard)</div>
+            
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th width="50%">❌ 官僚行政盲點 / Bureaucratic Neglect</th>
+                        <th width="50%">🎯 數位黑客劫持 / Hacker Exploitation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="row-scam">
+                        <td>放任專案臨時網域過期 (省 800 元)</td>
+                        <td>自動化腳本精準「合法搶註」無主網址</td>
+                    </tr>
+                    <tr>
+                        <td>原因：缺乏數位資產生命週期管理觀念。</td>
+                        <td>目的：低成本收割政府長年累積的權威權重。</td>
+                    </tr>
+                    <tr class="row-truth">
+                        <td>未清除各大官網留存的「舊回溯連結」</td>
+                        <td>佈署後台「301 Redirect」永久跳轉代碼</td>
+                    </tr>
+                    <tr>
+                        <td>後果：親手為民眾與孩童築起一條安全破口。</td>
+                        <td>結果：將乾淨綠能流量瞬間引流至黑心色情站。</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-title" style="font-size: 0.95em; margin-bottom: 10px;">⏱️ 流量污染黑客手法放樣 (Malicious Redirection Flow)</div>
+            <div class="flowchart-container">
+                <div class="flow-node" style="border-left: 4px solid #2e7d32; background:#f4fbf5;">1. 民眾點擊官方文宣 / 政府官網上的光電宣導連結</div>
+                <div class="flow-arrow">▼</div>
+                <div class="flow-node" style="border-left: 4px solid #d32f2f; background:#fff5f5;">2. 請求發送至已過期、被數位蟑螂搶註的舊 `.org` 或獨立網域</div>
+                <div class="flow-arrow">▼</div>
+                <div class="flow-node" style="background:#222531; color:#fff;">3. 黑客後台執行 301 腳本：一秒跳轉引流至成人色情「送茶」網站</div>
+            </div>
+        </div>
+
         <p>一個推廣綠能、正經八百的政府官方太陽能光電推廣連結，點下去之後，跳出來的不是環保小撇步，也不是節能減碳大計，而是最赤裸裸的成人色情網站。這種「國家級的黑色幽默」，就活生生地發生在我們眼前的數位世界裡。</p>
         
         <p>這不是都市傳說。許多民眾在查閱政府公開資訊或點擊宣導文宣時，往往會因為那是 `.gov.tw` 或公務機關背書的內容而毫無防備。今天，我們就從一個懂電腦、常跑工地的硬核內行視角，用最直白的邏輯，扒開這個公務體系在數位世界裡鬧出的低級大笑話，看看那「消失的 800 元」究竟如何讓神聖的綠能土地變成了數位紅燈區。</p>
 
         <h3>一、 一個網域（Domain Name）過期引發的連鎖塌陷</h3>
         <p>在實體工程中，地基如果沒有定期維護、任由其合約過期，大樓遲早會塌。在數位世界裡，網域（也就是網址）就是一棟大樓的門牌。公務機關當年為了推廣光電，轟轟烈烈地申請了一個專用網域，並把它印在成千上萬本的實體文宣、海報，甚至永久埋在政府各級單位的官網超連結裡。</p>
-        <p>然而，當專案結束或承辦人員異動後，這個網域的「年度續期維護費」——通常只要區區的 <strong>800 元新臺幣</strong>——卻在公務體系的僵化流程中被遺忘了。這張門牌，就這樣在網路上變成了「無主之地」。</p>
+        <p>然而，當專案結束或承辦人員異動後，這個網域的「年度續期維護費」——通常只要區區的 <span class="highlight">800 元新臺幣</span>——卻在公務體系的僵化流程中被遺忘了。這張門牌，就這樣在網路上變成了「無主之地」。</p>
 
         <h3>二、 數位蟑螂（Domain Squatters）的精準精算與惡意收割</h3>
         <p>當政府放任網域過期，網路上的自動化惡意腳本（Bot）早就盯上了這塊肥肉。這群俗稱「數位蟑螂」或「網域獵人」的境外黑客與非法業者，有著極其敏銳的嗅覺：</p>
@@ -137,7 +197,7 @@
         <p>於是，非法業者花費不到一千元的代價，瞬間「合法搶註」了這個網域。他們不需要重蓋網站，只需要在後台設定一行簡單的代碼（301 Redirect 跳轉），就能把所有相信政府文宣點進來的乾淨流量，成千上萬地瞬間引流到他們經營的色情「送茶」網站、博弈平台上。這就是最典型的數位土地轉生。</p>
 
         <h3>三、 官僚怠惰的後座力：你以為的綠能，變成了孩子眼中的黃片</h3>
-        <p>這造成的後果極其惡劣且諷刺。學校老師帶著學生做專題、公務員在做綠能簡報、一般民眾想了解光電政策，點開政府官網的推薦連結，跳出來的卻是挑逗的文字與不堪入目的畫面。這種行政管理上的重大紕漏，反映出公務機關在面對數位資產時，缺乏最基本的基礎生命週期管理（Lifecycle Management）觀念。</p>
+        <p>這造成的後果極其惡劣且諷刺。學校老師帶著學生做專題、公務員在做綠能簡報、一般民眾想了解光電政策，點開政府官網的推薦連結，跳出來的卻是挑逗的文字與不堪入目的畫面。這種行政管理上的重大漏，反映出公務機關在面對數位資產時，缺乏最基本的基礎生命週期管理（Lifecycle Management）觀念。</p>
 
         <h3>四、 岫老師的數位診斷：如何終結這種國家級尷尬？</h3>
         <p>要解決這種低級錯誤，公務體系必須引進實體工程的「驗收與維護協定」：</p>
@@ -155,7 +215,7 @@
                 <span class="tag" style="background: #e8eaf6; color: #1a237e;">#DigitalDisaster</span>
                 <span class="tag">#GreenEnergy</span>
                 <span class="tag">#Bureaucracy</span>
-                <span class="tag">#RiskManagement</span>
+                <span class="tag">#DashboardSummary</span>
             </div>
 
             <h1>
@@ -165,7 +225,7 @@
 
             <p>An official, highly publicized government hyperlink intended to promote green solar energy is executed. Instead of environmental guidelines or energy-saving strategies, the user is directly routed to an explicit adult escort platform. This "state-level dark humor" is currently transpiring live within our digital infrastructure.</p>
             
-            <p>This is no urban legend. Countless citizens executing queries or reviewing promotional literature trust these hyperlinks implicitly due to the authoritative `.gov.tw` domain suffix or explicit institutional backing. Today, from the pragmatic, forensic perspective of a computer veteran who regularly maneuvers through physical construction sites and digital logic, we will dissect this bureaucratic catastrophe. Let us trace how a "missing NT$800" effectively converted a sacred eco-friendly asset into a digital red-light district.</p>
+            <p>This is no urban legend. Countless citizens executing queries or reviewing promotional literature trust these hyperlinks implicitly due to the authoritative `.gov.tw` domain suffix or explicit institutional backing. Today, from the pragmatic, forensic perspective of a computer veteran who regularly maneuvers through physical construction sites and digital logic, we will deconstruct this bureaucratic catastrophe. Let us trace how a "missing NT$800" effectively converted a sacred eco-friendly asset into a digital red-light district.</p>
 
             <h3>1. The Collapse of an Expired Domain (Structural Foundation Failure)</h3>
             <p>In structural engineering, if a foundation contract lapses without systematic lifecycle maintenance, the structural integrity of the high-rise will inevitably fail. In the digital matrix, a domain name is the immutable street address of an infrastructure. Years ago, the authorities launched a massive campaign to promote green energy, acquiring a dedicated domain. They permanently embedded this hyperlink into thousands of physical pamphlets, posters, and the core code of various municipal web pages.</p>
@@ -193,7 +253,7 @@
         </div>
 
         <div style="margin-top: 50px; border-top: 1px dashed #ccc; padding-top: 30px; text-align: center;">
-            <a href="index.html" style="display: inline-block; padding: 12px 30px; background-color: #1a237e; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            <a href="index.html" style="display: inline-block; padding: 12px 30px; background-color: #1a237e; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: background-color 0.2s;">
                 讀畢．返回診斷首頁 / Back to Main Hub
             </a>
         </div>
