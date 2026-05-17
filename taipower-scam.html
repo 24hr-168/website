@@ -132,9 +132,9 @@
 
         <div class="article-meta">
             <span class="tag" style="background: #ffebee; color: #c62828;">#資安預警</span>
-            <span class="tag">#釣魚郵件</span>
-            <span class="tag">#社交工程</span>
-            <span class="tag">#中英完整對照</span>
+            <span class="tag">#台電釣魚詐騙</span>
+            <span class="tag">#社交工程漏洞</span>
+            <span class="tag">#中英1比1飽滿版</span>
         </div>
 
         <h1>台電節電獎勵金 NT$1,008 釣魚郵件深度鑑識：一個連時間邏輯都算不準的低級數位收割現場</h1>
@@ -157,43 +157,47 @@
                 <tbody>
                     <tr class="row-scam">
                         <td>寄件人顯示名稱：「台灣電力公司總部」</td>
-                        <td>發信網域揭穿：來自境外無關之惡意第三方機房</td>
+                        <td>發信網域揭穿：來自境外無關之惡意第三方匿名機房</td>
                     </tr>
                     <tr>
-                        <td>手法：利用大眾對公用事業公信力的權威盲從。</td>
-                        <td>真相：系統標頭電子郵件地址與台電官方毫無關聯。</td>
+                        <td>手法：利用大眾對公用事業公信力的權威進行盲從收割。</td>
+                        <td>真相：系統內部標頭的電子郵件真實位址與台電官方網域毫無關聯。</td>
                     </tr>
                     <tr class="row-truth">
                         <td>催繳警示：「請於 5 月 13 日前完成申領」</td>
-                        <td>時間悖論硬傷：發信時間竟是 5 月 17 日</td>
+                        <td>時間悖論硬傷：發信時間戳記竟是 5 月 17 日</td>
                     </tr>
                     <tr>
-                        <td>手法：製造時程緊迫感，逼迫受害者慌亂決策。</td>
-                        <td>真相：腳本撰寫錯誤，產生穿越時空的低級邏輯悖論。</td>
+                        <td>手法：故意製造迫切的時程緊迫感，逼迫受害者慌亂下做出決策。</td>
+                        <td>真相：自動化群發腳本配置錯誤，產生穿越時空的低級邏輯悖論。</td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="info-title" style="font-size: 0.95em; margin-bottom: 10px;">⏱️ 社交工程攻擊鏈剖析 (Social Engineering Attack Chain)</div>
             <div class="timeline-chart">
-                <div class="timeline-node"><strong>1. 攔截雷達：</strong> 指揮部雷達偵測到大批冒充台電發送的「節電獎勵金」群發垃圾郵件。</div>
-                <div class="timeline-node"><strong>2. 話術偽裝：</strong> 以節能獎勵利誘受害者，並利用「逾期取消」製造心理防線破口。</div>
-                <div class="timeline-node"><strong>3. 憑證收割：</strong> 引導受害者點擊惡意連結，企圖竊取個資與信用卡關鍵時間戳記。</div>
-                <div class="timeline-node"><strong>4. 邏輯擊碎：</strong> 揪出發信腳本的時間戳記硬傷，直接判定為粗糙的自動化收割現場。</div>
+                <div class="timeline-node"><strong>1. 雷達攔截：</strong> 地下指揮部資安雷達成功攔截大批冒充台灣電力公司發送的「節電獎勵金」群發垃圾垃圾郵件。</div>
+                <div class="timeline-node"><strong>2. 話術偽裝：</strong> 以節能退費利益誘惑受害者，並利用「逾期不予受理」製造心理防線破口，引導跨過安全邊界。</div>
+                <div class="timeline-node"><strong>3. 憑證收割：</strong> 強引導受害者點擊惡意偽造連結，企圖洗劫個資、身分證字號、信用卡與卡片安全碼。</div>
+                <div class="timeline-node"><strong>4. 邏輯擊碎：</strong> 揪出發信腳本「5/17 發信催繳 5/13 截止」的時間戳記硬傷，判定為粗糙的自動化數位收割現場。</div>
             </div>
         </div>
 
         <p>一早起來，指揮部的資安防護雷達便成功攔截到一封偽裝成台灣電力公司的釣魚郵件。內文宣稱用戶有高達 NT$1,008 元的節電獎勵金尚未領取，企圖利用公用事業的權威性與利益誘惑，誘騙毫無防備的民眾點擊惡意連結。今天，我們就用一本正經的硬核資安技術視角，將這場粗糙的社交工程騙局扒光，看看這群境外黑客在自動化腳本中犯下的致命低級漏洞。</p>
+        
+        <p>這不是都市傳說，而是天天在我們手機與信箱裡上演的數位底層博弈。許多民眾在查閱政府公開資訊或點擊宣導文宣時，往往會因為那是 `.gov.tw` 或公務機關背書的內容而毫無防備。黑客正是精算出這種心理防線的盲點，才敢公然進行大範圍的憑證收割。然而，不論偽裝網頁刻得再精緻，自動化程式碼運作時只要基準線一歪，漏洞就會像實體工程沒閉合的線路一樣，暴露在專業老手的眼前。</p>
 
         <h2>一、 時間軸上的悖論硬傷：黑客腳本的穿越劇</h2>
-        <p>這封釣魚郵件最大的笑柄，在於黑客編寫自動化發信腳本時，時間邏輯發生了嚴重走鐘。郵件中言之鑿鑿地警告用戶：<span class="highlight">「請於 5 月 13 日前點擊下方連結完成獎勵金申領，逾期將不予受理」</span>。然而，當我們翻看郵件標頭（Email Header）的真實發信時間戳記，卻清清楚楚顯示著發信時間是 5 月 17 日。</p>
-        <p>這就是最典型的「時空悖論」。發信時間居然比截止日期還要晚了整整四天！黑客在大量收割個資時，顯然因為粗製濫造、未在後台針對各個變數進行閉合導線核對，才鬧出這種「穿越時空催繳」的低級大笑話。只要稍微保持理性，一眼就能看穿這背後荒謬的邏輯死角。</p>
+        <p>這封釣魚郵件最大的笑柄，在於黑客編寫自動化發信腳本時，時間邏輯發生了嚴重走鐘。郵件中言之鑿鑿地警告用戶：<span class="highlight">「請於 5 月 13 日前點擊下方連結完成獎勵金申領，逾期將不予受理」</span>。然而，當我們翻看郵件標頭（Email Header）的真實發信時間戳記，卻清清楚楚顯示著發信時間是 <strong>5 月 17 日</strong>。</p>
+        <p>這就是最典型的「時空悖論」。發信時間居然比截止日期還要晚了整整四天！黑客在大量收割個資時，顯然因為粗製濫造、未在後台針對各個時間變數進行閉合導線核對，才鬧出這種「穿越時空催繳」的低級大笑話。這群境外黑客可能套用了幾個月前的舊模板，在修改發信腳本時，只改了發信排程，卻忘記校對內文裡的截止日期變數。只要讀者稍微保持理性，核對一下眼前的時間節點，一眼就能看穿這背後荒謬的邏輯死角。</p>
 
         <h2>二、 撕開寄件人外衣：寄件者欄位的障眼法</h2>
-        <p>在社交工程詐騙中，黑客最常用的招式就是「顯示名稱偽裝」。這封郵件的收件夾畫面上赫然寫著「台灣電力公司（Taiwan Power Company）」，讓許多習慣用手機快速看一眼的白領族群極易上當。然而，當我們將指紋雷達對準實際的電子郵件位址時，面紗瞬間掉落——發信域名根本不是官方的 `.com.tw`，而是一串隨機申請的境外跳轉匿名網址。</p>
+        <p>在社交工程詐騙中，黑客最常用的招式就是「顯示名稱偽裝」。這封郵件的收件夾畫面上赫然寫著「台灣電力公司（Taiwan Power Company）」，讓許多習慣用手機快速看一眼的白領族群極易上當。黑客利用大眾對電力公用事業公信力的權威盲從，企圖在第一目光接觸時就建立起虛假的信任防線。</p>
+        <p>然而，當我們將指紋雷達對準實際的電子郵件位址（From Header）時，偽裝的面紗瞬間掉落。發信域名根本不是官方合法的 `.com.tw` 或政府專用的 `.gov.tw`，而是一串毫無邏輯、隨機申請的境外跳轉匿名網址。這種「金蟬脫殼」的障眼法在資安鑑識小組眼裡，就像是在工地現場拿著假名牌進場偽裝成監工一樣，只要調出底層路由與傳輸紀錄，黑客的底細立刻被扒得一乾二淨。</p>
 
-        <h2>三、 憑證收割與洗劫路徑</h2>
-        <p>一旦用戶被利益沖昏頭、無視了上述的時間悖論，點擊了郵件中的「立即領取獎勵」連結，瀏覽器就會被引導至一個刻意仿冒台電網路櫃檯的假網頁。該網站的核心任務只有一個：全面收割受害者的姓名、身分證字號、信用卡卡號以及安全碼（CVV）。黑客隨後會在幾秒鐘內於境外發動信用卡盜刷，將受害者的數位財產洗劫一空。</p>
+        <h2>三、 憑證收割與全盤洗劫的路徑</h2>
+        <p>一旦用戶被利益沖昏頭、無視了上述的時間悖論，點擊了郵件中的「立即領取獎勵」連結，瀏覽器就會被引導至一個刻意仿冒台電網路櫃檯的假網頁。這個假網頁是黑客用前端 HTML 刻意高仿的「數位誘捕籠」。</p>
+        <p>該網站的核心任務只有一個：全面收割受害者的姓名、身分證字號、信用卡卡號、過期年月以及最關鍵的卡片背面三碼安全碼（CVV）。當你把這些資訊填進去並點擊發送時，後台的惡意 API 腳本會在幾微秒內把你的隱私憑證打包傳送到境外黑客的資料庫。隨後，他們會在幾秒鐘內於境外發動信用卡自動化盜刷，將受害者的數位財產洗劫一空。這不是單純的惡作劇，而是一條成熟、冷酷且高效的黑產數位收割供應鏈。</p>
 
         <div class="verdict-box">
             <strong>岫老師的數位診斷結論：</strong> 網路世界就像工地，基準線一歪，後面蓋的都是危樓。這場冒充台電的釣魚攻擊雖然設計了精美的視覺外衣，卻因為黑客自己在發信腳本中漏算時間差，產生了「5/17發信催繳5/13截止」的邏輯死局。守護數位資產的第一準則：永遠去驗證發信端點，不要被急迫的話術牽著走。驗證端點，保持安全。
@@ -205,16 +209,20 @@
             <h1>Taipower Electricity Saving Incentive NT$1,008 Phishing Email Forensic Analysis: A Low-Level Digital Harvesting Incident Trapped in Temporal Paradox</h1>
 
             <p>Early this morning, our technical detection perimeter intercepted a highly deceptive phishing email campaign masquerading as official correspondence from the Taiwan Power Company (Taipower). The communication falsely claims that the recipient is entitled to an unclaimed electricity-saving incentive rebate of NT$1,008. It attempts to exploit the perceived institutional authority of a public utility alongside immediate monetary allure to trick unsuspecting users into executing malicious URLs. Today, we apply an uncompromising, technical threat-intel lens to dissect this crude operation, exposing the fatal script logic anomalies left behind by these threat actors.</p>
+            
+            <p>This is no urban legend; it is a relentless digital baseline battle playing out daily inside our inboxes and mobile devices. Many professionals lower their cognitive defense parameters when interacting with content bearing government branding or authoritative .gov.tw references. Threat actors precisely calculate these psychological blind spots to orchestrate large-scale credential harvesting campaigns. However, no matter how meticulously an adversarial landing page is structured, if the technical baseline of the automated script is misaligned, the structural failure will expose itself immediately to veteran forensic analysts.</p>
 
             <h2>1. The Chronological Paradigm Failure: A Temporal Script Contradiction</h2>
             <p>The most egregious flaw within this phishing payload rests on a fundamental chronological failure generated by the threat actor's automated mailing engine. The body of the message aggressively warns the victim: <strong>"Click the link below to finalize your claim before May 13th; non-compliance will result in immediate forfeiture."</strong> However, upon auditing the immutable Email Header and its authoritative transport timestamps, the cryptographic verification proves the message was systematically dispatched on <strong>May 17th</strong>.</p>
-            <p>This reveals a definitive temporal paradox: the message deployment date lags behind its own hard enforcement deadline by a full four days. During rapid credential harvesting campaigns, adversaries routinely deploy poorly audited codebases. Because the orchestrators failed to run validation loops or verify parameter convergence, they generated a ridiculous chronological contradiction. Any professional maintaining baseline operational discipline can isolate this logical failure in zero seconds.</p>
+            <p>This reveals a definitive temporal paradox: the message deployment date lags behind its own hard enforcement deadline by a full four days. During rapid credential harvesting campaigns, adversaries routinely deploy poorly audited codebases or reuse legacy campaign templates. In this instance, the orchestrator updated the SMTP transmission schedule but completely failed to calibrate the internal string variables governing the deadline. Any professional maintaining baseline operational discipline can isolate this logical failure in zero seconds.</p>
 
             <h2>2. Unmasking Sender Spoofing: Display Name Obfuscation</h2>
-            <p>A primary tactic utilized in contemporary social engineering is display name manipulation. In the victim's inbox, the sender prominently broadcasts "Taiwan Power Company," a visual lure engineered to bypass the cognitive defense barriers of busy corporate white-collar professionals checking devices in transit. Yet, the moment forensic telemetry is targeted at the underlying SMTP metadata, the obfuscation collapses. The originating domain entirely lacks the official state-sanctioned `.com.tw` suffix, tracing instead to an anonymous, throwaway offshore relay node.</p>
+            <p>A primary tactic utilized in contemporary social engineering is display name manipulation. In the victim's inbox, the sender prominently broadcasts "Taiwan Power Company," a visual lure engineered to bypass the cognitive defense barriers of busy corporate white-collar professionals checking devices in transit. The attackers exploit institutional trust to manufacture a false sense of security at the primary visual touchpoint.</p>
+            <p>Yet, the moment forensic telemetry is targeted at the underlying SMTP metadata (the 'From' envelope-from address), the obfuscation collapses. The originating domain entirely lacks the official state-sanctioned `.com.tw` or dedicated government `.gov.tw` suffix, tracing instead to an anonymous, throwaway offshore relay node. In the eyes of a threat intelligence team, this obfuscation is equivalent to an unauthorized individual presenting a forged badge at a physical construction yard—once the transmission logs and routing headers are audited, the adversary's true infrastructure is completely exposed.</p>
 
             <h2>3. Credential Exfiltration and Asset Harvesting Trajectory</h2>
-            <p>Should a user fall prey to the financial incentive and ignore the structural timeline errors, executing the malicious hyperlink triggers a sequence routing the web browser to a highly convincing clone of the Taipower virtual service desk. The architecture of this credential harvester has one solitary objective: the absolute collection of Personally Identifiable Information (PII) and financial credentials, including full names, National ID numbers, primary account numbers, and card verification values (CVV). Once harvested, the adversarial network automates unauthorized transaction execution overseas within seconds, achieving full capital exfiltration.</p>
+            <p>Should a user fall prey to the financial incentive and ignore the structural timeline errors, executing the malicious hyperlink triggers a sequence routing the web browser to a highly convincing clone of the Taipower virtual service desk. This fraudulent portal operates strictly as a digital snare engineered for exfiltration.</p>
+            <p>The architecture of this credential harvester has one solitary objective: the absolute collection of Personally Identifiable Information (PII) and financial credentials, including full names, National ID numbers, credit card numbers, expiration parameters, and the card verification value (CVV). The moment this telemetry is inputted and executed, backend malicious APIs transmit your data packet directly into the adversary's offshore infrastructure. Within a multi-second window, the network automates unauthorized transaction execution overseas, achieving full capital exfiltration. This is a mature, fully optimized cybercrime supply chain built for financial extraction.</p>
 
             <div class="verdict-box">
                 <strong>Xiu's Digital Diagnosis Verdict:</strong> The digital domain mirrors a physical construction site—if your benchmark lines are skewed, the entire superstructure is compromised. This spoofed Taipower campaign deployed an aesthetic veneer but fundamentally broke down due to a fatal script error that generated a logical impasse: dispatching a demand on May 17th for a deadline that expired on May 13th. The supreme directive for protecting digital assets remains absolute: always verify the originating endpoints; never allow simulated urgency to dictate your tactical decisions. Verify endpoints, stay secure.
