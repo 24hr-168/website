@@ -17,7 +17,7 @@
             padding: 0;
         }
         .container {
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
             background-color: #ffffff;
             padding: 25px 20px;
@@ -71,6 +71,120 @@
         li {
             margin-bottom: 8px;
         }
+
+        /* 🎨 100% 複製 stone-cost-timeline.html：中軸棋盤交錯式時間軸流程圖 */
+        .timeline-wrapper {
+            margin: 40px 0;
+            background: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px 15px;
+        }
+        .timeline-main-title {
+            font-size: 1.15em;
+            font-weight: bold;
+            color: #1a237e;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 15px;
+        }
+        .timeline-track {
+            position: relative;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        /* 中間縱向脊椎骨 */
+        .timeline-track::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            background-color: #1a237e;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -1.5px;
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        /* 歷史節點圓標 */
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            right: -8px;
+            background-color: #ffffff;
+            border: 4px solid #d32f2f;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        /* 左右交錯放樣動線 */
+        .left-node {
+            left: 0;
+            text-align: right;
+        }
+        .right-node {
+            left: 50%;
+        }
+        .right-node::after {
+            left: -8px;
+        }
+        .node-box {
+            padding: 15px;
+            background-color: #ffffff;
+            position: relative;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .node-title-red {
+            color: #c62828;
+            font-weight: bold;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+        .node-title-orange {
+            color: #e65100;
+            font-weight: bold;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+        .node-desc {
+            font-size: 0.85em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* 📱 手機端自適應（防爆模線路） */
+        @media screen and (max-width: 600px) {
+            .timeline-track::after {
+                left: 20px;
+            }
+            .timeline-item {
+                width: 100%;
+                padding-left: 45px;
+                padding-right: 0;
+            }
+            .timeline-item::after {
+                left: 12px;
+            }
+            .left-node {
+                text-align: left;
+                left: 0;
+            }
+            .right-node {
+                left: 0;
+            }
+        }
+
         .verdict-box {
             background-color: #e8eaf6;
             padding: 20px;
@@ -121,21 +235,79 @@
         </h1>
 
         <p>身為一個在現場研究、跑工地幾十年的老手，我最看不得的就是普通創業者懷揣著一生攢下來的夢想積蓄，第一步卻盲目踏進黑心連鎖總部的無情深坑。在工程放樣上，一公釐的錯就會導致結構崩塌；在商業博弈裡，如果你看不懂合約的空間與資金死穴，等待你的同樣是血本無歸的塌陷現場。</p>
-        
-        <p>今天，我們不需要等警察來抓，也不需要翻閱枯燥的法律條文。我們要直接用最硬核、最直白的實戰視角，扒光這群黑心加盟總部在後台玩的冷血算盤。這篇文章的目的，就是要告訴所有有無辜創業夢的人，為什麼你還沒開店就已經註定吃啞巴虧，原因有以下三個致命痛點細節：</p>
+
+        <div class="timeline-wrapper">
+            <div class="timeline-main-title">📊 24hr-168 數據鑑識：無辜加盟主遭資金絞殺的時間進程流程圖</div>
+            <div class="timeline-track">
+                
+                <div class="timeline-item left-node">
+                    <div class="node-box">
+                        <div class="node-title-red">📍 階段一：2-300萬至千萬權利金</div>
+                        <div class="node-desc">創業者交出一生積蓄。學會做甜品飲料的基礎技術，以為手握生財工具，實則還沒開店資金鏈就已在起跑線被抽乾。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item right-node">
+                    <div class="node-box">
+                        <div class="node-title-orange">💸 總部算盤：虛擬招牌套利</div>
+                        <div class="node-desc">用品牌包裝一條龍技術轉移，在實體店面還沒點燈開張前，就已經在後台鎖死並落袋他們的固定預期收益。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item left-node">
+                    <div class="node-box">
+                        <div class="node-title-red">📍 階段二：20-30萬押金＋10萬死月租</div>
+                        <div class="node-desc">付了高額店租押金，砸了數百萬裝潢。因為地點都是總部去採點規劃的，在合約空間限制下，臨時想換地方根本不容易。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item right-node">
+                    <div class="node-box">
+                        <div class="node-title-orange">💸 總部算盤：聯合房東空間絞殺</div>
+                        <div class="node-desc">算準你砸了重金裝潢不敢跑，與房東聯合锚定租金。有些甚至出面代談，強行設下十萬元以上起跳的固定成本死穴。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item left-node">
+                    <div class="node-box">
+                        <div class="node-title-red">📍 階段三：100% 央廚物料連帶責任</div>
+                        <div class="node-desc">原料命脈被完全綁死。一旦中央廚房食安失誤、或豬隊友發表不當政治言論、員工惡搞，無辜加盟主直接面臨消費者全方面抵制。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item right-node">
+                    <div class="node-box">
+                        <div class="node-title-orange">💸 總部算盤：割肉劃清界線</div>
+                        <div class="node-desc">材料綁定費照收、物料抽成照拿。出了事冷處理，在粉專發一句輕描淡寫的「已解除合約」，啞巴虧（Dumb Loss）全由加盟主自吞。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item left-node">
+                    <div class="node-box">
+                        <div class="node-title-red">📍 階段四：終局破產想討公道沒門</div>
+                        <div class="node-desc">店面關門、背負巨額負債與員工惡名。吃虧了發現合約早就被鎖死，想要尋求公道卻發現根本求告無門。</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item right-node">
+                    <div class="node-box">
+                        <div class="node-title-orange">💸 總部算盤：後台巨額索賠</div>
+                        <div class="node-desc">依法向惡搞方或豬隊友求償百萬。這筆巨額賠償金直接進了總部口袋，錢也是沒無辜加盟主的份，總部根本不理底層死活。</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <p>今天，我們不需要等警察來抓，也不需要翻閱枯燥的法律條文。我們要直接用最硬核、最直白的實戰視光視角，扒光這群黑心加盟總部在後台玩的冷血算盤。這篇文章的目的，就是要告訴所有有無辜創業夢的人，為什麼你還沒開店就已經註定吃啞巴虧，原因有以下三個致命痛點細節：</p>
 
         <h3>一、 千萬權利金的虛無圈套（開店前的資金大抽空）</h3>
-        <p>很多人的做生意夢想，第一步都是選擇加盟知名大廠。然而，在資本家的精心包裝下，這往往是創業者踩到的第一個巨大黑洞：</p>
-        
-        <blockquote>
-            「領取技術的代價：創業者動輒要交出 2-300萬 到 800萬 甚至 1000萬元 的高額加盟權利金... 在你學會了做甜品飲料、店面燈火還沒點亮前，身上的血汗錢就已被徹底榨乾。」
-        </blockquote>
-
-        <p>這個漏洞最為諷刺：你以為砸下千萬買到的是「品牌效應」與安全感，實則在系統後台的算盤裡，你只是成了總部最肥美的提款機。在實體案場還沒營運前，總部就已經鎖定了他們的預期收益，而所有的經營風險，從這一秒起全部轉嫁到加盟主的頭上。</p>
+        <p>很多人的做生意夢想，第一步都是選擇加盟知名大廠。然而，在資本家的精心包裝下，這往往是創業者踩到的第一個巨大黑洞：動輒新台幣 <span class="highlight">200 萬元、300 萬元，甚至高達 800 萬至 1000 萬元的昂貴加盟權利金</span>，在你學會了做甜品飲料、店面燈火還沒點亮前，身上的血汗錢就已被徹底榨乾。</p>
+        <p>你以為砸下千萬買到的是「品牌效應」與安全感，實則在系統後台的算盤裡，你只是成了總部最肥美的提款機。在實體案場還沒營運前，總部就已經鎖定了他們的預期收益，而所有的經營風險，從這一秒起全部轉嫁到加盟主的頭上。</p>
 
         <h3>二、 20-30萬押金與十萬死租金（總部與房東的空間連環絞殺）</h3>
-        <p>網路加盟高度依賴社交工程手法，也就是利用創業者想找好地點的心理弱點。當你找了店面，付了 <span class="highlight">20-30萬元的昂貴租金押金</span>後，博弈遊戲才真正進入最慘烈的肉搏戰。</p>
-        <p>因為房東不是傻子，他心知肚明你一旦加盟了，砸了幾百萬裝潢，就<span class="highlight">絕對不敢輕易搬遷、更不怕你嫌房租貴！</span>原因在於很多地點都是總部去採點規劃的，合約限制死死卡著，你真臨時想再換地方也根本不容易。</p>
+        <p>網絡加盟高度依賴社交工程手法，也就是利用創業者想找好地點的心理弱點。當你找了店面，付了 <span class="highlight">20-30萬元的昂貴租金押金</span>後，博弈遊戲才真正進入最慘烈的肉搏戰。</p>
+        <p>因為房東不是傻子，他心知肚明你一旦加盟了，砸了幾百萬裝潢，就<b>絕對不敢輕易搬遷、更不怕你嫌房租貴！</b>原因在於很多地點都是總部去採點規劃的，合約限制死死卡著，你真臨時想再換地方也根本不容易。</p>
         <p>更黑心的是，有些總部還會主動出面「幫你談租金」，結果一錨定就是<span class="highlight">十萬元以上起跳的月死租金</span>！這等於你還沒有開店、還沒有賺到一毛錢，就已經踩進了總部與房東聯合設下的高額固定成本死穴。</p>
 
         <h3>三、 100% 央廚綁定陪葬，與總部割肉的「冷處理」真相</h3>
@@ -149,8 +321,8 @@
         <p>一旦你將資金輸入這個體系，所有的<b>啞巴虧（Dumb Loss）</b>、惡名與負債，通通只能由加盟主自己獨自吞下，造成不可逆的財務滅頂。</p>
 
         <h3>四、 岫老師的數位診斷：如何奪回你的營運自主權？</h3>
-        <p>要終結這種行政管理與創業上的重大災難，我們必須強制執行老手的實戰防禦協定：</p>
-        <p><strong>A. 認清流量的根本主導權：</strong> 其實來客率和材料供應，從來不是由連鎖平台的招牌或招牌決定。只要你東西好、用料良心，拒絕總部不合理的物料抽成，命脈才能死死鎖在自己手裡。</p>
+        <p>要終結這種重大災難，我們必須強制執行老手的實戰防禦協定：</p>
+        <p><strong>A. 認清流量的根本主導權：</strong> 其實來客率和材料供應，從來不是由連鎖平台的招牌決定。只要你東西好、用料良心，拒絕總部不合理的物料抽成，命脈才能死死鎖在自己手裡。</p>
         <p><strong>B. 自主流量強力加持：</strong> 依靠我們精準的關鍵字佈局與線上流量加持（青蔚 SEO 達人計畫），何愁沒有客人主動上門？讓主導性完全掌握在自己手裡，拒絕當資本家的提款機。</p>
 
         <div class="verdict-box">
@@ -173,37 +345,10 @@
             </h1>
 
             <p>As a seasoned site and tech professional who has spent decades analyzing complex structures and operational layouts, I refuse to watch innocent entrepreneurs blindly surrender their lifetime savings into the predatory systems of corrupt franchise headquarters. In physical site surveying, a single millimeter of error collapses a high-rise; in commercial legal frameworks, failing to identify spatial and financial death traps guarantees instant bankruptcy.</p>
-            
-            <p>Today, we do not need to wait for regulatory intervention. From a direct, pragmatic forensic perspective, we will expose the cold calculations operating behind these corporate curtains. The objective of this brief is to outline why unsuspecting stakeholders are systematically forced into absorbing absolute liabilities, driven by three critical structural flaws:</p>
-
-            <h3>1. The Multi-Million Franchise Fee Illusion (Upfront Capital Exfiltration)</h3>
-            <p>For many, the aspiration of business ownership initiates with partnering under a prominent franchise banner. However, beneath the sophisticated marketing, lies the primary exfiltration trap:</p>
-            
-            <blockquote>
-                "The cost of acquiring basic operational transfer: Entrepreneurs routinely execute upfront franchise fees ranging from NT$2-3 million up to NT$8-10 million... Before the retail store even initiates operations, their core capital reserves are completely extracted."
-            </blockquote>
 
             <p>The institutional irony here is profound: the franchisee believes they are purchasing "brand security," but within the ledger mechanics of headquarters, they are merely categorized as immediate cash flow liquidity. The franchisor anchors their profit margin prior to launch, shifting 100% of the long-term operational liabilities onto the individual investor.</p>
-
-            <h3>2. The NT$200k-300k Deposit and Inflated Fixed Rent (Spatial and Lease Collusion)</h3>
-            <p>Commercial leasing dependency operates strictly on corporate social engineering, exploiting the franchisee's desperation for premium foot traffic. Once you secure a lease and deploy <span class="highlight" style="background: #e8eaf6;">NT$200,000 to NT$300,000 in heavy rental deposits</span>, the real commercial strangulation commences.</p>
-            <p>Landlords accurately audit your position; they recognize that since you have committed millions into brand-specific interior fit-outs, you <b>cannot easily relocate and will reluctantly absorb predatory rent increments.</b> Because the destination was designated by headquarters under strict contract bounds, executing a tactical relocation is legally and structurally blocked.</p>
-            <p>In worse cases, franchise headquarters directly interfere under the guise of corporate lease negotiations, purposely anchoring fixed rents at exorbitant thresholds <b>exceeding NT$100,000 per month</b>, guaranteeing systematic capital drain before a single invoice is generated.</p>
-
-            <h3>3. Central Kitchen Lock-In and the Reality of Corporate Radio Silence</h3>
-            <p>Unsuspecting franchisees executing these agreements surrender complete ingredient supply sovereignty. Under mandatory central kitchen lock-in clauses, a single product contamination or logistical failure at the central facility instantly triggers comprehensive consumer boycotts across all innocent domestic locations sharing the brand name.</p>
-            <p>Furthermore, if an isolated peer location engages in polarizing controversies or hostile customer interactions, the entire brand network suffers absolute depreciation. When catastrophic brand damage occurs, the backend calculations of headquarters execute standard crisis protocols:</p>
-            <ul>
-                <li>The franchisor deploys standard corporate radio silence, publishing a brief statement declaring contract termination and legal recourse against the offending party to sever institutional liability.</li>
-                <li>Crucially, <strong>the multi-million legal settlements recovered via these lawsuits flow directly back into the corporate treasury—leaving ruined franchisees completely uncompensated.</strong></li>
-                <li>Headquarters maintains their material margins and onboarding fees, remaining entirely indifferent to your financial survival. Seeking legal recourse is systematically blocked by hardcoded contract parameters.</li>
-            </ul>
-            <p>Ultimately, all <b>Dumb Losses</b>, legal liabilities, and accrued debts are absorbed solely by the individual franchisee, culminating in absolute financial ruin.</p>
-
-            <h3>4. Xiu's Digital Diagnosis: Reclaiming Operational Sovereignty</h3>
-            <p>To mitigate these devastating structural failures, independent entrepreneurs must enforce strict forensic risk management protocols:</p>
-            <p><strong>A. Decouple Customer Acquisition from the Franchise Banner:</strong> True foot traffic and ingredient integrity are never generated by a fragile, centralized corporate platform. Reclaim ownership of your supply matrix and protect your bottom line from predatory corporate markups.</p>
-            <p><strong>B. Accelerate Independent Traffic Generation:</strong> Deploy precision keyword architecture and automated traffic systems (The Qingwei SEO Expert Plan) to directly command your customer base. Retain 100% ownership of your digital assets and operational destiny.</p>
+            <p>Landlords accurately audit your position; they recognize that since you have committed millions into brand-specific interior fit-outs, you <b>cannot easily relocate and will reluctantly absorb predatory rent increments.</b> Because the destination was designated by headquarters under strict contract bounds, executing a tactical relocation is legally and structurally blocked. Franchise headquarters directly interfere under the guise of corporate lease negotiations, purposely anchoring fixed rents at exorbitant thresholds <b>exceeding NT$100,000 per month</b>, guaranteeing systematic capital drain before a single invoice is generated.</p>
+            <p>Ultimately, all <b>Dumb Losses</b>, legal liabilities, and accrued debts are absorbed solely by the individual franchisee, culminating in absolute financial ruin. True foot traffic and ingredient integrity are never generated by a fragile, centralized corporate platform. Deploy precision keyword architecture and automated traffic systems (The Qingwei SEO Expert Plan) to directly command your customer base. Retain 100% ownership of your digital assets and operational destiny.</p>
 
             <div class="verdict-box">
                 <strong>Xiu's Digital Diagnosis Verdict:</strong> This franchise framework is structurally predatory, operationally toxic, and financially fatal. Remember this golden rule of digital and physical risk mitigation: <em>Corporate syndicates will never rush into a digital matrix to hand you commercial sovereignty without extracting your total net worth first.</em> Protect your capital, verify the endpoint variables, and stay secure.
