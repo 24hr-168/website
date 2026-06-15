@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>岫導工程隨身查 - 座標鎖定修改版</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; font-family: -apple-system, sans-serif; overflow: hidden; background: #f4f4f4; }
+        #sidebar { position: absolute; top: 16px; left: 16px; z-index: 1000; width: 380px; max-height: calc(100% - 32px); background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+        @media (max-width: 576px) { #sidebar { width: 92%; left: 4%; max-height: 50%; top: auto; bottom: 16px; } }
+        h3 { font-size: 15px; color: #1c1c1e; border-left: 4px solid #007AFF; padding-left: 8px; margin-top: 5px; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; background: #f8f9fa; padding: 10px; border-radius: 8px; }
+        .input-group input { width: 100%; padding: 8px 12px; border: 1px solid #d1d1d6; border-radius: 6px; font-size: 14px; outline: none; }
+        .save-btn { background: #34c759; color: white; border: none; padding: 8px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .mode-selector { display: flex; gap: 4px; background: #eeeef4; padding: 4px; border-radius: 8px; }
+        .mode-btn { flex: 1; border: none; background: transparent; padding: 6px; font-size: 13px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #666; }
+        .mode-btn.active { background: white; color: #007AFF; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        /* 【已修正】：列表框撐開，不會被壓縮 */
+        #worksites-list { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 300px; }
+        .site-card { background: white; border: 1px solid #e5e5ea; padding: 10px; border-radius: 10px; cursor: pointer; }
+        .site-card:hover, .site-card.active { border-color: #007AFF; background: #f2f7ff; }
+        .site-name { font-size: 14px; font-weight: bold; color: #1c1c1e; }
+        .site-address { font-size: 15px; color: #ff9500; font-weight: bold; background: #fff9f0; padding: 6px 8px; border-radius: 6px; margin: 4px 0; border: 1px dashed #ffb347; word-break: break-all; }
+        .route-info { display: flex; gap: 10px; margin: 4px 0; font-size: 12px; font-weight: bold; color: #007AFF; background: #eef6ff; padding: 4px; border-radius: 6px; }
+        .timeline-add-btn { width: 100%; background: #007AFF; color: white; border: none; padding: 5px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 4px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 4px; }
+        .action-btn { flex: 1; background: #f2f2f7; color: #007AFF; border: none; padding: 4px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .action-btn.del { color: #ff3b30; }
+        .earth-zone { background: #1c1c1e; color: white; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .earth-zone select { width: 100%; padding: 6px; border-radius: 6px; border: none; font-size: 13px; font-weight: bold; }
+        .earth-btn { background: #007AFF; color: white; border: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; }
+        #timeline-container { display: flex; flex-direction: column; gap: 8px; background: #fafafa; padding: 10px; border-radius: 10px; border: 1px dashed #d1d1d6; }
+        .timeline-item { position: relative; padding-left: 15px; border-left: 2px solid #34c759; font-size: 11px; color: #3a3a3c; margin-bottom: 4px; }
+        .timeline-item::before { content: ''; position: absolute; left: -6px; top: 3px; width: 10px; height: 10px; background: #34c759; border-radius: 50%; }
+        .timeline-time { font-weight: bold; color: #1c1c1e; }
+        #map { width: 100%; height: 100%; z-index: 1; }
+        .leaflet-control-layers { border-radius: 12px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; font-family: -apple-system, sans-serif; font-size: 13px; font-weight: bold; padding: 6px 10px !important; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3>📥 快速記憶新案場</h3>
+        <div class="input-group">
+            <input type="text" id="site-name-input" placeholder="工地名稱" />
+            <input type="text" id="site-addr-input" placeholder="門牌" />
+            <input type="text" id="site-link-input" placeholder="Google 地圖連結" />
+            <button class="save-btn" onclick="saveNewSite()">儲存案場並生扒座標</button>
+        </div>
+        <h3>🚲 選擇交通</h3>
+        <div class="mode-selector">
+            <button id="mode-driving" class="mode-btn active" onclick="setTravelMode('driving')">🚗 開車</button>
+            <button id="mode-motorcycle" class="mode-btn" onclick="setTravelMode('motorcycle')">🛵 騎車</button>
+            <button id="mode-bike" class="mode-btn" onclick="setTravelMode('bike')">🚲 單車</button>
+            <button id="mode-foot" class="mode-btn" onclick="setTravelMode('foot')">🚶 步行</button>
+        </div>
+        <h3>🏠 我的工程案場清單</h3>
+        <div id="worksites-list"></div>
+        <div style="display:flex; gap:5px; margin-top:10px;">
+            <button onclick="exportData()" style="flex:1; padding:8px;">📤 匯出</button>
+            <button onclick="document.getElementById('import-file').click()" style="flex:1; padding:8px;">📥 匯入</button>
+            <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+        </div>
+        <h3>🌍 Google 地球智慧月份打包</h3>
+        <div class="earth-zone">
+            <select id="export-month-select"><option value="2026-06">2026 年 06 月</option></select>
+            <button class="earth-btn" onclick="exportMonthToGoogleEarth()">🚀 打包下載 KML</button>
+        </div>
+        <h3>⏳ 岫導專屬時間軸</h3>
+        <div id="timeline-container">
+            <div id="timeline-list"></div>
+            <button onclick="clearTimeline()" style="background:none; border:none; color:#8e8e93; font-size:11px; cursor:pointer; text-align:right;">🧹 清空紀錄</button>
+        </div>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const osmStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+        const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps Satellite' });
+        const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '© OpenTopoMap' });
+        const map = L.map('map', { zoomControl: false, layers: [googleSatellite] }).setView([24.2750, 120.7781], 12);
+        const baseMaps = { "🛰️ Google 衛星混合圖": googleSatellite, "🎨 舒適淺色標準圖": osmStandard, "🏔️ 漸層高對比地形圖": topoMap };
+        L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+        let siteMarkerGroup = L.layerGroup().addTo(map);
+        let routingGroup = L.layerGroup().addTo(map);
+        let myCurrentLocation = { lat: 24.2750, lng: 120.7781 };
+        let currentMode = 'driving';
+        let currentActiveSite = null;
+        let lastFetchedCoordinates = [];
+        navigator.geolocation.getCurrentPosition(pos => { myCurrentLocation.lat = pos.coords.latitude; myCurrentLocation.lng = pos.coords.longitude; });
+        let mySites = JSON.parse(localStorage.getItem('xiu_worksites')) || [];
+        let myTimeline = JSON.parse(localStorage.getItem('xiu_timeline')) || [];
+
+        function setTravelMode(mode) { currentMode = mode; document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active')); document.getElementById(`mode-${mode}`).classList.add('active'); if(currentActiveSite) selectSite(currentActiveSite.id, currentActiveSite.lat, currentActiveSite.lng); }
+        function saveNewSite() { const name = document.getElementById('site-name-input').value.trim(); let addr = document.getElementById('site-addr-input').value.trim(); let rawUrl = document.getElementById('site-link-input').value.trim(); if (!name || !rawUrl) { alert('岫老師，工地稱呼和地圖連結一定要輸入喔！'); return; } let lat, lng; let match = rawUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/); if (!match) { match = rawUrl.match(/[q|ll]=(-?\d+\.\d+),(-?\d+\.\d+)/); } if (match) { lat = parseFloat(match[1]); lng = parseFloat(match[2]); } else { let parts = rawUrl.split(/[\s,]+/); lat = parseFloat(parts[0]); lng = parseFloat(parts[1]); } if (isNaN(lat) || isNaN(lng)) { let userCoord = prompt("❌ 網址未包含經緯度文字，請手動輸入："); if (userCoord) { let parts = userCoord.split(/[\s,]+/); lat = parseFloat(parts[0]); lng = parseFloat(parts[1]); } } if (isNaN(lat) || isNaN(lng)) { return alert('座標抓取失敗。'); } if (!addr) { addr = `${lat.toFixed(5)}, ${lng.toFixed(5)}`; } mySites.push({ id: Date.now(), name: name, address: addr, lat: lat, lng: lng }); localStorage.setItem('xiu_worksites', JSON.stringify(mySites)); document.getElementById('site-name-input').value = ''; document.getElementById('site-addr-input').value = ''; document.getElementById('site-link-input').value = ''; renderSitesList(); alert(`✅ 案場「${name}」已儲存！`); }
+        function editSite(e, id) { e.stopPropagation(); const site = mySites.find(s => s.id === id); if (!site) return; const newName = prompt(`✏️ 修改工地名稱：`, site.name); if (newName === null) return; const newAddr = prompt(`📋 補寫或修改車機精確門牌：`, site.address); if (newAddr === null) return; site.name = newName.trim() || site.name; site.address = newAddr.trim() || site.address; localStorage.setItem('xiu_worksites', JSON.stringify(mySites)); renderSitesList(); if(currentActiveSite && currentActiveSite.id === id) selectSite(id, site.lat, site.lng); alert(`📝 已更新！`); }
+        function deleteSite(e, id) { e.stopPropagation(); if(confirm('確定要刪除？')) { mySites = mySites.filter(s => s.id !== id); localStorage.setItem('xiu_worksites', JSON.stringify(mySites)); renderSitesList(); } }
+        function selectSite(id, lat, lng) { const site = mySites.find(s=>s.id===id); currentActiveSite = site; document.querySelectorAll('.site-card').forEach(card => card.classList.remove('active')); document.getElementById(`site-${id}`).classList.add('active'); siteMarkerGroup.clearLayers(); L.marker([lat, lng]).addTo(siteMarkerGroup).bindPopup(`<b>🏗️ ${site.name}</b>`).openPopup(); routingGroup.clearLayers(); let osrmProfile = currentMode === 'foot' ? 'foot' : currentMode === 'bike' ? 'bicycle' : 'driving'; fetch(`https://router.project-osrm.org/route/v1/${osrmProfile}/${myCurrentLocation.lng},${myCurrentLocation.lat};${lng},${lat}?overview=full&geometries=geojson`).then(res => res.json()).then(data => { if (data.routes && data.routes.length > 0) { const route = data.routes[0]; site.currentCalculatedTime = Math.round(route.duration/60); site.currentCalculatedDist = (route.distance/1000).toFixed(1); document.getElementById(`time-${id}`).innerText = `⏱️ 約 ${site.currentCalculatedTime} 分鐘`; document.getElementById(`dist-${id}`).innerText = `📏 ${site.currentCalculatedDist} 公里`; lastFetchedCoordinates = route.geometry.coordinates; const polyline = L.polyline(route.geometry.coordinates.map(c => [c[1], c[0]]), { color: '#FF2D55', weight: 6, opacity: 0.8 }).addTo(routingGroup); map.fitBounds(polyline.getBounds(), { padding: [40, 40] }); } }); }
+        function addToTimeline(e, id) { e.stopPropagation(); const site = mySites.find(s => s.id === id); if(!site || !site.currentCalculatedTime) return alert('請先點擊精算後再紀錄！'); const now = new Date(); myTimeline.unshift({ dateKey: `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`, time: `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`, siteName: site.name, address: site.address, lat: site.lat, lng: site.lng, coords: lastFetchedCoordinates, text: `前往【${site.name}】，里程 ${site.currentCalculatedDist} 公里。` }); localStorage.setItem('xiu_timeline', JSON.stringify(myTimeline)); renderTimeline(); alert('⏱️ 行程已歸檔！'); }
+        function exportMonthToGoogleEarth() { const selectedMonth = document.getElementById('export-month-select').value; const monthFilteredItems = myTimeline.filter(item => item.dateKey === selectedMonth); if(monthFilteredItems.length === 0) return alert('該月份無紀錄'); let kmlContent = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>岫導紀錄-${selectedMonth}</name>`; monthFilteredItems.forEach((item, index) => { kmlContent += `<Placemark><name>🏠 ${item.siteName}</name><description>${item.text}</description><Point><coordinates>${item.lng},${item.lat},0</coordinates></Point></Placemark>`; if(item.coords && item.coords.length > 0) { let coordString = item.coords.map(c => `${c[0]},${c[1]},40`).join(' '); kmlContent += `<Placemark><name>軌跡-${index + 1}</name><LineString><coordinates>${coordString}</coordinates></LineString></Placemark>`; } }); kmlContent += `</Document></kml>`; const blob = new Blob([kmlContent], { type: 'application/vnd.google-earth.kml+xml' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `岫導_${selectedMonth}.kml`; a.click(); }
+        function renderTimeline() { const list = document.getElementById('timeline-list'); list.innerHTML = ''; myTimeline.slice(0, 5).forEach(item => { list.innerHTML += `<div class="timeline-item"><span class="timeline-time">[${item.dateKey}]</span> ${item.siteName} - ${item.text}</div>`; }); }
+        function clearTimeline() { if(confirm('清空？')) { myTimeline = []; localStorage.setItem('xiu_timeline', JSON.stringify(myTimeline)); renderTimeline(); } }
+        
+      // --- 匯入匯出與 CCTV 功能整合 ---
+        window.openNearbyCCTV = function(lat, lng) { 
+            // 修正為公路局官方即時影像查詢，這比 TDX API 更穩定
+            window.open(`https://cctv.freeway.gov.tw/`, '_blank'); 
+        };
+
+        function exportData() { 
+            const data = JSON.stringify({sites: mySites, timeline: myTimeline}); 
+            const blob = new Blob([data], {type: 'application/json'}); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = 'backup.json'; 
+            a.click(); 
+        }
+
+        function importData(event) { 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                const data = JSON.parse(e.target.result); 
+                mySites = data.sites; 
+                myTimeline = data.timeline; 
+                localStorage.setItem('xiu_worksites', JSON.stringify(mySites)); 
+                localStorage.setItem('xiu_timeline', JSON.stringify(myTimeline)); 
+                renderSitesList(); 
+                renderTimeline(); 
+            }; 
+            reader.readAsText(event.target.files[0]); 
+        }
+
+        function renderSitesList() { 
+            const list = document.getElementById('worksites-list'); 
+            list.innerHTML = ''; 
+            if (mySites.length === 0) { 
+                list.innerHTML = '<div style="color:#8e8e93; font-size:12px; text-align:center;">💡 尚無記憶案場。</div>'; 
+                return; 
+            } 
+            mySites.forEach(site => { 
+                const card = document.createElement('div'); 
+                card.className = 'site-card'; 
+                card.id = `site-${site.id}`; 
+                card.onclick = () => selectSite(site.id, site.lat, site.lng); 
+                card.innerHTML = `<div class="site-name">🏗️ ${site.name}</div><div class="site-address">📋 ${site.address}</div><div class="route-info"><span id="time-${site.id}">⏱️ 點擊精算</span><span id="dist-${site.id}">📏 點擊里程</span></div><button class="timeline-add-btn" onclick="addToTimeline(event, ${site.id})">➕ 紀錄行程</button><button class="timeline-add-btn" style="background:#007AFF" onclick="openNearbyCCTV(${site.lat}, ${site.lng})">📹 附近即時影像</button><div class="btn-group"><button class="action-btn" onclick="editSite(event, ${site.id})">✏️ 修改</button><button class="action-btn del" onclick="deleteSite(event, ${site.id})">❌ 刪除</button></div>`; 
+                list.appendChild(card); 
+            }); 
+        }
+
+        // 確保頁面載入時執行
+        renderSitesList(); 
+        renderTimeline();
+    </script>
+</body>
+</html>
