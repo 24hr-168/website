@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24hr-168 手機發稿小助手</title>
+    <!-- 引入 Tailwind CSS 方便手機排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 確保手機鍵盤彈出時輸入框體驗順暢 */
+        input, select, textarea { font-size: 16px !important; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 font-sans text-slate-800">
+
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200 my-2">
+        
+        <!-- 大字體頂部標題 -->
+        <div class="bg-gradient-to-r from-red-600 to-orange-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-black flex items-center justify-center gap-2">
+                <i class="fa-solid fa-pen-to-square"></i> 靈感發稿神器
+            </h1>
+            <p class="text-xs text-red-100 mt-1">填完一鍵複製，直接貼給 AI 生成全套網頁！</p>
+        </div>
+
+        <div class="p-5 space-y-5">
+            
+            <!-- 1. 選擇主題分類 -->
+            <div>
+                <label class="block text-base font-bold text-slate-800 mb-2">
+                    <i class="fa-solid fa-list-check text-red-600"></i> 1. 選擇主題專區
+                </label>
+                <select id="category" class="w-full border-2 border-slate-200 rounded-2xl p-3 text-base bg-slate-50 focus:border-red-500 focus:bg-white outline-none font-bold text-slate-700">
+                    <option value="🌙 1. 深夜食堂（夜貓嚴選）">🌙 1. 深夜食堂（夜貓嚴選）</option>
+                    <option value="🚗 2. 秘境踏青（避開人潮）">🚗 2. 秘境踏青（避開人潮）</option>
+                    <option value="🏗️ 3. 工程秘辛（實務抓漏）">🏗️ 3. 工程秘辛（實務抓漏）</option>
+                    <option value="☕ 4. 風格咖啡（筆電插座）">☕ 4. 風格咖啡（筆電插座）</option>
+                    <option value="🛒 5. 爆款選物（家電實測）">🛒 5. 爆款選物（家電實測）</option>
+                    <option value="⛺ 6. 戶外野營（車宿秘境）">⛺ 6. 戶外野營（車宿秘境）</option>
+                    <option value="🍱 7. 台味食堂（排隊老店）">🍱 7. 台味食堂（排隊老店）</option>
+                    <option value="🛍️ 8. 夜市必吃（隱藏攤位）">🛍️ 8. 夜市必吃（隱藏攤位）</option>
+                    <option value="🚗 9. 親子放電（免費公園）">🚗 9. 親子放電（免費公園）</option>
+                    <option value="💡 10. 生活密技（租屋裝修）">💡 10. 生活密技（租屋裝修）</option>
+                </select>
+            </div>
+
+            <!-- 2. 輸入店名或品項 -->
+            <div>
+                <label class="block text-base font-bold text-slate-800 mb-2">
+                    <i class="fa-solid fa-store text-red-600"></i> 2. 店名 / 品項名稱
+                </label>
+                <input type="text" id="shopName" placeholder="例如: 豐原古都茶藝館" class="w-full border-2 border-slate-200 rounded-2xl p-3 text-base bg-slate-50 focus:border-red-500 focus:bg-white outline-none">
+            </div>
+
+            <!-- 3. 輸入想法概念 -->
+            <div>
+                <label class="block text-base font-bold text-slate-800 mb-2">
+                    <i class="fa-solid fa-lightbulb text-red-600"></i> 3. 想法概念與亮點特色
+                </label>
+                <textarea id="ideas" rows="4" placeholder="例如: 有茶食、套餐、獨立包廂，蘆薈飲很適合夏天，包廂內有許多歷史簽名印記，刻劃年少輕狂，消費不貴，有停車場。" class="w-full border-2 border-slate-200 rounded-2xl p-3 text-base bg-slate-50 focus:border-red-500 focus:bg-white outline-none"></textarea>
+            </div>
+
+            <!-- 4. 輸入地圖連結 -->
+            <div>
+                <label class="block text-base font-bold text-slate-800 mb-2">
+                    <i class="fa-solid fa-map-location-dot text-red-600"></i> 4. 地圖或 FB 連結 (選填)
+                </label>
+                <input type="url" id="mapUrl" placeholder="貼上 Google 地圖分享連結" class="w-full border-2 border-slate-200 rounded-2xl p-3 text-base bg-slate-50 focus:border-red-500 focus:bg-white outline-none">
+            </div>
+
+            <!-- 生成按鈕 -->
+            <button onclick="generatePrompt()" class="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-black text-lg py-4 rounded-2xl shadow-lg hover:opacity-95 active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> 產生發稿文字格式
+            </button>
+
+            <!-- 5. 輸出成果與一鍵複製區 -->
+            <div id="resultArea" class="hidden space-y-3 pt-4 border-t-2 border-slate-100">
+                <label class="block text-base font-bold text-slate-800">
+                    <i class="fa-solid fa-copy text-green-600"></i> 生成的素材文字（看過沒問題就點下方按鈕複製）：
+                </label>
+                <textarea id="outputText" rows="6" class="w-full p-3 text-sm font-mono bg-amber-50 border-2 border-amber-200 rounded-2xl text-slate-800 leading-relaxed" readonly></textarea>
+                
+                <!-- 大複製按鈕 -->
+                <button onclick="copyToClipboard()" id="copyBtn" class="w-full bg-slate-800 text-white font-bold text-base py-3.5 rounded-2xl shadow hover:bg-slate-900 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paste"></i> 一鍵複製全部文字
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 腳本邏輯 -->
+    <script>
+        function generatePrompt() {
+            const category = document.getElementById('category').value;
+            const shopName = document.getElementById('shopName').value.trim();
+            const ideas = document.getElementById('ideas').value.trim();
+            const mapUrl = document.getElementById('mapUrl').value.trim();
+
+            if (!shopName || !ideas) {
+                alert('請填寫「店名/品項」與「想法概念」喔！');
+                return;
+            }
+
+            // 組合成乾淨格式化的文字
+            const formattedText = `【發稿素材請求】
+主題分類：${category}
+店名/品項：${shopName}
+想法與亮點：${ideas}
+地圖/粉專連結：${mapUrl || '無'}
+
+請幫我生成這篇的完整 HTML 文章碼 (posts/ 資料夾) 與 index.html 的疊加卡片碼！`;
+
+            document.getElementById('outputText').value = formattedText;
+            document.getElementById('resultArea').classList.remove('hidden');
+            
+            // 自動滾動到下方成果區
+            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('outputText');
+            outputText.select();
+            outputText.setSelectionRange(0, 99999); // 針對手機 Safari/Android 支援
+            navigator.clipboard.writeText(outputText.value).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '<i class="fa-solid fa-check text-green-400"></i> 已複製！快去貼給 Gemini！';
+                btn.classList.remove('bg-slate-800');
+                btn.classList.add('bg-green-700');
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-paste"></i> 一鍵複製全部文字';
+                    btn.classList.remove('bg-green-700');
+                    btn.classList.add('bg-slate-800');
+                }, 2500);
+            });
+        }
+    </script>
+</body>
+</html>
