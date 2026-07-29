@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-IO 案場時間軸與情資總庫 📖</title>
+    <link rel="icon" type="image/png" href="https://24hr-168.com/favicon.ico">
+    <style>
+        :root {
+            --bg: #fdfbf7;
+            --card-bg: #ffffff;
+            --text-main: #374151;
+            --text-sub: #9ca3af;
+            --accent: #f472b6;
+            --border: #f3f4f6;
+            
+            --mac-mint: #dcfce7;
+            --mac-mint-txt: #15803d;
+            --mac-sky: #e0f2fe;
+            --mac-sky-txt: #0369a1;
+            --mac-peach: #ffe4e6;
+            --mac-peach-txt: #be123c;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", sans-serif;
+            margin: 0;
+            padding: 20px 15px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 850px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 2px dashed #f3e8ff;
+        }
+
+        h1 { font-size: 24px; color: #4b5563; margin: 0 0 8px 0; }
+        p.subtitle { font-size: 14px; color: #6b7280; margin: 0; }
+
+        .search-box { margin-bottom: 20px; display: flex; gap: 10px; }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 30px;
+            font-size: 15px;
+            outline: none;
+            background: #ffffff;
+        }
+
+        input[type="text"]:focus { border-color: #f472b6; }
+
+        .btn-sync {
+            padding: 10px 20px;
+            background: #f472b6;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(244, 114, 182, 0.3);
+        }
+
+        .company-filter-zone { margin-bottom: 25px; }
+        .filter-title { font-size: 13px; font-weight: bold; color: #9ca3af; margin-bottom: 10px; }
+        .company-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .tag-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: #ffffff;
+            color: #4b5563;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+
+        .tag-btn.active {
+            background: #38bdf8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .timeline-container { display: flex; flex-direction: column; gap: 15px; }
+
+        .timeline-card {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid #f3f4f6;
+        }
+
+        .cal-box {
+            background: #fff5f5;
+            border-right: 2px dashed #ffe4e6;
+            padding: 15px;
+            min-width: 95px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .cal-month { font-size: 11px; font-weight: 800; color: #f472b6; }
+        .cal-day { font-size: 26px; font-weight: 800; color: #374151; line-height: 1; margin: 4px 0; }
+        .cal-year { font-size: 10px; color: #9ca3af; }
+
+        .card-body {
+            padding: 15px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .project-title { font-size: 16px; font-weight: bold; color: #1f2937; margin: 0; }
+
+        .company-badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            background: var(--mac-sky);
+            color: var(--mac-sky-txt);
+            white-space: nowrap;
+        }
+
+        .memo-content {
+            font-size: 14px;
+            color: #4b5563;
+            background: #fafafa;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border-left: 3px solid #f472b6;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* 📍 地圖內嵌容器修飾 */
+        .map-preview-box iframe {
+            width: 100% !important;
+            height: 200px !important;
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2px dashed #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>🌸 岫老師的案場時間軸情報站 📖</h1>
+        <p class="subtitle">點選下方公司按鈕，秒查所有放樣歷史與地點小 Memo！</p>
+    </header>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 搜尋案場名稱、公司或關鍵字 (例：青山旭、石材放樣)..." oninput="renderDashboard()">
+        <button class="btn-sync" onclick="importData()">📥 同步大腦數據</button>
+    </div>
+
+    <div class="company-filter-zone">
+        <div class="filter-title">🏢 依合作公司 / 分類過濾：</div>
+        <div class="company-tags" id="companyTagsContainer"></div>
+    </div>
+
+    <div class="timeline-container" id="timelineContainer"></div>
+
+</div>
+
+<script>
+    const storageKey = 'xiu_history_v7';
+    let currentSelectedCompany = 'ALL';
+
+    window.onload = function() {
+        renderDashboard();
+    };
+
+    function getLocalData() {
+        return JSON.parse(localStorage.getItem(storageKey) || "[]");
+    }
+
+    function renderDashboard() {
+        const history = getLocalData();
+        renderCompanyTags(history);
+        renderTimeline(history);
+    }
+
+    function renderCompanyTags(history) {
+        const container = document.getElementById('companyTagsContainer');
+        const companies = new Set();
+
+        history.forEach(item => {
+            const parts = (item.tags || '').split(' / ');
+            if (parts.length >= 2 && parts[1].trim()) companies.add(parts[1].trim());
+            if (parts.length >= 1 && parts[0].trim()) companies.add(parts[0].trim());
+        });
+
+        let html = `<button class="tag-btn ${currentSelectedCompany === 'ALL' ? 'active' : ''}" onclick="filterByCompany('ALL')">✨ 全部顯示</button>`;
+        companies.forEach(comp => {
+            if(comp) {
+                const isActive = currentSelectedCompany === comp ? 'active' : '';
+                html += `<button class="tag-btn ${isActive}" onclick="filterByCompany('${comp}')">🏢 ${comp}</button>`;
+            }
+        });
+
+        container.innerHTML = html;
+    }
+
+    function filterByCompany(comp) {
+        currentSelectedCompany = comp;
+        renderDashboard();
+    }
+
+    function renderTimeline(history) {
+        const container = document.getElementById('timelineContainer');
+        const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+
+        let filtered = history.filter(item => {
+            const tagParts = (item.tags || '').split(' / ');
+            const location = tagParts[0] || '現場紀錄';
+            const company = tagParts[1] || '一般';
+            
+            const matchesCompany = (currentSelectedCompany === 'ALL') || 
+                                   (company === currentSelectedCompany) || 
+                                   (location === currentSelectedCompany);
+
+            const textToSearch = (item.text || '') + (item.tags || '') + (item.time || '');
+            const matchesSearch = textToSearch.toLowerCase().includes(keyword);
+
+            return matchesCompany && matchesSearch;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>🌱 目前尚無該分類的紀錄！</h3>
+                    <p>請點擊右上角「📥 同步大腦數據」貼上文字，即可自動展現時間軸卡片！</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filtered.map(item => {
+            const tagParts = (item.tags || '').split(' / ');
+            const locationName = tagParts[0] || '現場位置';
+            const companyName = tagParts[1] || '合作案場';
+
+            // 💡 強化修復：相容 2026/7/29 等多種日期解析格式
+            let dateStr = (item.time || '').replace(/\(已修訂\)/, '').trim();
+            dateStr = dateStr.replace(/\//g, '-'); // 斜線轉橫線相容 Safari
+            const dateObj = new Date(dateStr);
+            
+            const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            const month = isNaN(dateObj.getMonth()) ? 'JUL' : monthNames[dateObj.getMonth()];
+            const day = isNaN(dateObj.getDate()) ? '29' : String(dateObj.getDate()).padStart(2, '0');
+            const year = isNaN(dateObj.getFullYear()) ? '2026' : dateObj.getFullYear();
+
+            // 處理地圖與純文字顯示
+            let rawText = item.text || '';
+            let mapHtml = '';
+            
+            if (rawText.includes('<iframe')) {
+                const mapMatch = rawText.match(/<iframe[^>]*><\/iframe>/i);
+                if (mapMatch) {
+                    mapHtml = `<div class="map-preview-box">${mapMatch[0]}</div>`;
+                    rawText = rawText.replace(/🗺️\s*\\?\[GOOGLE\\_MAP\\_EMBED:[^\]]*\\?\]/g, '').replace(/<iframe[^>]*><\/iframe>/gi, '');
+                }
+            }
+
+            // 清理 HTML 標籤留純文字小 Memo
+            const cleanMemo = rawText.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+
+            return `
+                <div class="timeline-card">
+                    <div class="cal-box">
+                        <span class="cal-month">${month}</span>
+                        <span class="cal-day">${day}</span>
+                        <span class="cal-year">${year}</span>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="card-header-row">
+                                <h3 class="project-title">📐 ${locationName}</h3>
+                                <span class="company-badge">🏢 ${companyName}</span>
+                            </div>
+                            <div class="memo-content">${cleanMemo || '無備註內文'}</div>
+                            ${mapHtml}
+                        </div>
+                        <div class="card-footer" style="margin-top:10px;">
+                            <span>📍 案場：${locationName}</span>
+                            <span>📅 紀錄時間：${item.time}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function importData() {
+        const clipText = prompt("請貼上您複製的「大腦密碼」JSON 文字：");
+        if (!clipText || clipText.trim() === "") return;
+        try {
+            const imported = JSON.parse(clipText);
+            if (imported.history) {
+                localStorage.setItem(storageKey, JSON.stringify(imported.history));
+                renderDashboard();
+                alert("🌸 數據同步成功！青山旭 RF 花台等案場資料已成功載入！");
+            } else {
+                alert("貼上的 JSON 格式不對喔，請重新從手帳複製！");
+            }
+        } catch (e) {
+            alert("資料格式解析失敗，請重新確認複製的內容。");
+        }
+    }
+</script>
+
+</body>
+</html>

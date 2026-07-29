@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Q-IO情資站">
+    
+    <link rel="apple-touch-icon" href="https://24hr-168.com/favicon.ico">
+    <link rel="icon" type="image/png" href="https://24hr-168.com/favicon.ico">
+
+    <title>Q-IO 現場情資控制台 V24.0 (案場時間軸數據版)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.1/turndown.min.js"></script>
+    <style>
+        :root { 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --accent: #38bdf8; 
+            --text: #f1f5f9; 
+            --danger: #ef4444; 
+            --success: #10b981; 
+            --editor-bg: #ffffff;
+            --editor-text: #0f172a;
+        }
+        
+        * { box-sizing: border-box !important; }
+
+        html, body { 
+            background: var(--bg); 
+            color: var(--text); 
+            padding: 10px; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; 
+            width: 100% !important; 
+            min-width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden;
+        }
+        
+        .main-container { display: flex; flex-direction: column; gap: 15px; width: 100% !important; }
+        .section { background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); width: 100% !important; }
+
+        h2 { margin-top: 5px; margin-bottom: 10px; color: var(--text); font-size: 20px; }
+        h3 { color: var(--accent); margin-top: 0; margin-bottom: 12px; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 10px; width: 100% !important; }
+        label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: bold; }
+        
+        select, input[type="text"] { width: 100% !important; padding: 10px; background: #0f172a; color: var(--text); border: 1px solid #475569; border-radius: 8px; font-size: 14px; outline: none; height: 42px; }
+        
+        .custom-setting-group { display: flex; gap: 6px; margin-top: 6px; width: 100%; }
+        .btn-mini { padding: 6px 10px; font-size: 12px; background: #334155; border: none; color: #cbd5e1; border-radius: 6px; cursor: pointer; flex: 1; font-weight: bold; }
+        .btn-mini:hover { background: #475569; color: white; }
+        
+        .btn-gps-action { width: 100% !important; margin-top: 6px; background: #1e3a8a; color: #93c5fd; padding: 8px; font-size: 12px; font-weight: bold; border-radius: 6px; border: 1px solid #3b82f6; cursor: pointer; }
+        .btn-gps-action:hover { background: #2563eb; color: white; }
+
+        .toolbar { background: #f8f9fa; border: 1px solid #cbd5e1; border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: 100% !important; }
+        .toolbar button, .toolbar select, .toolbar input[type="color"] { padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; color: #334155; display: inline-flex; align-items: center; height: 36px; }
+        .toolbar button:hover { background: #f1f5f9; }
+        .toolbar .separator { width: 1px; height: 20px; background: #cbd5e1; margin: 0 2px; }
+        
+        .mode-btn { background: #0284c7 !important; color: white !important; border: none !important; font-weight: bold; margin-left: auto; }
+        
+        .editor-container { position: relative; width: 100% !important; }
+        #visual-editor { width: 100% !important; min-height: 250px; max-height: 450px; overflow-y: auto; outline: none; font-size: 16px; line-height: 1.6; display: block; border: 1px solid #cbd5e1; border-radius: 0 0 8px 8px; padding: 15px; background: var(--editor-bg); color: var(--editor-text); }
+        #code-editor { width: 100% !important; min-height: 250px; display: none; font-family: monospace; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 0 0 8px 8px; padding: 15px; background: #1e293b; color: #f8fafc; resize: vertical; }
+        
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; width: 100% !important; }
+        .btn { flex: 1; min-width: 160px; padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; text-align: center; color: white; transition: background 0.2s; }
+        .btn-success { background: var(--success); }
+        .btn-qio { background: #0284c7; }
+        .btn-danger { background: var(--danger); }
+        
+        .history-list { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; width: 100% !important; }
+        .history-card { background: #1e293b; border-left: 5px solid var(--accent); border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100% !important; }
+        
+        .history-header-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 1px dashed #334155; padding-bottom: 8px; }
+        .history-info-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .history-tag { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; color: #fff; white-space: nowrap; }
+        .history-time { font-size: 12px; color: #64748b; white-space: nowrap; }
+        
+        .card-actions-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .card-btn { padding: 6px 10px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; white-space: nowrap; }
+        .btn-card-toggle { background: #475569; }
+        .btn-edit { background: #f59e0b; }
+        .btn-copy { background: var(--success); }
+        .btn-prompt { background: #38bdf8; color: #0f172a; }
+        .btn-del { background: var(--danger); }
+        
+        .history-summary { font-size: 14px; color: #94a3b8; line-height: 1.5; word-break: break-all; white-space: pre-wrap; width: 100% !important; }
+        .history-content { font-size: 14px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; word-wrap: break-word; word-break: break-all; padding: 15px; background: #0f172a; border-radius: 8px; border: 1px solid #334155; display: none; width: 100% !important; margin-top: 5px; }
+        
+        .backup-zone { margin-top: 25px; padding: 15px; border: 1px dashed #475569; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #141b2e; width: 100% !important; }
+        .btn-backup { background: #334155; color: #cbd5e1; font-size: 13px; padding: 12px; border: 1px solid #475569; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        #status-bar { color: var(--accent); font-weight: bold; font-size: 14px; min-height: 20px; margin-bottom: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <h2>Q-IO 現場情資控制台 🪐 <span style="font-size:13px; color:#94a3b8;">V24.0 (案場時間軸數據版)</span></h2>
+    <div id="status-bar"></div>
+
+    <div class="main-container">
+        
+        <div class="section">
+            <h3>🗂️ 情資分類與骨架設定</h3>
+            <div class="grid-auto">
+                <div>
+                    <label for="locationSelect">📍 地點 / 案場名稱</label>
+                    <select id="locationSelect"></select>
+                    <div class="custom-setting-group">
+                        <button class="btn-mini" onclick="addCustomOption('location')">＋新增案場</button>
+                        <button class="btn-mini" onclick="resetDefaultOptions('location')">🔄 重設</button>
+                    </div>
+                    <button class="btn-gps-action" onclick="triggerGpsLocationAndInsert()">📍 填寫今日案場位置</button>
+                </div>
+                <div>
+                    <label for="categorySelect">📂 合作公司 / 分類</label>
+                    <select id="categorySelect"></select>
+                    <div class="custom-setting-group">
+                        <button class="btn-mini" onclick="addCustomOption('category')">＋新增公司</button>
+                        <button class="btn-mini" onclick="resetDefaultOptions('category')">🔄 重設</button>
+                    </div>
+                </div>
+                <div>
+                    <label for="skeletonSelect">💀 放樣與實務骨架 (點選追加)</label>
+                    <select id="skeletonSelect" onchange="insertSkeletonBrick(this.value)">
+                        <option value="">選擇並在游標處追加骨架...</option>
+                    </select>
+                    <div class="custom-setting-group">
+                        <button class="btn-mini" onclick="addCustomSkeleton()">＋新增骨架</button>
+                        <button class="btn-mini" onclick="resetDefaultOptions('skeleton')">🔄 重設</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📝 情資內容編輯區 <span id="edit-mode-indicator" style="font-size:12px; color:#f59e0b; font-weight:bold; margin-left:10px;"></span></h3>
+            <div class="editor-container">
+                <div class="toolbar">
+                    <select id="fontSizeSelect" style="max-width: 110px;">
+                        <option value="">字體大小</option>
+                        <option value="24px">大標題</option>
+                        <option value="20px">中標題</option>
+                        <option value="16px">標準字體</option>
+                    </select>
+                    <button type="button" onclick="formatText('bold')"><b>B</b></button>
+                    <button type="button" onclick="formatText('underline')"><u>U</u></button>
+                    
+                    <div class="separator"></div>
+                    <span style="font-size:12px; color:#475569;">顏色:</span>
+                    <input type="color" id="textColorPicker" value="#000000" style="padding:0; width:28px; height:28px; border:none; cursor:pointer;">
+                    <button type="button" onclick="applyColor()">套用</button>
+                    
+                    <div class="separator"></div>
+                    <button type="button" onclick="insertPhotoMarkdownCodeBrick()" style="background:#fdf2f8; border-color:#fbcfe8; color:#db2777; font-weight:bold;">🖼️ 預留相片碼</button>
+                    <button type="button" onclick="insertMapMarkdownCodeBrick()" style="background:#e0f2fe; border-color:#bae6fd; color:#0284c7; font-weight:bold;">🗺️ 預留地圖碼</button>
+                    
+                    <div class="separator"></div>
+                    
+                    <select id="emojiSelect" onchange="insertEmoji(this.value)" style="font-size:13px; font-weight:bold; color:#0284c7; max-width:180px;">
+                        <option value="">🎨 點選插入手帳貼紙...</option>
+                        <optgroup label="🛠️ 現場工務與放樣">
+                            <option value="🏢">🏢 合作公司紀錄</option>
+                            <option value="📐">📐 CAD/圖資量測</option>
+                            <option value="⚠️">⚠️ 尺寸落差/坑點</option>
+                            <option value="🛠️">🛠️ 現場放樣吸收</option>
+                            <option value="💡">💡 完美解決方案</option>
+                            <option value="📝">📝 開會才數紀錄</option>
+                            <option value="✅">✅ 複測驗收通過</option>
+                            <option value="❌">❌ 才數請款爭議</option>
+                            <option value="⚡">⚡ 打雷射/放線</option>
+                        </optgroup>
+                        <optgroup label="⭐ Google 地圖評論必備">
+                            <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐ 滿分五顆星</option>
+                            <option value="💯">💯 100分超級推薦</option>
+                            <option value="👍">👍 大推/讚</option>
+                            <option value="❤️">❤️ 超喜歡/愛店</option>
+                            <option value="🤤">🤤 流口水/超美味</option>
+                            <option value="🏠">🏠 環境乾淨舒服</option>
+                        </optgroup>
+                        <optgroup label="🍱 美食與生活隨筆">
+                            <option value="🧋">🧋 珍珠奶茶/手搖飲</option>
+                            <option value="☕">☕ 提神咖啡</option>
+                            <option value="🍱">🍱 豐富便當/正餐</option>
+                            <option value="🚗">🚗 巡場趴趴走</option>
+                        </optgroup>
+                    </select>
+                    
+                    <button type="button" class="mode-btn" id="toggle-mode-btn" onclick="toggleMode()">切換至：Markdown 原始碼</button>
+                </div>
+                
+                <div id="visual-editor" contenteditable="true">
+                    <p>岫老師好！隨手上記錄合作公司（例如：台灣大程）與案場名稱，點選 <b>🚀 複製 Q-IO 日曆手帳發稿指令</b>，AI 就會自動為你解析公司、案名與放樣時間軸！</p>
+                </div>
+                <textarea id="code-editor" readonly></textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-success" id="save-card-main-btn" onclick="saveDataAsCard()">💾 儲存成本地卡片</button>
+                <button class="btn btn-qio" onclick="generateQioPromptFromEditor()">🚀 複製 Q-IO 日曆手帳發稿指令</button>
+                <button class="btn btn-danger" onclick="clearEditorField()">🧹 清空重寫</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🗂️ 個人事業與現場知識庫卡片</h3>
+            <div class="history-list" id="historyCardContainer"></div>
+        </div>
+
+        <div class="backup-zone">
+            <button class="btn-backup" onclick="exportFullBrainData()">📋 複製整包大腦密碼（備份）</button>
+            <button class="btn-backup" style="border-color: #38bdf8; color: #38bdf8;" onclick="importFullBrainData()">📥 貼上大腦密碼還原（匯入）</button>
+        </div>
+
+    </div>
+
+<script>
+    let isCodeMode = false;
+    let editingCardIndex = null; 
+    
+    const storageKey = 'xiu_history_v7'; 
+    const optionsKey = 'xiu_options_v7';
+
+    const defaultOptions = {
+        location: ["七期豪宅A棟", "新光三越專櫃", "市政特區案場", "高鐵特區工地", "Google商家探店"],
+        category: [
+            { name: "台灣大程", color: "#10b981" },
+            { name: "石材放樣", color: "#38bdf8" },
+            { name: "門框與結構誤差", color: "#f59e0b" },
+            { name: "才數與請款角力", color: "#ef4444" },
+            { name: "生活美食隨筆", color: "#475569" }
+        ],
+        skeleton: [
+            { title: "🏢 案場量測與合作公司紀錄", content: "### 🏢 合作公司 / 案場名稱\n- **公司**：台灣大程\n- **案名**：\n\n### 📐 現場實測與放樣數據\n- \n\n### 📝 每次量測 Memo 備忘\n- " },
+            { title: "施工與結構誤差紀錄", content: "### ⚠️ 現場結構與尺寸落差\n- \n\n### 🛠️ 預防性吸收與放樣方案\n- \n\n### 💡 才數與施工連鎖影響\n- " }
+        ]
+    };
+
+    const turndownService = new TurndownService({ headingStyle: 'atx', hr: '---', bulletListMarker: '-' });
+    turndownService.keep(['span', 'font', 'u', 'iframe']); 
+
+    window.onload = function() {
+        initSelectOptions();
+        renderHistoryCards();
+    };
+
+    function showToast(msg) {
+        const bar = document.getElementById('status-bar');
+        bar.innerText = msg;
+        setTimeout(() => bar.innerText = '', 3500);
+    }
+
+    function insertHtmlAtCursor(htmlContent) {
+        const visualEditor = document.getElementById('visual-editor');
+        visualEditor.focus();
+        const selection = window.getSelection();
+        if (selection.rangeCount) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            const div = document.createElement('div');
+            div.innerHTML = htmlContent;
+            const fragment = document.createDocumentFragment();
+            let node;
+            while ((node = div.firstChild)) { fragment.appendChild(node); }
+            range.insertNode(fragment);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        } else {
+            visualEditor.innerHTML += htmlContent;
+        }
+    }
+
+    function insertSkeletonBrick(idx) {
+        if (idx === "" || isCodeMode) return;
+        let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+        let skeleton = savedOptions.skeleton[idx];
+        if (skeleton) {
+            let formattedHtml = "<p>" + skeleton.content.replace(/\n/g, "<br>") + "</p>";
+            insertHtmlAtCursor(formattedHtml);
+            showToast(`💀 已在游標處追加骨架：${skeleton.title}`);
+        }
+        document.getElementById('skeletonSelect').value = "";
+    }
+
+    function insertPhotoMarkdownCodeBrick() {
+        if (isCodeMode) return alert("請先切換回一般編輯狀態！");
+        const placeholderHTML = `<p style="color:#db2777; font-weight:bold;">🖼️ ![【請填寫相片描述】](【回家上網貼上圖片網址】)</p>`;
+        insertHtmlAtCursor(placeholderHTML);
+        showToast("🖼️ 已預留相片 Markdown 位置！");
+    }
+
+    function insertMapMarkdownCodeBrick() {
+        if (isCodeMode) return alert("請先切換回一般編輯狀態！");
+        const mapHTML = `<p style="color:#0284c7; font-weight:bold;">🗺️ [GOOGLE_MAP_EMBED: 請在此處貼上 Google 地圖 iframe src 網址]</p>`;
+        insertHtmlAtCursor(mapHTML);
+        showToast("🗺️ 已預留 Google 地圖位置！");
+    }
+
+    function triggerGpsLocationAndInsert() {
+        if (isCodeMode) return alert("請先切換回一般編輯狀態！");
+        const timeString = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+        const defaultText = `案場紀錄 (${timeString})`;
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const gpsText = `案場座標 (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`;
+                    promptLocationNameAndInsert(gpsText);
+                },
+                () => { promptLocationNameAndInsert(defaultText); }, 
+                { timeout: 3000 }
+            );
+        } else {
+            promptLocationNameAndInsert(defaultText);
+        }
+    }
+
+    function promptLocationNameAndInsert(autoLocationText) {
+        const userInput = prompt("請填寫目前案場名稱：", autoLocationText);
+        if (userInput === null) return; 
+        const finalLocation = userInput.trim() || autoLocationText;
+
+        let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+        if (!savedOptions.location.includes(finalLocation)) {
+            savedOptions.location.unshift(finalLocation);
+            localStorage.setItem(optionsKey, JSON.stringify(savedOptions));
+            initSelectOptions();
+        }
+        document.getElementById('locationSelect').value = finalLocation;
+
+        const locationHTML = `<p>📍 <b>案場位置紀錄</b>：<span style="color:#0284c7; font-weight:bold;">${finalLocation}</span></p>`;
+        insertHtmlAtCursor(locationHTML);
+        showToast("✅ 案場名稱已寫入編輯器！");
+    }
+
+    function initSelectOptions() {
+        let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+        document.getElementById('locationSelect').innerHTML = savedOptions.location.map(v => `<option value="${v}">${v}</option>`).join('');
+        document.getElementById('categorySelect').innerHTML = savedOptions.category.map(v => {
+            const name = typeof v === 'object' ? v.name : v; return `<option value="${name}">${name}</option>`;
+        }).join('');
+        document.getElementById('skeletonSelect').innerHTML = `<option value="">選擇並在游標處追加骨架...</option>` + 
+            savedOptions.skeleton.map((v, idx) => `<option value="${idx}">${v.title}</option>`).join('');
+    }
+
+    function addCustomOption(type) {
+        let val = prompt(`請輸入要新增的名稱：`);
+        if(!val || !val.trim()) return;
+        let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+        if (type === 'category') {
+            const colors = ["#475569", "#1e3a8a", "#115e59", "#166534", "#6d28d9", "#10b981", "#38bdf8"]; 
+            savedOptions.category.push({ name: val.trim(), color: colors[Math.floor(Math.random() * colors.length)] });
+        } else {
+            savedOptions.location.push(val.trim());
+        }
+        localStorage.setItem(optionsKey, JSON.stringify(savedOptions)); initSelectOptions();
+        showToast("✅ 新增成功");
+    }
+
+    function addCustomSkeleton() {
+        let title = prompt("請輸入新骨架名稱："); 
+        let content = prompt("請輸入內文結構：");
+        if(!title || !content) return;
+        let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+        savedOptions.skeleton.push({ title: title.trim(), content: content });
+        localStorage.setItem(optionsKey, JSON.stringify(savedOptions)); initSelectOptions();
+    }
+
+    function resetDefaultOptions(type) {
+        if(confirm(`確定要重設該選項嗎？`)) {
+            let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+            savedOptions[type] = defaultOptions[type]; localStorage.setItem(optionsKey, JSON.stringify(savedOptions));
+            initSelectOptions();
+        }
+    }
+
+    function formatText(styleType) {
+        if (isCodeMode) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.isCollapsed) return;
+        const range = selection.getRangeAt(0);
+        let element = styleType === 'bold' ? document.createElement('strong') : document.createElement('u');
+        try { range.surroundContents(element); } catch (e) {
+            const fragment = range.extractContents(); element.appendChild(fragment); range.insertNode(element);
+        }
+        selection.removeAllRanges();
+    }
+
+    function applyColor() {
+        if (isCodeMode) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.isCollapsed) return;
+        const color = document.getElementById('textColorPicker').value;
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span'); span.style.color = color;
+        try { range.surroundContents(span); } catch (e) {
+            const fragment = range.extractContents(); span.appendChild(fragment); range.insertNode(span);
+        }
+        selection.removeAllRanges();
+    }
+
+    document.getElementById('fontSizeSelect').addEventListener('change', function() {
+        if (isCodeMode || !this.value) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.isCollapsed) { this.value = ""; return; }
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span'); span.style.fontSize = this.value;
+        try { range.surroundContents(span); } catch (e) {
+            const fragment = range.extractContents(); span.appendChild(fragment); range.insertNode(span);
+        }
+        this.value = ""; selection.removeAllRanges();
+    });
+
+    function insertEmoji(emoji) {
+        if (isCodeMode || !emoji) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const range = selection.getRangeAt(0); range.deleteContents();
+        const textNode = document.createTextNode(emoji + " "); range.insertNode(textNode);
+        range.setStartAfter(textNode); range.setEndAfter(textNode);
+        selection.removeAllRanges(); selection.addRange(range);
+        document.getElementById('emojiSelect').value = ""; document.getElementById('visual-editor').focus();
+    }
+
+    function clearEditorField() {
+        document.getElementById('visual-editor').innerHTML = '<p><br></p>';
+        document.getElementById('code-editor').value = '';
+        editingCardIndex = null;
+        document.getElementById('edit-mode-indicator').innerText = "";
+        document.getElementById('save-card-main-btn').innerText = "💾 儲存成本地卡片";
+    }
+
+    function toggleMode() {
+        const visualEditor = document.getElementById('visual-editor');
+        const codeEditor = document.getElementById('code-editor');
+        const btn = document.getElementById('toggle-mode-btn');
+        if (!isCodeMode) {
+            codeEditor.value = turndownService.turndown(visualEditor.innerHTML);
+            visualEditor.style.display = 'none'; codeEditor.style.display = 'block';
+            btn.innerText = "切換回：一般視覺編輯"; isCodeMode = true;
+        } else {
+            visualEditor.style.display = 'block'; codeEditor.style.display = 'none';
+            btn.innerText = "切換至：Markdown 原始碼"; isCodeMode = false;
+        }
+    }
+
+    function packQioPrompt(rawText, categoryName) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const month = monthNames[now.getMonth()];
+        const day = String(now.getDate()).padStart(2, '0');
+        const weekNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        const week = weekNames[now.getDay()];
+
+        let promptText = `岫老師丟給你的最新 Q-IO 現場觀察素材：\n\n`;
+        promptText += `📌 核心分類 / 合作公司：${categoryName}\n`;
+        promptText += `📅 日期紀錄：${year}-${month}-${day} (${week})\n`;
+        promptText += `🔥 現場狀況/放樣數據/內幕文字：\n${rawText}\n\n`;
+        promptText += `【Q-IO 日曆手帳 + 案場數據庫雙重規格要求】：\n`;
+        promptText += `1. 品牌目標：發布於 24hr-168.com，專注於石材放樣與 CAD 幾何美學的極簡文青日記風格。\n`;
+        promptText += `2. 首頁撕頁日曆卡片 (index.html 專用)：請輸出帶有日曆視覺的 <article class="calendar-card"> HTML 碼，左側包含 (MONTH: ${month}, DAY: ${day}, YEAR: ${year}, WEEK: ${week})，右側為大標題、2 行精華摘要、馬卡龍標籤，與「翻閱日記 ➔」鈕。\n`;
+        promptText += `3. 文章主頁 (articles/ 專用)：提供完整單頁 HTML (含吸附選單、地圖/影片嵌入、600-800 字中文乾貨+英文翻譯)。\n`;
+        promptText += `4. ✨ 案場時間軸數據 JSON 條目 (特別加強)：請單獨在最後輸出一個名為 timeline_entry 的 JSON 區塊，格式為：\n`;
+        promptText += `   {\n`;
+        promptText += `     "company": "合作公司名(例：台灣大程)",\n`;
+        promptText += `     "projectName": "案場名稱",\n`;
+        promptText += `     "date": "${year}-${month}-${day}",\n`;
+        promptText += `     "memo": "本次量測極簡小 Memo",\n`;
+        promptText += `     "articleUrl": "articles/log-00X.html"\n`;
+        promptText += `   }\n`;
+        promptText += `   方便未來匯入 dashboard.html 案場超大號時間軸總庫！\n\n`;
+        promptText += `請依據以上規格，直接幫我產出「日曆卡片 HTML」、「文章主頁 HTML」、「案場時間軸 JSON」與「上架 SOP」！`;
+        return promptText;
+    }
+
+    function generateQioPromptFromEditor() {
+        const visualEditor = document.getElementById('visual-editor');
+        const catName = document.getElementById('categorySelect').value;
+        let markdownText = turndownService.turndown(visualEditor.innerHTML);
+        if (!markdownText.trim() || markdownText === '<p><br></p>') { alert("編輯器裡面沒有文字喔！"); return; }
+
+        const fullPrompt = packQioPrompt(markdownText, catName);
+        copyToClipboardFallback(fullPrompt, "🚀 已複製包含「案場時間軸數據」的全套發稿指令！");
+    }
+
+    function copyCardPrompt(idx) {
+        let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        const item = history[idx];
+        if (!item) return;
+        const tagParts = item.tags.split(' / ');
+        const catName = tagParts[1] || "台灣大程";
+        const fullPrompt = packQioPrompt(item.text, catName);
+        copyToClipboardFallback(fullPrompt, "🚀 已複製包含「案場時間軸數據」的全套發稿指令！");
+    }
+
+    function copyToClipboardFallback(text, msg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => mobileCopyFallback(text, msg));
+        } else {
+            mobileCopyFallback(text, msg);
+        }
+    }
+
+    function mobileCopyFallback(text, msg) {
+        const ta = document.createElement('textarea'); ta.value = text;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta);
+        ta.focus(); ta.select(); 
+        if (document.execCommand('copy')) showToast(msg);
+        document.body.removeChild(ta);
+    }
+
+    function saveDataAsCard() {
+        const visualEditor = document.getElementById('visual-editor');
+        const loc = document.getElementById('locationSelect').value;
+        const catName = document.getElementById('categorySelect').value;
+        
+        let markdownText = turndownService.turndown(visualEditor.innerHTML);
+        if (!markdownText.trim() || markdownText === '<p><br></p>') { alert("內容是空的！"); return; }
+
+        let savedOptions = JSON.parse(localStorage.getItem(optionsKey)) || defaultOptions;
+        let catObj = savedOptions.category.find(c => (typeof c === 'object' ? c.name : c) === catName) || {color: "#10b981"};
+
+        let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+        if (editingCardIndex !== null) {
+            if(history[editingCardIndex]) {
+                history[editingCardIndex].tags = `${loc} / ${catName}`;
+                history[editingCardIndex].color = catObj.color || "#10b981";
+                history[editingCardIndex].text = markdownText;
+                if(!history[editingCardIndex].time.includes("(已修訂)")) history[editingCardIndex].time += " (已修訂)";
+            }
+            showToast("💾 卡片修訂更新完成！");
+        } else {
+            history.unshift({
+                time: new Date().toLocaleString('zh-TW', { hour12: false }),
+                tags: `${loc} / ${catName}`,
+                color: catObj.color || "#10b981",
+                text: markdownText
+            });
+            showToast("💾 案場卡片已成功儲存在手機本地！");
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify(history));
+        renderHistoryCards(); clearEditorField();
+    }
+
+    function startEditCard(idx) {
+        let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        const card = history[idx]; if (!card) return;
+        if (isCodeMode) toggleMode();
+
+        const tagParts = card.tags.split(' / ');
+        if (tagParts.length === 2) {
+            document.getElementById('locationSelect').value = tagParts[0];
+            document.getElementById('categorySelect').value = tagParts[1];
+        }
+        
+        document.getElementById('visual-editor').innerHTML = card.text.replace(/\n/g, "<br>");
+        editingCardIndex = idx;
+        document.getElementById('edit-mode-indicator').innerText = `⚠️ 正在修改第 ${idx + 1} 張卡片...`;
+        document.getElementById('save-card-main-btn').innerText = "💾 完成修改並更新卡片";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderHistoryCards() {
+        const container = document.getElementById('historyCardContainer');
+        let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        if (history.length === 0) { container.innerHTML = '<div style="color:#64748b; padding:10px;">目前尚無卡片。</div>'; return; }
+
+        container.innerHTML = history.map((item, idx) => {
+            return `
+                <div class="history-card" style="border-left: 5px solid ${item.color || '#38bdf8'};">
+                    <div class="history-header-row">
+                        <div class="history-info-meta">
+                            <span class="history-tag" style="background:${item.color || '#38bdf8'};"># ${item.tags || '一般'}</span>
+                            <span class="history-time">📅 ${item.time}</span>
+                        </div>
+                        <div class="card-actions-top">
+                            <button class="card-btn btn-card-toggle" onclick="toggleCardContent(${idx})">展開/收合</button>
+                            <button class="card-btn btn-edit" onclick="startEditCard(${idx})">✏️ 編輯</button>
+                            <button class="card-btn btn-prompt" onclick="copyCardPrompt(${idx})">🚀 轉發稿指令</button>
+                            <button class="card-btn btn-copy" onclick="copyCardContent(${idx})">📋 複製原文</button>
+                            <button class="card-btn btn-del" onclick="deleteCardItem(${idx})">刪除</button>
+                        </div>
+                    </div>
+                    <div class="history-summary" id="hSummary_${idx}">${item.text.replace(/\n/g, ' ').substring(0, 80)}...</div>
+                    <div class="history-content" id="hContent_${idx}">${item.text}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function toggleCardContent(idx) {
+        const contentEl = document.getElementById(`hContent_${idx}`);
+        const summaryEl = document.getElementById(`hSummary_${idx}`);
+        if (contentEl.style.display === "block") {
+            contentEl.style.display = "none"; summaryEl.style.display = "block";
+        } else {
+            contentEl.style.display = "block"; summaryEl.style.display = "none";
+        }
+    }
+
+    function copyCardContent(idx) {
+        let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        copyToClipboardFallback(history[idx].text, "📋 已複製卡片 Markdown 原文！");
+    }
+
+    function deleteCardItem(idx) {
+        if (confirm("確定刪除這張卡片嗎？")) {
+            let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            history.splice(idx, 1); localStorage.setItem(storageKey, JSON.stringify(history));
+            if (editingCardIndex === idx) clearEditorField();
+            renderHistoryCards();
+        }
+    }
+
+    function exportFullBrainData() {
+        const fullData = {
+            version: "V24.0",
+            editorDraft: document.getElementById('visual-editor').innerHTML,
+            options: JSON.parse(localStorage.getItem(optionsKey) || JSON.stringify(defaultOptions)),
+            history: JSON.parse(localStorage.getItem(storageKey) || "[]")
+        };
+        const jsonString = JSON.stringify(fullData, null, 2);
+        copyToClipboardFallback(jsonString, "📋 整包大腦密碼備份複製成功！");
+    }
+
+    function importFullBrainData() {
+        const clipText = prompt("請直接在此貼上您先前備份的大腦密碼 JSON 文字：");
+        if (!clipText || clipText.trim() === "") return;
+        try {
+            const imported = JSON.parse(clipText);
+            if (imported.options) localStorage.setItem(optionsKey, JSON.stringify(imported.options));
+            if (imported.history) {
+                let normalizedHistory = imported.history.map(h => {
+                    return {
+                        time: h.time || new Date().toLocaleString(),
+                        tags: h.tags || (h.tag ? `一般 / ${h.tag}` : "一般"),
+                        color: h.color || "#10b981", text: h.text || ""
+                    };
+                });
+                localStorage.setItem(storageKey, JSON.stringify(normalizedHistory));
+            }
+            if (imported.editorDraft) document.getElementById('visual-editor').innerHTML = imported.editorDraft;
+            initSelectOptions(); renderHistoryCards();
+            showToast("📥 大腦記憶已完美跨裝置還原！");
+        } catch (e) { alert("貼上的資料格式不正確，請重新檢查。"); }
+    }
+</script>
+
+</body>
+</html>
