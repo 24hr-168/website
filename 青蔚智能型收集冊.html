@@ -24,182 +24,39 @@
             border: 1px solid #333;
             box-sizing: border-box;
         }
-        h1 {
-            color: #00ffcc;
-            text-align: center;
-            margin-bottom: 5px;
-            font-size: 22px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #888;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #00ffcc;
-            font-size: 14px;
-        }
+        h1 { color: #00ffcc; text-align: center; margin-bottom: 5px; font-size: 22px; }
+        .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; color: #00ffcc; font-size: 14px; }
         select, input[type="text"], textarea {
-            width: 100%;
-            padding: 10px 12px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 14px;
-            box-sizing: border-box;
+            width: 100%; padding: 10px 12px; background-color: #2a2a2a; border: 1px solid #444;
+            border-radius: 6px; color: #fff; font-size: 14px; box-sizing: border-box;
         }
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #00ffcc;
-        }
-        .radio-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            background: #2a2a2a;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #444;
-        }
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .btn-primary {
-            flex: 2;
-            padding: 12px;
-            background: linear-gradient(135deg, #0088ff, #00ffcc);
-            border: none;
-            border-radius: 6px;
-            color: #000;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-        }
-        .btn-card {
-            flex: 1;
-            padding: 12px;
-            background: #ff9900;
-            border: none;
-            border-radius: 6px;
-            color: #000;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .output-box {
-            margin-top: 20px;
-            background: #111;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #333;
-            position: relative;
-        }
-        textarea#jsonOutput {
-            height: 150px;
-            font-family: 'Courier New', Courier, monospace;
-            color: #00ffcc;
-            background: #000;
-            resize: vertical;
-        }
-        .copy-btn {
-            background: #333;
-            color: #fff;
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 4px;
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            border: none;
-            cursor: pointer;
-        }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: #00ffcc; }
+        .radio-group { display: flex; gap: 15px; flex-wrap: wrap; background: #2a2a2a; padding: 10px; border-radius: 6px; border: 1px solid #444; }
+        .radio-option { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-primary { flex: 2; padding: 12px; background: linear-gradient(135deg, #0088ff, #00ffcc); border: none; border-radius: 6px; color: #000; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .btn-card { flex: 1; padding: 12px; background: #ff9900; border: none; border-radius: 6px; color: #000; font-weight: bold; font-size: 14px; cursor: pointer; }
+        
+        .output-box { margin-top: 20px; background: #111; padding: 15px; border-radius: 6px; border: 1px solid #333; position: relative; }
+        textarea#jsonOutput { height: 140px; font-family: 'Courier New', Courier, monospace; color: #00ffcc; background: #000; resize: vertical; }
 
         /* 🎴 卡片庫樣式 */
-        .card-section {
-            margin-top: 30px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
-            margin-top: 12px;
-        }
-        .card {
-            background: #252525;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 12px;
-            position: relative;
-        }
-        .card-tag {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #0088ff;
-            color: #fff;
-            display: inline-block;
-            margin-bottom: 6px;
-        }
-        .card-folder-name {
-            font-size: 11px;
-            color: #00ffcc;
-            font-family: monospace;
-            background: #1a1a1a;
-            padding: 3px 6px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            word-break: break-all;
-        }
-        .card-title {
-            font-weight: bold;
-            color: #fff;
-            font-size: 15px;
-            margin-bottom: 6px;
-        }
-        .card-subtopic {
-            font-size: 13px;
-            color: #ffcc00;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-        .card-notes {
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 10px;
-            white-space: pre-wrap;
-            max-height: 50px;
-            overflow: hidden;
-        }
-        .card-actions {
-            display: flex;
-            gap: 6px;
-        }
-        .card-btn {
-            padding: 4px 8px;
-            font-size: 11px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-        }
+        .card-section { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        .card-header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .sync-btn { background: #333; color: #00ffcc; border: 1px solid #00ffcc; padding: 5px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+        .sync-btn:hover { background: #00ffcc; color: #000; }
+        
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+        .card { background: #252525; border: 1px solid #444; border-radius: 8px; padding: 12px; position: relative; }
+        .card-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #0088ff; color: #fff; display: inline-block; margin-bottom: 6px; }
+        .card-folder-name { font-size: 11px; color: #00ffcc; font-family: monospace; background: #1a1a1a; padding: 3px 6px; border-radius: 4px; margin-bottom: 8px; word-break: break-all; }
+        .card-title { font-weight: bold; color: #fff; font-size: 15px; margin-bottom: 6px; }
+        .card-subtopic { font-size: 13px; color: #ffcc00; font-weight: 500; margin-bottom: 6px; }
+        .card-notes { font-size: 12px; color: #aaa; margin-bottom: 10px; white-space: pre-wrap; max-height: 50px; overflow: hidden; }
+        .card-actions { display: flex; gap: 6px; }
+        .card-btn { padding: 4px 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
         .btn-use { background: #00ffcc; color: #000; font-weight: bold; }
         .btn-edit { background: #555; color: #fff; }
         .btn-del { background: #ff4444; color: #fff; }
@@ -209,7 +66,7 @@
 
 <div class="container">
     <h1>🚀 24hr-168 系統 B 全媒體指令發射台</h1>
-    <div class="subtitle">岫老師專屬 | 手機電腦通用 • 自動擷取第一行標題 • 直覺卡片庫</div>
+    <div class="subtitle">岫老師專屬 | 跨設備匯入/匯出備份 • 靈感卡片庫</div>
 
     <input type="hidden" id="editingCardId" value="">
 
@@ -257,7 +114,14 @@
 
     <!-- 🎴 靈感卡片庫 -->
     <div class="card-section">
-        <label>🎴 岫老師的靈感卡片庫 (自動抓取小主題命名):</label>
+        <div class="card-header-tools">
+            <label style="margin:0;">🎴 岫老師的靈感卡片庫:</label>
+            <div>
+                <button class="sync-btn" onclick="exportCards()">📥 匯出卡片備份檔</button>
+                <button class="sync-btn" onclick="document.getElementById('importFile').click()">📤 匯入卡片檔</button>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importCards(event)">
+            </div>
+        </div>
         <div id="cardGrid" class="card-grid"></div>
     </div>
 </div>
@@ -265,14 +129,12 @@
 <script>
     let cards = JSON.parse(localStorage.getItem('xiu_cards') || '[]');
 
-    // 💡 輔助函式：抓取筆記的第一行作為小主題
     function getSubtopicFromNotes(notesText) {
         if (!notesText) return "通用篇";
         const lines = notesText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         return lines.length > 0 ? lines[0] : "通用篇";
     }
 
-    // 💡 輔助函式：生成易讀的資料夾名稱
     function getFolderName(seriesType, topic, subtopic) {
         const typeMap = { 'food_store': '探店', 'scenic_tour': '風景', 'explainer': '科普' };
         const cleanTopic = (topic || "未命名").replace(/[\\/:*?"<>|]/g, "");
@@ -291,10 +153,10 @@
         const generateArticle = document.getElementById('generateArticle').checked;
 
         const configData = {
-            "suggested_folder_name": folderName,  // 👈 提示您建資料夾時的名字！
+            "suggested_folder_name": folderName,
             "series_type": seriesType,
             "main_topic": topic,
-            "sub_topic": subtopic,                // 👈 抓到的第一行小主題
+            "sub_topic": subtopic,
             "full_notes": notes || "無特殊指示",
             "targets": {
                 "short_video": generateVideo,
@@ -309,7 +171,7 @@
         const jsonText = document.getElementById('jsonOutput');
         jsonText.select();
         document.execCommand("copy");
-        alert("✅ 通單已複製！檔名建議用下面的名稱，方便分類喔！");
+        alert("✅ 通單已複製！");
     }
 
     function saveToCard() {
@@ -343,11 +205,50 @@
                 notes: notes
             };
             cards.unshift(newCard);
-            alert("💾 新靈感卡片已成功存入！");
+            alert("💾 新靈感卡片已存入！");
         }
 
         localStorage.setItem('xiu_cards', JSON.stringify(cards));
         renderCards();
+    }
+
+    // 📥 匯出卡片備份至手機/電腦
+    function exportCards() {
+        if (cards.length === 0) {
+            alert("目前卡片庫是空的，沒有卡片可以匯出喔！");
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cards, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `xiu_cards_backup_${Date.now()}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    // 📤 匯入卡片備份檔（跨設備同步）
+    function importCards(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedCards = JSON.parse(e.target.result);
+                if (Array.isArray(importedCards)) {
+                    cards = importedCards;
+                    localStorage.setItem('xiu_cards', JSON.stringify(cards));
+                    renderCards();
+                    alert("🎉 成功匯入卡片！跨設備同步完成！");
+                } else {
+                    alert("檔案格式不符合卡片備忘庫格式！");
+                }
+            } catch (err) {
+                alert("讀取備份檔失敗，請確認檔案是否正確。");
+            }
+        };
+        reader.readAsText(file);
     }
 
     function renderCards() {
@@ -399,7 +300,7 @@
             document.getElementById('seriesType').value = card.seriesType;
             document.getElementById('topic').value = card.topic;
             document.getElementById('notes').value = card.notes;
-            alert("內容已帶回上方框框，修改第一行或筆記後，點擊 [💾 存為靈感卡片] 即可更新！");
+            alert("已帶回上方輸入框，修改完點擊 [💾 存為靈感卡片] 即可更新！");
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
