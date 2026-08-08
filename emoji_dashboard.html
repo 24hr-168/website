@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岫老師專屬能量符號表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .emoji-cell { font-size: 1.75rem; text-align: center; cursor: pointer; transition: transform 0.1s; }
+        .emoji-cell:hover { transform: scale(1.2); }
+        .copy-btn { cursor: pointer; }
+        .copy-btn:hover { background-color: #fef08a; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background-color: #1f2937; color: white; padding: 10px 20px; border-radius: 6px; display: none; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-6 bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">🌱 岫老師專屬能量符號表 🚀</h1>
+                <p class="text-sm text-gray-500 mt-1">點擊下方表格中任一格的「彩色符號」或「說明文字」，即可一鍵複製！專為您的工程、投資、生活與內容創作打造。</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs text-gray-600">
+                <span class="font-semibold">💡 操作提示：</span>點擊符號直接複製該圖示，點擊文字則複製對應說明，絕不拖泥帶水！
+            </div>
+        </header>
+
+        <div class="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-100">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-600 uppercase text-xs md:text-sm border-b border-gray-200">
+                        <th class="py-3 px-4 w-1/5">分類</th>
+                        <th class="py-3 px-4 w-1/6 text-center">彩色符號</th>
+                        <th class="py-3 px-4 w-7/12">說明與應用情境</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 divide-y divide-gray-100 text-sm" id="tableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">已複製至剪貼簿！✨</div>
+
+    <script>
+        const symbolsData = [
+            // 高速衝刺與科技未來
+            { category: "高速衝刺與科技未來", emoji: "⚡", desc: "系統全速運轉，資料秒開不卡頓" },
+            { category: "高速衝刺與科技未來", emoji: "🛠️", desc: "精準打造自動化基地，讓效率起飛" },
+            { category: "高速衝刺與科技未來", emoji: "🎯", desc: "鎖定市場靶心，專案完美上線" },
+            { category: "高速衝刺與科技未來", emoji: "🤖", desc: "AI 智能輔助，端對端解決方案一次到位" },
+            { category: "高速衝刺與科技未來", emoji: "🚀", desc: "火箭升空：代表專案高速啟動，突破技術瓶頸" },
+            { category: "高速衝刺與科技未來", emoji: "🔮", desc: "水晶球：預測市場趨勢與技術演進方向" },
+            { category: "高速衝刺與科技未來", emoji: "⚙️", desc: "齒輪轉動：系統底層邏輯自動化順暢運作" },
+            { category: "高速衝刺與科技未來", emoji: "🔋", desc: "能量滿格：資金與開發動力隨時充飽" },
+            { category: "高速衝刺與科技未來", emoji: "💻", desc: "程式編寫：敲打充滿邏輯的程式碼，打造高效工具" },
+            { category: "高速衝刺與科技未來", emoji: "💾", desc: "資料儲存：建置專屬資訊庫，告別幻覺與資料遺失" },
+            { category: "高速衝刺與科技未來", emoji: "🔌", desc: "串接 API：完美對接外部數據源與伺服器" },
+            { category: "高速衝刺與科技未來", emoji: "📡", desc: "訊號連線：佈署 IP 攝影機與網通設備不中斷" },
+            { category: "高速衝刺與科技未來", emoji: "🔑", desc: "核心關鍵：掌握專案成敗的通關密碼" },
+            { category: "高速衝刺與科技未來", emoji: "🛡️", desc: "系統防護：嚴謹的防呆與容錯快取機制" },
+            { category: "高速衝刺與科技未來", emoji: "🔬", desc: "精準除錯：放大檢視每一行程式碼的異常狀態" },
+            { category: "高速衝刺與科技未來", emoji: "📐", desc: "精準運算：CAD 檢驗工具自動比對尺寸誤差" },
+            { category: "高速衝刺與科技未來", emoji: "📜", desc: "腳本開發：撰寫 AutoCAD LISP 提升繪圖效率" },
+            { category: "高速衝刺與科技未來", emoji: "💡", desc: "靈光乍現：解決卡關問題的完美創新瞬間" },
+            { category: "高速衝刺與科技未來", emoji: "📈", desc: "數據連動：讓市場脈動與儀表板即時呈現" },
+            { category: "高速衝刺與科技未來", emoji: "🖥️", desc: "雙螢幕工作站：建置專屬開發與監控環境" },
+            { category: "高速衝刺與科技未來", emoji: "⚙️", desc: "系統底層順暢運作，自動化架構完美佈署" },
+            { category: "高速衝刺與科技未來", emoji: "🔌", desc: "串接穩定 API 端點，資料抓取零誤差" },
+            { category: "高速衝刺與科技未來", emoji: "💾", desc: "快取歷史報價，離線狀態下數據依然齊全" },
+            { category: "高速衝刺與科技未來", emoji: "📡", desc: "IP 攝影機統一監控，守護自動化基地安全" },
+            { category: "高速衝刺與科技未來", emoji: "⏱️", desc: "定時器精準觸發，網頁報價秒級自動更新" },
+            { category: "高速衝刺與科技未來", emoji: "🛡️", desc: "防呆機制完美攔截無效空值，防止介面崩潰" },
+            { category: "高速衝刺與科技未來", emoji: "🔬", desc: "逐行檢驗向量長度，自動排除工程圖紙瑕疵" },
+            { category: "高速衝刺與科技未來", emoji: "📐", desc: "客製化 LISP 腳本，完美對位圖面尺寸標註" },
+            { category: "高速衝刺與科技未來", emoji: "📜", desc: "自動化程式開發，大幅縮減現場放樣時間" },
+            { category: "高速衝刺與科技未來", emoji: "🖥️", desc: "雙螢幕操作介面，一側盯盤一側編寫專業邏輯" },
+
+            // 穩健扎根與事業經營
+            { category: "穩健扎根與事業經營", emoji: "🌱", desc: "小樹苗：事業與計畫正在一步步扎根、茁壯" },
+            { category: "穩健扎根與事業經營", emoji: "⛰️", desc: "穩固山峰：石材工程穩扎穩打，累積扎實好口碑" },
+            { category: "穩健扎根與事業經營", emoji: "📏", desc: "嚴謹丈量：現場尺寸分毫不差，展現職人水準" },
+            { category: "穩健扎根與事業經營", emoji: "🤝", desc: "團隊合作：與 Manager C、Master A、Master D 溝通無間" },
+            { category: "穩健扎根與事業經營", emoji: "📝", desc: "專業筆記：繪製精準施工圖，讓複雜工序化繁為簡" },
+            { category: "穩健扎根與事業經營", emoji: "📊", desc: "戰情儀表板：簡約看盤介面，市場資訊一眼掌握" },
+            { category: "穩健扎根與事業經營", emoji: "📑", desc: "專案規劃：靈活調節營運與投資方向" },
+            { category: "穩健扎根與事業經營", emoji: "💼", desc: "專業商務：穩健推進未來的每一個事業藍圖" },
+            { category: "穩健扎根與事業經營", emoji: "📌", desc: "重點標記：現場放樣與施工圖檢查嚴格對位" },
+            { category: "穩健扎根與事業經營", emoji: "✒️", desc: "手繪圖面：全神貫注進行現場尺寸勘查與技術繪圖" },
+            { category: "穩健扎根與事業經營", emoji: "🏢", desc: "工程現場：營建與石材工程的專業執行場域" },
+            { category: "穩健扎根與事業經營", emoji: "🔨", desc: "現場施作：落實放樣與石材工程的每一個細節" },
+            { category: "穩健扎根與事業經營", emoji: "📋", desc: "查驗清單：CAD 圖面檢查邏輯與核對" },
+            { category: "穩健扎根與事業經營", emoji: "☕", desc: "咖啡充電：盯盤與檢視圖紙時不可或缺的思考時光" },
+            { category: "穩健扎根與事業經營", emoji: "📖", desc: "閱讀手冊：研讀官方文件與程式碼，擺脫幻覺依據" },
+            { category: "穩健扎根與事業經營", emoji: "🖋️", desc: "專業簽核：確認圖面無誤，確保工程品質無虞" },
+            { category: "穩健扎根與事業經營", emoji: "🔍", desc: "仔細審查：反覆核對現場尺寸與設計圖是否吻合" },
+            { category: "穩健扎根與事業經營", emoji: "🗝️", desc: "關鍵技術：掌握石材與營建放樣的核心競爭力" },
+            { category: "穩健扎根與事業經營", emoji: "📂", desc: "專案歸檔：將所有工程圖資與數據妥善整理" },
+            { category: "穩健扎根與事業經營", emoji: "🏷️", desc: "標籤分類：將工程項目清楚歸類" },
+            { category: "穩健扎根與事業經營", emoji: "👷", desc: "專業營建人才，嚴格把關每一處結構細節" },
+            { category: "穩健扎根與事業經營", emoji: "🏗️", desc: "高聳建築結構，穩固扎實的石材工程實踐" },
+            { category: "穩健扎根與事業經營", emoji: "🧱", desc: "砌石與疊磚，一磚一瓦體現職人工藝" },
+            { category: "穩健扎根與事業經營", emoji: "📐", desc: "現場放樣量測，分毫不差的精準對位" },
+            { category: "穩健扎根與事業經營", emoji: "📝", desc: "CAD 圖面檢查，嚴謹防堵尺寸標註錯誤" },
+            { category: "穩健扎根與事業經營", emoji: "🤝", desc: "與優秀 subcontractors 密切協作，工程順利推進" },
+            { category: "穩健扎根與事業經營", emoji: "🏢", desc: "石材工程專案執行，高標準的品質控管" },
+            { category: "穩健扎根與事業經營", emoji: "📑", desc: "每日工程進度表，讓現場施工井然有序" },
+            { category: "穩健扎根與事業經營", emoji: "💼", desc: "營建事業穩健佈局，展現專業領導力" },
+            { category: "穩健扎根與事業經營", emoji: "📌", desc: "現場基準點標記，確保後續施工零誤差" },
+
+            // 股市分析與財務佈局
+            { category: "股市分析與財務佈局", emoji: "🐂", desc: "看準市場趨勢，迎接牛市大爆發" },
+            { category: "股市分析與財務佈局", emoji: "🔋", desc: "資金水位充滿電，精準佈局綠能與半導體" },
+            { category: "股市分析與財務佈局", emoji: "🔍", desc: "技術分析：挖掘產業下一顆明日之星（如旺宏、華邦電）" },
+            { category: "股市分析與財務佈局", emoji: "💰", desc: "資產增長：靈活調節投資部位，secure gains" },
+            { category: "股市分析與財務佈局", emoji: "📈", desc: "股價上揚：檢視力積電、燿華等標的技術線圖" },
+            { category: "股市分析與財務佈局", emoji: "📉", desc: "風險控制：冷靜觀察盤面變化，適時出場" },
+            { category: "股市分析與財務佈局", emoji: "🏦", desc: "資金調度：配置個人與事業的財務水位" },
+            { category: "股市分析與財務佈局", emoji: "🎫", desc: "股權憑證：掌握半導體與 PCB 板塊的即時動態" },
+            { category: "股市分析與財務佈局", emoji: "💵", desc: "獲利了結：精準執行投資策略，鎖定波段漲幅" },
+            { category: "股市分析與財務佈局", emoji: "⚖️", desc: "資產平衡：穩健調整投資組合，降低風險" },
+            { category: "股市分析與財務佈局", emoji: "📰", desc: "市場資訊：隨時掌握衛星通訊與產業最新動態" },
+            { category: "股市分析與財務佈局", emoji: "📑", desc: "看盤紀錄：記錄各檔股票的除權息與營收表現" },
+            { category: "股市分析與財務佈局", emoji: "🧮", desc: "精算殖利率：評估半導體與綠能類股的投資價值" },
+            { category: "股市分析與財務佈局", emoji: "🖥️", desc: "盯盤系統：隨時關注台積電與各類股的跳動行情" },
+            { category: "股市分析與財務佈局", emoji: "⏱️", desc: "掌握買賣點：在開盤日精準出手，絕不拖泥帶水" },
+            { category: "股市分析與財務佈局", emoji: "💡", desc: "投資靈感：從產業洞察中發掘潛力飆股" },
+            { category: "股市分析與財務佈局", emoji: "🤝", desc: "價值投資：與市場好夥伴共同成長，實現財富藍圖" },
+            { category: "股市分析與財務佈局", emoji: "📊", desc: "報價分析：檢視台積電 ADR 與各指數的連動關係" },
+            { category: "股市分析與財務佈局", emoji: "🔑", desc: "致富關鍵：嚴守紀律，精準佈局目標產業" },
+            { category: "股市分析與財務佈局", emoji: "🛡️", desc: "資金保護：避開產業停滯期與風險標的" },
+            { category: "股市分析與財務佈局", emoji: "🔋", desc: "投資部位隨時充飽動能，伺機佈局潛力板塊" },
+            { category: "股市分析與財務佈局", emoji: "🐂", desc: "半導體產業多頭啟動，精準掌握行情脈動" },
+            { category: "股市分析與財務佈局", emoji: "🔍", desc: "鑽研技術線圖，洞察主力資金流向" },
+            { category: "股市分析與財務佈局", emoji: "📈", desc: "持股強勢表態，獲利穩健向上攀升" },
+            { category: "股市分析與財務佈局", emoji: "💰", desc: "高瞻遠矚，調節持股實現資產增值" },
+            { category: "股市分析與財務佈局", emoji: "📑", desc: "個人投資組合覆盤，優化資金配置策略" },
+            { category: "股市分析與財務佈局", emoji: "⚖️", desc: "嚴守風險紀律，動態平衡投資水位" },
+            { category: "股市分析與財務佈局", emoji: "🖥️", desc: "自製看盤儀表板，即時掌握全球股市動態" },
+            { category: "股市分析與財務佈局", emoji: "💵", desc: "波段操作精準停利，穩穩將獲利放入口袋" },
+            { category: "股市分析與財務佈局", emoji: "🏦", desc: "靈活調度資金，為下一波投資機會做好準備" },
+
+            // 療癒生活與靈性夥伴
+            { category: "療癒生活與靈性夥伴", emoji: "🦜", desc: "小鸚鵡：像寶貝凱克鸚鵡皮蛋一樣充滿活力與靈性" },
+            { category: "療癒生活與靈性夥伴", emoji: "🥜", desc: "美味點心：準備爆米花與核果，看著寵物開心玩耍" },
+            { category: "療癒生活與靈性夥伴", emoji: "🪶", desc: "療癒時光：感受寵物帶來的單純美好，充電後再出發" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍃", desc: "自然氣息：忙碌之餘享受片刻寧靜，讓心靈沉澱" },
+            { category: "療癒生活與靈性夥伴", emoji: "🛋️", desc: "舒適居家：打造專屬休憩空間，完美放鬆身心" },
+            { category: "療癒生活與靈性夥伴", emoji: "🌅", desc: "美好早晨：帶著滿滿熱情迎接充滿無限可能的每一天" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍿", desc: "歡樂互動：陪伴皮蛋吃爆米花，享受居家溫馨" },
+            { category: "療癒生活與靈性夥伴", emoji: "🌿", desc: "綠意盎然：在舒適環境中調劑身心，平衡工作節奏" },
+            { category: "療癒生活與靈性夥伴", emoji: "🐾", desc: "寵物足跡：記錄凱克鸚鵡在家中跳躍探索的可愛身影" },
+            { category: "療癒生活與靈性夥伴", emoji: "🎵", desc: "愉悅心情：聆聽寵物的歡叫，洗去一天的疲憊" },
+            { category: "療癒生活與靈性夥伴", emoji: "🏡", desc: "溫暖避風港：維護籠邊環境，給予鸚鵡最舒適的家" },
+            { category: "療癒生活與靈性夥伴", emoji: "🧸", desc: "療癒玩偶：陪伴寵物玩耍的歡樂時光" },
+            { category: "療癒生活與靈性夥伴", emoji: "🌞", desc: "陽光灑落：在舒適的陽台享受午後悠閒" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍉", desc: "新鮮水果：為寵物準備營養均衡的點心" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍵", desc: "靜心品茗：在忙碌專案之餘享受片刻清閒" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍰", desc: "精緻甜點：犒賞自己一週辛勞的療癒下午茶" },
+            { category: "療癒生活與靈性夥伴", emoji: "🛁", desc: "舒適沐浴：洗去工程現場的塵土，徹底放鬆" },
+            { category: "療癒生活與靈性夥伴", emoji: "🛌", desc: "香甜睡眠：擁有充足休息，迎接明日挑戰" },
+            { category: "療癒生活與靈性夥伴", emoji: "🌺", desc: "生活點綴：用美麗的事物豐富居家日常" },
+            { category: "療癒生活與靈性夥伴", emoji: "🥂", desc: "慶祝時刻：專案順利上線後的放鬆小酌" },
+            { category: "療癒生活與靈性夥伴", emoji: "🦜", desc: "活潑可愛的凱克鸚鵡，為生活帶來無限歡笑" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍿", desc: "雙手捧著爆米花，看著寵物滿足的神情" },
+            { category: "療癒生活與靈性夥伴", emoji: "🪶", desc: "輕柔的羽毛，展現寵物健康有活力的狀態" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍃", desc: "午後微風吹拂，享受與寵物共處的靜謐時光" },
+            { category: "療癒生活與靈性夥伴", emoji: "🛋️", desc: "溫馨舒適的客廳，是絕佳的休憩充電站" },
+            { category: "療癒生活與靈性夥伴", emoji: "🏡", desc: "為寶貝寵物打造安全又溫暖的專屬籠舍" },
+            { category: "療癒生活與靈性夥伴", emoji: "🍉", desc: "精心準備天然鮮果，呵護寵物腸胃健康" },
+            { category: "療癒生活與靈性夥伴", emoji: "🧸", desc: "陪伴玩耍的小玩具，看著寵物開心的模樣" },
+            { category: "療癒生活與靈性夥伴", emoji: "🎵", desc: "聽著寵物悅耳的鳴叫，一天的辛勞瞬間融化" },
+            { category: "療癒生活與靈性夥伴", emoji: "🌅", desc: "充滿朝氣的早晨，與可愛夥伴展開新的一天" },
+
+            // 內容創作與無限靈感
+            { category: "內容創作與無限靈感", emoji: "✍️", desc: "SEO 內容產出：撰寫專業、具深度的產業見解文章" },
+            { category: "內容創作與無限靈感", emoji: "📱", desc: "數位手帳：使用 SwiftUI 與 PencilKit 設計專屬規劃工具" },
+            { category: "內容創作與無限靈感", emoji: "💡", desc: "靈感泉源：將工程痛點與防坑指南化為高流量內容" },
+            { category: "內容創作與無限靈感", emoji: "🌐", desc: "網站架設：打造青蔚 SEO 達人計畫的流量基地" },
+            { category: "內容創作與無限靈感", emoji: "🎨", desc: "視覺設計：打造專業且高質感的數位排版與介面" },
+            { category: "內容創作與無限靈感", emoji: "📝", desc: "文字筆記：隨手記錄端對端商業解決方案的邏輯架構" },
+            { category: "內容創作與無限靈感", emoji: "📚", desc: "知識庫建立：有系統地累積專業知識，拒絕內容幻覺" },
+            { category: "內容創作與無限靈感", emoji: "🔍", desc: "SEO 關鍵字佈局：精準鎖定受眾，提升網站曝光與廣告收益" },
+            { category: "內容創作與無限靈感", emoji: "⚙️", desc: "自動化發文：利用 spare laptop 讓內容行銷流程全自動運轉" },
+            { category: "內容創作與無限靈感", emoji: "📈", desc: "流量成長：見證高流量文章帶來的實質效益與被動收入" },
+            { category: "內容創作與無限靈感", emoji: "🎯", desc: "精準行銷：直擊產業痛點，吸引高黏著度讀者" },
+            { category: "內容創作與無限靈感", emoji: "📖", desc: "編輯出版：將工程經驗轉化為圖文並茂的專業指南" },
+            { category: "內容創作與無限靈感", emoji: "🔗", desc: "外部連結：建立扎實的內容網絡，提升 SEO 權重" },
+            { category: "內容創作與無限靈感", emoji: "💡", desc: "創意發想：不斷迭代優化內容策略，走在產業前端" },
+            { category: "內容創作與無限靈感", emoji: "🖥️", desc: "數位工作桌：在雙螢幕上流暢進行內容創作與排版" },
+            { category: "內容創作與無限靈感", emoji: "🧠", desc: "深度思考：剖析產業內幕，提供讀者最具價值的警示與建議" },
+            { category: "內容創作與無限靈感", emoji: "🪞", desc: "反思覆盤：檢視專案成效，持續精進自動化內容策略" },
+            { category: "內容創作與無限靈感", emoji: "🏷️", desc: "標籤管理：精準分類文章主題，提升網站結構化 SEO" },
+            { category: "內容創作與無限靈感", emoji: "☕", desc: "靈感咖啡：在濃郁咖啡香中構思下一篇熱門專欄" },
+            { category: "內容創作與無限靈感", emoji: "✨", desc: "完美呈現：讓每一篇產出的內容都閃閃發光，吸引目光" },
+            { category: "內容創作与無限靈感", emoji: "✍️", desc: "敲打鍵盤產出乾貨文章，建立權威知識庫" },
+            { category: "內容創作与無限靈感", emoji: "🌐", desc: "獨立站點佈局，打造源源不絕的自然流量" },
+            { category: "內容創作与無限靈感", emoji: "📚", desc: "系統化記錄工程防坑指南，提供讀者極高參考價值" },
+            { category: "內容創作与無限靈感", emoji: "🔍", desc: "精準鎖定利基市場關鍵字，提升網站變現能力" },
+            { category: "內容創作与無限靈感", emoji: "⚙️", desc: "自動化腳本運行，解放雙手讓內容行銷全自動化" },
+            { category: "內容創作与無限靈感", emoji: "📈", desc: "網站流量穩健創高，廣告收益持續成長" },
+            { category: "內容創作与無限靈感", emoji: "📱", desc: "UI 介面流暢設計，打造高質感的數位規劃軟體" },
+            { category: "內容創作与無限靈感", emoji: "🎨", desc: "簡約美學排版，提升讀者視覺體驗與停留時間" },
+            { category: "內容創作与無限靈感", emoji: "🧠", desc: "深度剖析產業內幕，提供具前瞻性的市場觀點" },
+            { category: "內容創作与無限靈感", emoji: "✨", desc: "精雕細琢每一篇文章，讓內容散發專業光芒" }
+        ];
+
+        const tableBody = document.getElementById('tableBody');
+        
+        // 根據分類給予不同標籤顏色
+        const categoryColors = {
+            "高速衝刺與科技未來": "text-blue-600 bg-blue-50 border-blue-100",
+            "穩健扎根與事業經營": "text-green-600 bg-green-50 border-green-100",
+            "股市分析與財務佈局": "text-amber-600 bg-amber-50 border-amber-100",
+            "療癒生活與靈性夥伴": "text-purple-600 bg-purple-50 border-purple-100",
+            "內容創作與無限靈感": "text-pink-600 bg-pink-50 border-pink-100"
+        };
+
+        symbolsData.forEach((item, index) => {
+            const badgeColor = categoryColors[item.category] || "text-gray-600 bg-gray-50 border-gray-100";
+            
+            const row = `
+                <tr class="hover:bg-yellow-50/60 transition">
+                    <td class="py-3 px-4 font-medium">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs border ${badgeColor}">
+                            ${item.category}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 emoji-cell select-all" onclick="copyText('${item.emoji}')" title="點擊直接複製符號">
+                        ${item.emoji}
+                    </td>
+                    <td class="py-3 px-4 text-gray-700 copy-btn" onclick="copyText('${item.desc}')" title="點擊直接複製說明文字">
+                        ${item.desc}
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+
+        // 複製邏輯
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.display = 'block';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 1500);
+            }).catch(err => {
+                console.error('自動複製失敗，請手動選取：', err);
+            });
+        }
+    </script>
+</body>
+</html>
