@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24hr-168.com | 系統 B 全媒體指令發射台</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #00ffcc;
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 22px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #00ffcc;
+            font-size: 14px;
+        }
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #00ffcc;
+        }
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-primary {
+            flex: 2;
+            padding: 12px;
+            background: linear-gradient(135deg, #0088ff, #00ffcc);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .btn-card {
+            flex: 1;
+            padding: 12px;
+            background: #ff9900;
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .output-box {
+            margin-top: 20px;
+            background: #111;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            position: relative;
+        }
+        textarea#jsonOutput {
+            height: 150px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ffcc;
+            background: #000;
+            resize: vertical;
+        }
+        .copy-btn {
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 🎴 卡片庫樣式 */
+        .card-section {
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .card {
+            background: #252525;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+        }
+        .card-tag {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #0088ff;
+            color: #fff;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+        .card-folder-name {
+            font-size: 11px;
+            color: #00ffcc;
+            font-family: monospace;
+            background: #1a1a1a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        .card-title {
+            font-weight: bold;
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .card-subtopic {
+            font-size: 13px;
+            color: #ffcc00;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .card-notes {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            max-height: 50px;
+            overflow: hidden;
+        }
+        .card-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .card-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-use { background: #00ffcc; color: #000; font-weight: bold; }
+        .btn-edit { background: #555; color: #fff; }
+        .btn-del { background: #ff4444; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 24hr-168 系統 B 全媒體指令發射台</h1>
+    <div class="subtitle">岫老師專屬 | 手機電腦通用 • 自動擷取第一行標題 • 直覺卡片庫</div>
+
+    <input type="hidden" id="editingCardId" value="">
+
+    <!-- 1. 選擇大主題路線 -->
+    <div class="form-group">
+        <label>🎬 1. 選擇大主題路線：</label>
+        <select id="seriesType" onchange="generateJSON()">
+            <option value="food_store">🍜 美食探店爆款線（時間軸對位 + 下車/入店閃回快切）</option>
+            <option value="scenic_tour">🌲 靜謐風景巡禮線（柔和過渡 + 人臉/車牌隱私動態模糊）</option>
+            <option value="explainer">💡 十萬個為什麼科普線（庫存連動 + 熊貓人/MG解答迷思）</option>
+        </select>
+    </div>
+
+    <!-- 2. 大主題名稱 -->
+    <div class="form-group">
+        <label>📌 2. 大主題類別名稱：</label>
+        <input type="text" id="topic" value="台中隱藏版牛肉麵" placeholder="例如：台中隱藏版牛肉麵、蟑螂生活科普..." oninput="generateJSON()">
+    </div>
+
+    <!-- 3. 文章/筆記與小主題 -->
+    <div class="form-group">
+        <label>📝 3. 文章筆記（第一行自動抓取為「小主題標題」）：</label>
+        <textarea id="notes" rows="4" placeholder="請將小主題寫在第一行，例如：&#10;一停好車就被香氣吸引的實測紀錄&#10;今天特地開車跑一趟台中巷弄，強調湯頭濃厚與牛筋軟嫩..." oninput="generateJSON()"></textarea>
+    </div>
+
+    <!-- 4. 開啟功能 -->
+    <div class="form-group">
+        <label>⚙️ 4. 勾選欲產出項目：</label>
+        <div class="radio-group">
+            <label class="radio-option"><input type="checkbox" id="generateVideo" checked onclick="generateJSON()"> 🎬 生成短影片 MP4</label>
+            <label class="radio-option"><input type="checkbox" id="generateArticle" checked onclick="generateJSON()"> 📝 生成 1200字 中文文章 (.md)</label>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-primary" onclick="copyJSON()">📋 複製 JSON 通單</button>
+        <button class="btn-card" onclick="saveToCard()">💾 存為靈感卡片</button>
+    </div>
+
+    <!-- 輸出區 -->
+    <div class="output-box">
+        <label>📄 生成的任務通單 (專屬 project_config.json)：</label>
+        <textarea id="jsonOutput" readonly></textarea>
+    </div>
+
+    <!-- 🎴 靈感卡片庫 -->
+    <div class="card-section">
+        <label>🎴 岫老師的靈感卡片庫 (自動抓取小主題命名):</label>
+        <div id="cardGrid" class="card-grid"></div>
+    </div>
+</div>
+
+<script>
+    let cards = JSON.parse(localStorage.getItem('xiu_cards') || '[]');
+
+    // 💡 輔助函式：抓取筆記的第一行作為小主題
+    function getSubtopicFromNotes(notesText) {
+        if (!notesText) return "通用篇";
+        const lines = notesText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        return lines.length > 0 ? lines[0] : "通用篇";
+    }
+
+    // 💡 輔助函式：生成易讀的資料夾名稱
+    function getFolderName(seriesType, topic, subtopic) {
+        const typeMap = { 'food_store': '探店', 'scenic_tour': '風景', 'explainer': '科普' };
+        const cleanTopic = (topic || "未命名").replace(/[\\/:*?"<>|]/g, "");
+        const cleanSub = (subtopic || "通用").replace(/[\\/:*?"<>|]/g, "");
+        return `[${typeMap[seriesType] || '靈感'}]_${cleanTopic}_${cleanSub}`;
+    }
+
+    function generateJSON() {
+        const seriesType = document.getElementById('seriesType').value;
+        const topic = document.getElementById('topic').value.trim() || "未命名主題";
+        const notes = document.getElementById('notes').value.trim();
+        const subtopic = getSubtopicFromNotes(notes);
+        const folderName = getFolderName(seriesType, topic, subtopic);
+
+        const generateVideo = document.getElementById('generateVideo').checked;
+        const generateArticle = document.getElementById('generateArticle').checked;
+
+        const configData = {
+            "suggested_folder_name": folderName,  // 👈 提示您建資料夾時的名字！
+            "series_type": seriesType,
+            "main_topic": topic,
+            "sub_topic": subtopic,                // 👈 抓到的第一行小主題
+            "full_notes": notes || "無特殊指示",
+            "targets": {
+                "short_video": generateVideo,
+                "web_article": generateArticle
+            }
+        };
+
+        document.getElementById('jsonOutput').value = JSON.stringify(configData, null, 2);
+    }
+
+    function copyJSON() {
+        const jsonText = document.getElementById('jsonOutput');
+        jsonText.select();
+        document.execCommand("copy");
+        alert("✅ 通單已複製！檔名建議用下面的名稱，方便分類喔！");
+    }
+
+    function saveToCard() {
+        const editingId = document.getElementById('editingCardId').value;
+        const seriesType = document.getElementById('seriesType').value;
+        const topic = document.getElementById('topic').value.trim();
+        const notes = document.getElementById('notes').value.trim();
+        const subtopic = getSubtopicFromNotes(notes);
+
+        if (!topic) {
+            alert("請先輸入大主題名稱喔！");
+            return;
+        }
+
+        if (editingId) {
+            const index = cards.findIndex(c => c.id == editingId);
+            if (index !== -1) {
+                cards[index].seriesType = seriesType;
+                cards[index].topic = topic;
+                cards[index].notes = notes;
+                cards[index].subtopic = subtopic;
+                alert("✏️ 卡片內容已更新！");
+            }
+            document.getElementById('editingCardId').value = "";
+        } else {
+            const newCard = {
+                id: Date.now(),
+                seriesType: seriesType,
+                topic: topic,
+                subtopic: subtopic,
+                notes: notes
+            };
+            cards.unshift(newCard);
+            alert("💾 新靈感卡片已成功存入！");
+        }
+
+        localStorage.setItem('xiu_cards', JSON.stringify(cards));
+        renderCards();
+    }
+
+    function renderCards() {
+        const grid = document.getElementById('cardGrid');
+        grid.innerHTML = '';
+
+        if (cards.length === 0) {
+            grid.innerHTML = '<div style="color:#666; font-size:13px;">目前沒有卡片，輸入後點按 [💾 存為靈感卡片] 保存！</div>';
+            return;
+        }
+
+        const tagMap = { 'food_store': '🍜 美食探店', 'scenic_tour': '🌲 靜謐風景', 'explainer': '💡 科普迷思' };
+
+        cards.forEach(card => {
+            const folderName = getFolderName(card.seriesType, card.topic, card.subtopic);
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.innerHTML = `
+                <span class="card-tag">${tagMap[card.seriesType] || '靈感'}</span>
+                <div class="card-folder-name">📁 建議資料夾: ${folderName}</div>
+                <div class="card-title">📌 大主題: ${card.topic}</div>
+                <div class="card-subtopic">🏷️ 小主題: ${card.subtopic}</div>
+                <div class="card-notes">${card.notes || '(無詳細內容)'}</div>
+                <div class="card-actions">
+                    <button class="card-btn btn-use" onclick="useCard(${card.id})">🚀 載入通單</button>
+                    <button class="card-btn btn-edit" onclick="editCard(${card.id})">✏️ 修改</button>
+                    <button class="card-btn btn-del" onclick="deleteCard(${card.id})">🗑️ 刪除</button>
+                </div>
+            `;
+            grid.appendChild(cardEl);
+        });
+    }
+
+    function useCard(id) {
+        const card = cards.find(c => c.id == id);
+        if (card) {
+            document.getElementById('seriesType').value = card.seriesType;
+            document.getElementById('topic').value = card.topic;
+            document.getElementById('notes').value = card.notes;
+            generateJSON();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function editCard(id) {
+        const card = cards.find(c => c.id == id);
+        if (card) {
+            document.getElementById('editingCardId').value = card.id;
+            document.getElementById('seriesType').value = card.seriesType;
+            document.getElementById('topic').value = card.topic;
+            document.getElementById('notes').value = card.notes;
+            alert("內容已帶回上方框框，修改第一行或筆記後，點擊 [💾 存為靈感卡片] 即可更新！");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function deleteCard(id) {
+        if (confirm("確定要刪除這張卡片嗎？")) {
+            cards = cards.filter(c => c.id != id);
+            localStorage.setItem('xiu_cards', JSON.stringify(cards));
+            renderCards();
+        }
+    }
+
+    generateJSON();
+    renderCards();
+</script>
+
+</body>
+</html>
