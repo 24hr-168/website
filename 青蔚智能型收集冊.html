@@ -51,6 +51,7 @@
         .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
         .card { background: #252525; border: 1px solid #444; border-radius: 8px; padding: 12px; position: relative; }
         .card-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #0088ff; color: #fff; display: inline-block; margin-bottom: 6px; }
+        .card-tag-warning { background: #ff3333 !important; }
         .card-folder-name { font-size: 11px; color: #00ffcc; font-family: monospace; background: #1a1a1a; padding: 3px 6px; border-radius: 4px; margin-bottom: 8px; word-break: break-all; }
         .card-title { font-weight: bold; color: #fff; font-size: 15px; margin-bottom: 6px; }
         .card-subtopic { font-size: 13px; color: #ffcc00; font-weight: 500; margin-bottom: 6px; }
@@ -66,7 +67,7 @@
 
 <div class="container">
     <h1>🚀 24hr-168 系統 B 全媒體指令發射台</h1>
-    <div class="subtitle">岫老師專屬 | 跨設備匯入/匯出備份 • 靈感卡片庫</div>
+    <div class="subtitle">岫老師專屬 | 包含防踩雷指南 • 跨設備一鍵匯出匯入</div>
 
     <input type="hidden" id="editingCardId" value="">
 
@@ -74,6 +75,7 @@
     <div class="form-group">
         <label>🎬 1. 選擇大主題路線：</label>
         <select id="seriesType" onchange="generateJSON()">
+            <option value="avoid_pitfalls">⚠️ 避坑指南與防踩雷線（醒目大字卡 + 動畫指引重點 + 實拍清晰化）</option>
             <option value="food_store">🍜 美食探店爆款線（時間軸對位 + 下車/入店閃回快切）</option>
             <option value="scenic_tour">🌲 靜謐風景巡禮線（柔和過渡 + 人臉/車牌隱私動態模糊）</option>
             <option value="explainer">💡 十萬個為什麼科普線（庫存連動 + 熊貓人/MG解答迷思）</option>
@@ -83,13 +85,13 @@
     <!-- 2. 大主題名稱 -->
     <div class="form-group">
         <label>📌 2. 大主題類別名稱：</label>
-        <input type="text" id="topic" value="台中隱藏版牛肉麵" placeholder="例如：台中隱藏版牛肉麵、蟑螂生活科普..." oninput="generateJSON()">
+        <input type="text" id="topic" value="工地裝潢大理石施工防坑指南" placeholder="例如：工地裝潢避坑、預售屋合約踩雷..." oninput="generateJSON()">
     </div>
 
     <!-- 3. 文章/筆記與小主題 -->
     <div class="form-group">
         <label>📝 3. 文章筆記（第一行自動抓取為「小主題標題」）：</label>
-        <textarea id="notes" rows="4" placeholder="請將小主題寫在第一行，例如：&#10;一停好車就被香氣吸引的實測紀錄&#10;今天特地開車跑一趟台中巷弄，強調湯頭濃厚與牛筋軟嫩..." oninput="generateJSON()"></textarea>
+        <textarea id="notes" rows="4" placeholder="請將小主題寫在第一行，例如：&#10;牆面大理石乾掛工法最容易被偷工減料的3個地方&#10;強調點一：角鐵厚度不夠；點二：掛鉤沒有填滿膠；點三：未做防水處置..." oninput="generateJSON()"></textarea>
     </div>
 
     <!-- 4. 開啟功能 -->
@@ -117,8 +119,8 @@
         <div class="card-header-tools">
             <label style="margin:0;">🎴 岫老師的靈感卡片庫:</label>
             <div>
-                <button class="sync-btn" onclick="exportCards()">📥 匯出卡片備份檔</button>
-                <button class="sync-btn" onclick="document.getElementById('importFile').click()">📤 匯入卡片檔</button>
+                <button class="sync-btn" onclick="exportCards()">📥 一鍵打包匯出全卡片</button>
+                <button class="sync-btn" onclick="document.getElementById('importFile').click()">📤 一鍵匯入全卡片</button>
                 <input type="file" id="importFile" style="display:none" accept=".json" onchange="importCards(event)">
             </div>
         </div>
@@ -136,7 +138,7 @@
     }
 
     function getFolderName(seriesType, topic, subtopic) {
-        const typeMap = { 'food_store': '探店', 'scenic_tour': '風景', 'explainer': '科普' };
+        const typeMap = { 'avoid_pitfalls': '避坑', 'food_store': '探店', 'scenic_tour': '風景', 'explainer': '科普' };
         const cleanTopic = (topic || "未命名").replace(/[\\/:*?"<>|]/g, "");
         const cleanSub = (subtopic || "通用").replace(/[\\/:*?"<>|]/g, "");
         return `[${typeMap[seriesType] || '靈感'}]_${cleanTopic}_${cleanSub}`;
@@ -171,7 +173,7 @@
         const jsonText = document.getElementById('jsonOutput');
         jsonText.select();
         document.execCommand("copy");
-        alert("✅ 通單已複製！");
+        alert("✅ 通單已複製！建議建立資料夾名為：" + document.getElementById('jsonOutput').value.match(/"suggested_folder_name": "([^"]+)"/)?.[1]);
     }
 
     function saveToCard() {
@@ -212,7 +214,6 @@
         renderCards();
     }
 
-    // 📥 匯出卡片備份至手機/電腦
     function exportCards() {
         if (cards.length === 0) {
             alert("目前卡片庫是空的，沒有卡片可以匯出喔！");
@@ -221,13 +222,12 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cards, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `xiu_cards_backup_${Date.now()}.json`);
+        downloadAnchor.setAttribute("download", `xiu_cards_all_backup_${Date.now()}.json`);
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
     }
 
-    // 📤 匯入卡片備份檔（跨設備同步）
     function importCards(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -240,7 +240,7 @@
                     cards = importedCards;
                     localStorage.setItem('xiu_cards', JSON.stringify(cards));
                     renderCards();
-                    alert("🎉 成功匯入卡片！跨設備同步完成！");
+                    alert("🎉 一鍵匯入成功！所有卡片已完整同步到位！");
                 } else {
                     alert("檔案格式不符合卡片備忘庫格式！");
                 }
@@ -260,14 +260,20 @@
             return;
         }
 
-        const tagMap = { 'food_store': '🍜 美食探店', 'scenic_tour': '🌲 靜謐風景', 'explainer': '💡 科普迷思' };
+        const tagMap = { 
+            'avoid_pitfalls': '⚠️ 避坑指南', 
+            'food_store': '🍜 美食探店', 
+            'scenic_tour': '🌲 靜謐風景', 
+            'explainer': '💡 科普迷思' 
+        };
 
         cards.forEach(card => {
             const folderName = getFolderName(card.seriesType, card.topic, card.subtopic);
+            const isWarning = card.seriesType === 'avoid_pitfalls';
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             cardEl.innerHTML = `
-                <span class="card-tag">${tagMap[card.seriesType] || '靈感'}</span>
+                <span class="card-tag ${isWarning ? 'card-tag-warning' : ''}">${tagMap[card.seriesType] || '靈感'}</span>
                 <div class="card-folder-name">📁 建議資料夾: ${folderName}</div>
                 <div class="card-title">📌 大主題: ${card.topic}</div>
                 <div class="card-subtopic">🏷️ 小主題: ${card.subtopic}</div>
