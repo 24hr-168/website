@@ -1,0 +1,1820 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+    <title>手帳貼紙月曆</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #e8e4de;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 6px;
+        }
+        .app {
+            max-width: 100%;
+            width: 100%;
+            max-width: 560px;
+            background: #fcf9f5;
+            border-radius: 20px;
+            padding: 14px 10px 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 0 2px;
+        }
+        .header .month {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d241a;
+        }
+        .header .year {
+            color: #999;
+            font-size: 16px;
+            margin-left: 4px;
+            font-weight: 400;
+        }
+        .header .nav button {
+            background: none;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            padding: 0 10px;
+            color: #6b5f52;
+            touch-action: manipulation;
+        }
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 700;
+            color: #999;
+            font-size: 15px;
+            padding: 6px 0 8px;
+            border-bottom: 2px solid #e8e0d8;
+            margin-bottom: 6px;
+        }
+        .weekdays span:first-child { color: #d4524e; }
+        .weekdays span:last-child { color: #d4524e; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .day-cell {
+            background: #fcf9f5;
+            border-radius: 10px;
+            border: 2px solid #e0d8d0;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            padding: 5px 4px 4px;
+            position: relative;
+            min-height: 0;
+            transition: 0.1s;
+        }
+        .day-cell.other-month { opacity: 0.35; }
+        .day-cell.today { border-color: #c0392b; background: #fff8f5; }
+        .day-cell .date-num {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2d241a;
+            line-height: 1.2;
+            padding-left: 2px;
+            flex-shrink: 0;
+            text-align: left;
+        }
+        .day-cell.special-date .date-num { color: #d0314e !important; }
+        .day-cell.other-month .date-num { color: #bbb; }
+        .day-cell .special-label {
+            font-size: 8px;
+            font-weight: 700;
+            color: #d0314e;
+            background: rgba(208, 49, 78, 0.10);
+            padding: 0 4px;
+            border-radius: 4px;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+            margin-top: -2px;
+            margin-bottom: 1px;
+            text-align: left;
+        }
+        .day-cell .sticker-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 2.5px;
+            flex: 1;
+            min-height: 0;
+            border: 1.5px solid #d5cdc5;
+            border-radius: 6px;
+            background: #d5cdc5;
+            margin-top: 2px;
+            width: 100%;
+        }
+        .day-cell .sticker-slot {
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: #fcf9f5;
+            transition: 0.1s;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+            padding: 2px;
+            min-height: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .day-cell .sticker-slot:first-child { border-radius: 4px 0 0 0; }
+        .day-cell .sticker-slot:nth-child(2) { border-radius: 0 4px 0 0; }
+        .day-cell .sticker-slot:nth-child(3) { border-radius: 0 0 0 4px; }
+        .day-cell .sticker-slot:nth-child(4) { border-radius: 0 0 4px 0; }
+        .day-cell .sticker-slot.filled {
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+        .day-cell .sticker-slot.filled::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+        .day-cell .sticker-slot .slot-emoji {
+            font-size: 20px;
+            line-height: 1;
+            z-index: 1;
+            position: relative;
+        }
+        .day-cell .sticker-slot .slot-text {
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+            z-index: 1;
+            position: relative;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            padding: 0 1px;
+            color: #fff;
+        }
+        .day-cell .sticker-slot .slot-emoji-only {
+            font-size: 26px;
+            line-height: 1;
+            z-index: 1;
+            position: relative;
+        }
+        .day-cell .sticker-slot.empty {
+            color: #d5cfc7;
+            font-size: 12px;
+            cursor: default;
+            background: #fcf9f5;
+        }
+        .day-cell .sticker-slot.empty::after {
+            content: '＋';
+            opacity: 0.2;
+            font-size: 14px;
+        }
+        .mode-toggle-area {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 14px 0 8px;
+            flex-wrap: wrap;
+        }
+        .mode-btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 2px solid #ddd;
+            background: white;
+            font-size: 16px;
+            font-weight: 600;
+            color: #888;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: 0.15s;
+            flex: 1;
+            max-width: 180px;
+        }
+        .mode-btn.active { border-color: #b2957a; background: #d4c5b2; color: #2d241a; }
+        .mode-btn:active { transform: scale(0.96); }
+        .sync-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 8px 0 4px;
+            flex-wrap: wrap;
+        }
+        .sync-btn {
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: 0.15s;
+        }
+        .sync-btn:active { transform: scale(0.95); }
+        .sync-btn.export { background: #e8f0e8; border-color: #8aaa8a; color: #2d5a2d; }
+        .sync-btn.import { background: #f0e8f0; border-color: #aa8aaa; color: #5a2d5a; }
+        .sync-btn input[type="file"] { display: none; }
+        .edit-area {
+            display: none;
+            margin-top: 12px;
+            border-top: 2px solid #eee;
+            padding-top: 14px;
+        }
+        .edit-area.open { display: block; }
+        .toolbar .label {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .sticker-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 10px;
+            min-height: 48px;
+            padding: 8px;
+            background: #f8f6f2;
+            border-radius: 14px;
+            border: 1.5px dashed #ddd;
+        }
+        .pool-sticker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 5px 14px 5px 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: white;
+            cursor: grab;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            border: 2px solid rgba(255,255,255,0.3);
+            font-size: 15px;
+            transition: 0.1s;
+            background-size: cover;
+            background-position: center;
+            min-height: 36px;
+            position: relative;
+            background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 60%);
+        }
+        .pool-sticker:active { cursor: grabbing; opacity: 0.6; }
+        .pool-sticker .pool-text {
+            text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+            z-index: 1;
+            position: relative;
+            font-size: 13px;
+        }
+        .pool-sticker .pool-emoji {
+            text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+            z-index: 1;
+            font-size: 18px;
+        }
+        .pool-sticker::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.06);
+            border-radius: 30px;
+            pointer-events: none;
+        }
+        .pool-sticker .del-pool {
+            cursor: pointer;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+            margin-left: 4px;
+            font-weight: 300;
+            z-index: 2;
+            position: relative;
+            text-shadow: 0 0 6px rgba(0,0,0,0.5);
+        }
+        .pool-sticker .del-pool:hover { color: #ff6b6b; }
+        .maker {
+            background: #f7f4ef;
+            border-radius: 18px;
+            padding: 14px 14px;
+            margin: 8px 0 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .maker .color-picker-btn {
+            background: none;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            padding: 4px 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            transition: 0.1s;
+        }
+        .maker .color-picker-btn:active { transform: scale(0.95); }
+        .maker .color-picker-btn .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1.5px solid #ddd;
+            flex-shrink: 0;
+            background: #e8e0d8;
+        }
+        .maker .color-picker-btn .color-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+        }
+        .maker .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            padding: 4px 12px 4px 8px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+            cursor: pointer;
+            flex: 1 1 auto;
+            min-width: 70px;
+        }
+        .maker .upload-area input[type="file"] { display: none; }
+        .maker .upload-area .upload-label {
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+        .maker .upload-area .preview-thumb {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            border: 1.5px solid #ddd;
+            flex-shrink: 0;
+            background-color: #eee;
+        }
+        .maker .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 55px;
+        }
+        .maker .input-group label { font-size: 9px; color: #aaa; font-weight: 500; letter-spacing: 0.3px; }
+        .maker .input-group input {
+            padding: 6px 10px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+            font-size: 14px;
+            background: white;
+            font-weight: 500;
+            width: 100%;
+        }
+        .maker .text-color-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            padding: 3px 10px 3px 8px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+        }
+        .maker .text-color-wrap .label {
+            font-size: 10px;
+            color: #999;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .maker .text-color-wrap input[type="color"] {
+            width: 28px;
+            height: 28px;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            border-radius: 50%;
+            background: none;
+        }
+        .maker .text-color-wrap input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        .maker .text-color-wrap input[type="color"]::-webkit-color-swatch {
+            border-radius: 50%;
+            border: 2px solid #ddd;
+        }
+        .maker .size-control {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            background: white;
+            padding: 3px 10px 3px 4px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+        }
+        .maker .size-control button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #555;
+            padding: 0 4px;
+            touch-action: manipulation;
+        }
+        .maker .size-control span {
+            font-size: 14px;
+            color: #888;
+            min-width: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .maker .add-btn {
+            background: #d4c5b2;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            color: #2d241a;
+            cursor: pointer;
+            font-size: 15px;
+            border: 1.5px solid #ccc;
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+        .maker .add-btn:active { transform: scale(0.95); }
+        .maker .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .maker-preview {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            padding: 3px 14px 3px 6px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+        }
+        .maker-preview .preview-sticker {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 12px 4px 6px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            background-size: cover;
+            background-position: center;
+            min-height: 30px;
+            position: relative;
+            min-width: 40px;
+            background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 60%);
+        }
+        .maker-preview .preview-sticker::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.06);
+            border-radius: 30px;
+            pointer-events: none;
+        }
+        .maker-preview .preview-sticker span {
+            text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+            z-index: 1;
+            position: relative;
+            font-size: 13px;
+        }
+        .emoji-panel {
+            display: none;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 10px;
+            background: white;
+            border-radius: 14px;
+            border: 1.5px solid #ddd;
+            margin-bottom: 6px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .emoji-panel.open { display: flex; }
+        .emoji-panel .emoji-btn {
+            font-size: 24px;
+            background: none;
+            border: 1.5px solid #eee;
+            border-radius: 8px;
+            padding: 2px 6px;
+            cursor: pointer;
+            transition: 0.1s;
+            line-height: 1.4;
+            min-width: 38px;
+            text-align: center;
+            touch-action: manipulation;
+        }
+        .emoji-panel .emoji-btn:active { transform: scale(0.9); }
+        .emoji-panel .emoji-btn:hover { background: #f0ece6; border-color: #bbb; }
+        .emoji-panel .emoji-btn.active { background: #d4c5b2; border-color: #b2957a; }
+        .emoji-toggle {
+            background: none;
+            border: 1.5px solid #ddd;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 20px;
+            cursor: pointer;
+            background: white;
+            color: #555;
+            touch-action: manipulation;
+        }
+        .emoji-toggle:active { transform: scale(0.92); }
+        .reset-btn {
+            background: #e8e0d8;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            font-weight: 500;
+            touch-action: manipulation;
+        }
+        .reset-btn:active { transform: scale(0.95); }
+        .hint {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 4px;
+            text-align: center;
+        }
+        .day-cell.drag-over { background: #f0e8de; border-color: #b2957a; }
+        .day-cell .sticker-slot.drag-over-slot { background: #e8ddd0 !important; border: 2px dashed #b2957a !important; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            max-width: 360px;
+            width: 92%;
+            padding: 24px 22px 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            animation: slideUp 0.25s ease;
+            position: relative;
+        }
+        .modal-box .modal-emoji { font-size: 48px; text-align: center; margin-bottom: 2px; }
+        .modal-box .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            color: #222;
+            margin-bottom: 4px;
+        }
+        .modal-box .modal-detail {
+            font-size: 16px;
+            color: #555;
+            text-align: center;
+            line-height: 1.5;
+            word-break: break-word;
+            padding: 6px 0 10px;
+            border-top: 1px solid #eee;
+            margin-top: 4px;
+        }
+        .modal-box .modal-date {
+            font-size: 14px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .modal-box .modal-close-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #d4c5b2;
+            border-radius: 30px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #2d241a;
+            cursor: pointer;
+            touch-action: manipulation;
+            margin-top: 4px;
+        }
+        .modal-box .modal-close-btn:active { transform: scale(0.96); }
+        .modal-box .edit-title {
+            font-size: 19px;
+            font-weight: 700;
+            text-align: center;
+            color: #222;
+            margin-bottom: 10px;
+        }
+        .modal-box .edit-input-group {
+            margin-bottom: 10px;
+        }
+        .modal-box .edit-input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 3px;
+        }
+        .modal-box .edit-input-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 30px;
+            border: 1.5px solid #ddd;
+            font-size: 15px;
+            background: #fcf9f5;
+            font-weight: 500;
+        }
+        .modal-box .edit-input-group input:focus {
+            outline: none;
+            border-color: #b2957a;
+        }
+        .modal-box .edit-date {
+            font-size: 14px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .modal-box .edit-hint {
+            font-size: 13px;
+            color: #b2957a;
+            text-align: center;
+            background: #f7f4ef;
+            padding: 6px 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .modal-box .modal-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .modal-box .modal-btn-row button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .modal-box .modal-btn-row button:active { transform: scale(0.96); }
+        .modal-box .modal-btn-row .save-btn {
+            background: #d4c5b2;
+            color: #2d241a;
+        }
+        .modal-box .modal-btn-row .delete-btn {
+            background: #f5e0e0;
+            color: #b34a4a;
+        }
+        .modal-box .modal-btn-row .cancel-btn {
+            background: #eee;
+            color: #888;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d241a;
+            color: #fcf9f5;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: toastIn 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+        @keyframes toastIn {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        @media (max-width: 420px) {
+            .app { padding: 10px 6px 14px; border-radius: 16px; }
+            .day-cell .date-num { font-size: 13px; }
+            .day-cell .sticker-slot .slot-emoji { font-size: 16px; }
+            .day-cell .sticker-slot .slot-text { font-size: 8px; }
+            .day-cell .sticker-slot .slot-emoji-only { font-size: 20px; }
+            .day-cell .sticker-slot.empty::after { font-size: 11px; }
+            .day-cell .special-label { font-size: 7px; }
+            .day-cell .sticker-grid { gap: 2px; }
+            .header .month { font-size: 20px; }
+            .header .nav button { font-size: 24px; padding: 0 6px; }
+            .weekdays { font-size: 13px; padding: 4px 0 6px; }
+            .mode-btn { font-size: 14px; padding: 8px 16px; max-width: 140px; }
+            .sync-btn { font-size: 12px; padding: 5px 12px; }
+            .maker { padding: 10px 10px; gap: 6px; }
+            .maker .color-picker-btn { padding: 2px 6px; font-size: 16px; }
+            .maker .color-picker-btn .color-dot { width: 20px; height: 20px; }
+            .maker .color-picker-btn .color-label { font-size: 11px; }
+            .maker .input-group input { font-size: 12px; padding: 4px 8px; }
+            .maker .upload-area { min-width: 50px; padding: 3px 8px 3px 6px; }
+            .maker .upload-area .upload-label { font-size: 12px; }
+            .maker .upload-area .preview-thumb { width: 24px; height: 24px; }
+            .maker .add-btn { font-size: 13px; padding: 6px 14px; }
+            .maker .text-color-wrap .label { font-size: 9px; }
+            .maker .text-color-wrap input[type="color"] { width: 24px; height: 24px; }
+            .maker-preview .preview-sticker { min-height: 24px; min-width: 32px; padding: 3px 8px 3px 5px; }
+            .maker-preview .preview-sticker span { font-size: 11px; }
+            .pool-sticker { padding: 3px 8px 3px 6px; min-height: 26px; font-size: 12px; }
+            .pool-sticker .pool-text { font-size: 10px; }
+            .pool-sticker .pool-emoji { font-size: 13px; }
+            .emoji-panel .emoji-btn { font-size: 18px; min-width: 30px; padding: 1px 4px; }
+            .emoji-toggle { font-size: 16px; padding: 3px 10px; }
+            .size-control button { font-size: 16px !important; }
+            .size-control span { font-size: 12px !important; min-width: 20px !important; }
+            .modal-box { padding: 18px 16px 16px; max-width: 300px; }
+            .modal-box .modal-emoji { font-size: 38px; }
+            .modal-box .modal-title { font-size: 18px; }
+            .modal-box .modal-detail { font-size: 14px; }
+            .modal-box .edit-title { font-size: 17px; }
+            .modal-box .edit-input-group input { font-size: 13px; padding: 6px 10px; }
+            .modal-box .edit-hint { font-size: 12px; padding: 4px 8px; }
+            .modal-box .modal-btn-row button { font-size: 13px; padding: 8px; }
+            .toast { font-size: 13px; padding: 10px 18px; bottom: 20px; }
+        }
+        @media (max-width: 370px) {
+            .day-cell .date-num { font-size: 12px; }
+            .day-cell .sticker-slot .slot-emoji { font-size: 13px; }
+            .day-cell .sticker-slot .slot-text { font-size: 7px; }
+            .day-cell .sticker-slot .slot-emoji-only { font-size: 16px; }
+            .day-cell .sticker-slot.empty::after { font-size: 9px; }
+            .day-cell .special-label { font-size: 6px; }
+            .grid { gap: 3px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+    <div class="header">
+        <div>
+            <span class="month" id="monthLabel"></span>
+            <span class="year" id="yearLabel"></span>
+        </div>
+        <div class="nav">
+            <button id="prevMonth">◀</button>
+            <button id="nextMonth">▶</button>
+        </div>
+    </div>
+    <div class="weekdays">
+        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+    </div>
+    <div class="grid" id="calendarGrid"></div>
+    <div class="mode-toggle-area">
+        <button class="mode-btn active" id="viewModeBtn">📅 月曆</button>
+        <button class="mode-btn" id="editModeBtn">✏️ 編輯貼紙</button>
+    </div>
+    <div class="sync-area">
+        <button class="sync-btn export" id="exportBtn">📤 匯出備份</button>
+        <button class="sync-btn import" id="importBtn">📥 匯入備份</button>
+        <input type="file" id="importFileInput" accept=".json" />
+    </div>
+    <div class="edit-area" id="editArea">
+        <div class="toolbar">
+            <div class="label">
+                <span>📌 貼紙庫</span>
+                <button class="reset-btn" id="resetAll">🗑 清除全部</button>
+            </div>
+            <div class="sticker-pool" id="stickerPool"></div>
+            <div class="maker">
+                <!-- 隨機底色按鈕 -->
+                <button class="color-picker-btn" id="randomColorBtn">
+                    <span class="color-dot" id="colorDot" style="background:#e8e0d8;"></span>
+                    <span class="color-label">🎲 隨機底色</span>
+                </button>
+
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="imageUpload" accept="image/*" />
+                    <span class="upload-label">📷 上傳</span>
+                    <div class="preview-thumb" id="imagePreview"></div>
+                </div>
+                <div class="input-group">
+                    <label>標題</label>
+                    <input type="text" id="stickerLabel" placeholder="貼紙名" maxlength="6" value="生日" />
+                </div>
+                <div class="input-group">
+                    <label>詳細</label>
+                    <input type="text" id="stickerDetail" placeholder="點開看" maxlength="20" value="🎉 吃大餐" />
+                </div>
+                <button class="emoji-toggle" id="emojiToggle">🎂</button>
+                <div class="text-color-wrap">
+                    <span class="label">字色</span>
+                    <input type="color" id="textColor" value="#2d241a" />
+                </div>
+                <div class="size-control">
+                    <button id="sizeDown">−</button>
+                    <span id="sizeDisplay">12</span>
+                    <button id="sizeUp">+</button>
+                </div>
+                <div class="maker-preview">
+                    <div class="preview-sticker" id="previewSticker" style="background:#e8e0d8;background-image:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 60%);">
+                        <span id="previewText">🎂 生日</span>
+                    </div>
+                </div>
+                <button class="add-btn" id="addStickerBtn">＋ 製作</button>
+            </div>
+            <div class="emoji-panel" id="emojiPanel"></div>
+            <div class="hint">❤️ 紅字=假日 · 👆 點貼紙看詳細 · ✏️ 編輯模式下長按貼紙可編輯</div>
+        </div>
+    </div>
+</div>
+
+<!-- 檢視 Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <div class="modal-emoji" id="modalEmoji">🎂</div>
+        <div class="modal-title" id="modalTitle">標題</div>
+        <div class="modal-date" id="modalDate">2026/8/13</div>
+        <div class="modal-detail" id="modalDetail">詳細內容</div>
+        <button class="modal-close-btn" id="modalCloseBtn">知道了 👍</button>
+    </div>
+</div>
+
+<!-- 編輯 Modal -->
+<div class="modal-overlay" id="editModalOverlay">
+    <div class="modal-box">
+        <div class="modal-emoji" id="editModalEmoji">🎂</div>
+        <div class="edit-title" id="editModalTitleText">編輯貼紙</div>
+        <div class="edit-input-group">
+            <label>標題</label>
+            <input type="text" id="editModalTitle" maxlength="8" placeholder="輸入標題" />
+        </div>
+        <div class="edit-input-group">
+            <label>詳細內容</label>
+            <input type="text" id="editModalDetail" maxlength="30" placeholder="輸入詳細內容" />
+        </div>
+        <div class="edit-date" id="editModalDate"></div>
+        <div class="edit-hint">💡 只會修改「這個日期」的「這張貼紙」</div>
+        <div class="modal-btn-row">
+            <button class="cancel-btn" id="editModalCancel">取消</button>
+            <button class="delete-btn" id="editModalDelete">🗑 刪除</button>
+            <button class="save-btn" id="editModalSave">💾 儲存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ============================================================
+        // 0. 台灣國定假日 + 自訂紀念日
+        // ============================================================
+        const SPECIAL_DATES = {
+            '1-1': '元旦', '1-2': '元旦補假', '2-28': '和平紀念日',
+            '4-4': '兒童節', '4-5': '清明節', '5-1': '勞動節',
+            '6-9': '端午節', '10-10': '國慶日', '9-27': '中秋節',
+            '2-17': '除夕', '2-18': '春節', '2-19': '春節',
+            '2-20': '春節', '2-21': '春節', '2-22': '春節', '2-23': '春節',
+            '11-19': '🎂 生日', '8-17': '🎂 小青生日', '5-8': '🎂 烏龜生日',
+        };
+        function isSpecialDate(month, day) {
+            const key = `${month + 1}-${day}`;
+            return SPECIAL_DATES[key] || null;
+        }
+
+        // ============================================================
+        // 1. Emoji 庫
+        // ============================================================
+        const EMOJI_CATEGORIES = {
+            '😊 表情': ['😀','😁','😂','😃','😄','😆','😉','😊','😋','😎','😍','🥰','😘','🙂','🤗','🤩','😐','😶','🙄','😏','😛','😜','😝','🤤','😒','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😨','😩','🤯','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠'],
+            '❤️ 愛心': ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','💕','💞','💓','💗','💖','💘','💝'],
+            '🏠 生活': ['🏠','🏡','🏘️','🏚️','🏗️','🏭','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏯','🏰','💒','🗼','🗽','⛪','🕌','🕍','🛕','⛩️','⛲','⛺','🏕️','🌋','🏜️','🏝️','🏖️','🏔️','🗻','🌄','🌅','🌆','🌇','🌉','🌊','🌌','🗾','🎆','🎇','✨','🎈','🎉','🎊','🎋','🎍','🎀','🎁'],
+            '🚗 交通/旅遊': ['🚗','🚘','🚙','🛻','🚕','🚖','🚌','🚍','🚎','🏎️','🚓','🚑','🚒','🚐','🛺','🚲','🛴','🛹','🛼','🚚','🚛','🚜','🏍️','🛵','🦽','🦼','🚔','🚡','🚠','🚟','🚃','🚋','🚞','🚝','','🚅','🚈','🚂','🚆','🚇','🚊','🚉','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🚤','🛶','⛵','🛥️','🚢','🛳️','⛴️','🚨','🚧','⚓','⛽','🚏','🚦','🚥','🗺️','🧭','🧳','🎒','⛰️','🏔️','🌋','🏜️','🏝️','🏖️','⛱️','🌅','🌄','🌇','🌆','🏙️','🌃','🌌','🌉','🌁','🏞️','🌲','🌳','🌴','🌵'],
+            '☕ 飲料/三餐': ['☕','🫖','🍵','🧋','🧃','🥤','🧊','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🍾','🧉','🥛','🍼','🫗','🍽️','🍴','🥄','🔪','🫕','🥘','🍲','🥣','🥗','🍿','🧈','🧂','🥫','🍱','🍘','🍙','🍚','🍛','🍜',' spaghetti','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🥡','🍦','🍧','🍨','🍩','🍪','🎂','🧁','🥧','🍫','🍬','🍭','🍮'],
+            '🍣 美食': ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🫑','🌽','🥕','🫒','🧄','🧅','🥔','🍠','🥐',' bagel','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','骨','🌭','🍔','🍟','🍕','🫓','🥪','🥙','🧆','🌮','🌯','🫔','🥗','🥘','🫕','🥫',' spaghetti','🍜','🍲','🍛','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🥡','🍦','🍧','🍨','🍩','🍪','🎂','🧁','🥧','🍫','🍬','🍭','🍮'],
+            '🏖️ 度假': ['🧳','🎒','⛱️','🏖️','🏝️','🏜️','🏔️','🗻','🌋','🌄','🌅','🌆','🌇','🌉','🌁','🏙️','🌃','🌌','🌉','🌁','🏞️','🗾','🎑','⛺','🌲','🌳','🌴','🌵','🌸','🌺','🌻','🌼','🌷','🌹','🥀','🌿','☘️','🍀','🍁','🍂','🍃','🪴','🎍','🌾','💐','🐚','🪸','🪼','🐠','🐟','🐡','🦈','🐙','🐬','🐳','🐋','🦭','🐊','🐢','🐍','蜥','🦖','🦕','🐉','🌊','🏄','🏊','水','🚣','🪂','🏖️','⛱️','🚤','🛶','⛵','🛥️','🚢','🛳️','⛴️','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🗺️','🧭'],
+            '🎵 娛樂': ['🎵','🎶','🎼','🎤','🎧','📢','📣','🔊','🔉','🔈','💬','💭','🗯️','🎭','🎨','🎪','🎟️','🎫','🎖️','🏆','🏅','🥇','🥈','🥉','⚽','⚾','🥎','🏀','🏐','🏈','🏉','🎾','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼',' gymnastics','⛹️','🤾','🏌️','🏇','🧘','🏄','🏊','水','🚣','🏹','🎯','🎮','🎰','🎲','🧩','♟️',' bowling','🎪','🎨','🖼️','🎭','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎬','🎥','📽️','🎞️','📺','📷','📸','📹'],
+        };
+
+        // ============================================================
+        // 2. 隨機粉彩色產生器（修正：確保回傳正確的 CSS HSL 字串格式）
+        // ============================================================
+        function randomPastelColor() {
+            const h = Math.floor(Math.random() * 360);
+            const s = 45 + Math.floor(Math.random() * 35); // 飽和度 45% ~ 80%
+            const l = 65 + Math.floor(Math.random() * 20); // 明度 65% ~ 85%
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+
+        // ============================================================
+        // 3. 狀態
+        // ============================================================
+        let currentYear = 2026;
+        let currentMonth = 7;
+        const stickerMap = new Map();
+        let stickerPool = [];
+
+        let editorImage = '';
+        let editorTitle = '生日';
+        let editorDetail = '🎉 吃大餐';
+        let editorSize = 12;
+        let editorEmoji = '🎂';
+        let editorColor = '#2d241a';
+        let editorBgColor = '#e8e0d8';
+
+        let dragSticker = null;
+        let emojiPanelOpen = false;
+        let isEditMode = false;
+        let editingStickerInfo = null;
+
+        // DOM
+        const gridEl = document.getElementById('calendarGrid');
+        const monthLabel = document.getElementById('monthLabel');
+        const yearLabel = document.getElementById('yearLabel');
+        const stickerPoolEl = document.getElementById('stickerPool');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const stickerLabel = document.getElementById('stickerLabel');
+        const stickerDetail = document.getElementById('stickerDetail');
+        const sizeDisplay = document.getElementById('sizeDisplay');
+        const textColorInput = document.getElementById('textColor');
+        const previewSticker = document.getElementById('previewSticker');
+        const previewText = document.getElementById('previewText');
+        const addBtn = document.getElementById('addStickerBtn');
+        const resetAllBtn = document.getElementById('resetAll');
+        const emojiToggle = document.getElementById('emojiToggle');
+        const emojiPanel = document.getElementById('emojiPanel');
+        const editArea = document.getElementById('editArea');
+        const viewModeBtn = document.getElementById('viewModeBtn');
+        const editModeBtn = document.getElementById('editModeBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const importFileInput = document.getElementById('importFileInput');
+
+        const randomColorBtn = document.getElementById('randomColorBtn');
+        const colorDot = document.getElementById('colorDot');
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalEmoji = document.getElementById('modalEmoji');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDate = document.getElementById('modalDate');
+        const modalDetail = document.getElementById('modalDetail');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        const editModalOverlay = document.getElementById('editModalOverlay');
+        const editModalEmoji = document.getElementById('editModalEmoji');
+        const editModalTitleText = document.getElementById('editModalTitleText');
+        const editModalTitle = document.getElementById('editModalTitle');
+        const editModalDetail = document.getElementById('editModalDetail');
+        const editModalDate = document.getElementById('editModalDate');
+        const editModalSave = document.getElementById('editModalSave');
+        const editModalCancel = document.getElementById('editModalCancel');
+        const editModalDelete = document.getElementById('editModalDelete');
+
+        // ============================================================
+        // 4. 核心函數
+        // ============================================================
+        function dateKey(year, month, day) {
+            return `${year}-${month + 1}-${day}`;
+        }
+
+        function getStickersForDate(year, month, day) {
+            const key = dateKey(year, month, day);
+            return stickerMap.get(key) || [];
+        }
+
+        function getStickerAtSlot(year, month, day, slotIndex) {
+            const stickers = getStickersForDate(year, month, day);
+            return stickers[slotIndex] || null;
+        }
+
+        function setStickerAtSlot(year, month, day, slotIndex, sticker) {
+            const key = dateKey(year, month, day);
+            const list = stickerMap.get(key) || [];
+            while (list.length < 4) list.push(null);
+            list[slotIndex] = sticker;
+            while (list.length > 0 && list[list.length - 1] === null) list.pop();
+            if (list.length === 0) stickerMap.delete(key);
+            else stickerMap.set(key, list);
+            saveToLocal();
+            renderAll();
+        }
+
+        function updateStickerAtSlot(year, month, day, slotIndex, newTitle, newDetail) {
+            const key = dateKey(year, month, day);
+            const list = stickerMap.get(key) || [];
+            if (slotIndex < list.length && list[slotIndex]) {
+                list[slotIndex].title = newTitle;
+                list[slotIndex].detail = newDetail;
+                stickerMap.set(key, list);
+                saveToLocal();
+                renderAll();
+                return true;
+            }
+            return false;
+        }
+
+        function removeStickerAtSlot(year, month, day, slotIndex) {
+            const key = dateKey(year, month, day);
+            const list = stickerMap.get(key) || [];
+            if (slotIndex < list.length) {
+                list[slotIndex] = null;
+                while (list.length > 0 && list[list.length - 1] === null) list.pop();
+                if (list.length === 0) stickerMap.delete(key);
+                else stickerMap.set(key, list);
+                saveToLocal();
+                renderAll();
+                return true;
+            }
+            return false;
+        }
+
+        // ============================================================
+        // 5. 儲存 / 載入
+        // ============================================================
+        function getFullData() {
+            return {
+                year: currentYear,
+                month: currentMonth,
+                stickerMap: Array.from(stickerMap.entries()),
+                stickerPool: stickerPool
+            };
+        }
+
+        function loadFullData(data) {
+            currentYear = data.year || 2026;
+            currentMonth = data.month ?? 7;
+            stickerMap.clear();
+            if (data.stickerMap) {
+                data.stickerMap.forEach(([key, val]) => stickerMap.set(key, val));
+            }
+            if (data.stickerPool && data.stickerPool.length > 0) {
+                stickerPool = data.stickerPool;
+            } else {
+                stickerPool = [];
+            }
+            saveToLocal();
+            renderAll();
+        }
+
+        function saveToLocal() {
+            try {
+                localStorage.setItem('handbookCalendar', JSON.stringify(getFullData()));
+            } catch (e) {}
+        }
+
+        function loadFromLocal() {
+            try {
+                const raw = localStorage.getItem('handbookCalendar');
+                if (!raw) return false;
+                const data = JSON.parse(raw);
+                loadFullData(data);
+                return true;
+            } catch (e) { return false; }
+        }
+
+        // ============================================================
+        // 6. 匯出 / 匯入
+        // ============================================================
+        function exportData() {
+            const data = getFullData();
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const now = new Date();
+            const dateStr =
+                now.getFullYear() +
+                String(now.getMonth() + 1).padStart(2, '0') +
+                String(now.getDate()).padStart(2, '0');
+            a.download = `貼紙月曆備份_${dateStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ 匯出成功！');
+        }
+
+        function importData(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.stickerMap || !data.stickerPool) {
+                        showToast('❌ 檔案格式錯誤');
+                        return;
+                    }
+                    if (!confirm('匯入將覆蓋目前所有資料，確定繼續？')) return;
+                    loadFullData(data);
+                    showToast('✅ 匯入成功！');
+                } catch (err) {
+                    showToast('❌ 檔案解析失敗');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ============================================================
+        // 7. Toast
+        // ============================================================
+        let toastTimer = null;
+
+        function showToast(msg) {
+            const old = document.querySelector('.toast');
+            if (old) old.remove();
+            if (toastTimer) clearTimeout(toastTimer);
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.textContent = msg;
+            document.body.appendChild(div);
+            toastTimer = setTimeout(() => {
+                if (div.parentNode) div.remove();
+                toastTimer = null;
+            }, 2500);
+        }
+
+        // ============================================================
+        // 8. 渲染日曆
+        // ============================================================
+        function renderCalendar() {
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            let startOffset = (firstDay.getDay() + 6) % 7;
+            const prevMonthLast = new Date(currentYear, currentMonth, 0).getDate();
+
+            gridEl.innerHTML = '';
+
+            for (let i = startOffset - 1; i >= 0; i--) {
+                gridEl.appendChild(createDayCell(currentYear, currentMonth - 1, prevMonthLast - i, true));
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                gridEl.appendChild(createDayCell(currentYear, currentMonth, d, false));
+            }
+            const remaining = 42 - gridEl.children.length;
+            for (let d = 1; d <= remaining; d++) {
+                gridEl.appendChild(createDayCell(currentYear, currentMonth + 1, d, true));
+            }
+
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            monthLabel.textContent = monthNames[currentMonth];
+            yearLabel.textContent = currentYear;
+        }
+
+        function createDayCell(year, month, day, isOther) {
+            const cell = document.createElement('div');
+            cell.className = 'day-cell';
+            if (isOther) cell.classList.add('other-month');
+
+            const today = new Date();
+            if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate() && !isOther) {
+                cell.classList.add('today');
+            }
+
+            const specialName = isSpecialDate(month, day);
+            if (specialName && !isOther) {
+                cell.classList.add('special-date');
+            }
+
+            const numSpan = document.createElement('div');
+            numSpan.className = 'date-num';
+            numSpan.textContent = day;
+            cell.appendChild(numSpan);
+
+            if (specialName && !isOther) {
+                const label = document.createElement('div');
+                label.className = 'special-label';
+                label.textContent = specialName;
+                cell.appendChild(label);
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'sticker-grid';
+
+            const stickers = getStickersForDate(year, month, day);
+            for (let i = 0; i < 4; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'sticker-slot';
+                slot.dataset.slotIndex = i;
+                slot.dataset.year = year;
+                slot.dataset.month = month;
+                slot.dataset.day = day;
+
+                const sticker = stickers[i] || null;
+                if (sticker) {
+                    slot.classList.add('filled');
+                    if (sticker.image && sticker.image.startsWith('data:image')) {
+                        slot.style.backgroundImage = `url(${sticker.image})`;
+                        slot.style.backgroundSize = 'cover';
+                        slot.style.backgroundPosition = 'center';
+                    } else if (sticker.bgColor) {
+                        slot.style.background = sticker.bgColor;
+                        slot.style.backgroundImage = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 60%)`;
+                    } else {
+                        slot.style.background = '#e8e0d8';
+                    }
+
+                    const emojiSpan = document.createElement('span');
+                    emojiSpan.className = 'slot-emoji';
+                    emojiSpan.textContent = sticker.emoji || '📌';
+                    slot.appendChild(emojiSpan);
+
+                    if (sticker.title) {
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'slot-text';
+                        textSpan.textContent = sticker.title;
+                        textSpan.style.fontSize = Math.min(11, (sticker.size || 10) * 0.9) + 'px';
+                        textSpan.style.color = sticker.color || '#ffffff';
+                        slot.appendChild(textSpan);
+                    }
+
+                    slot.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showModal(sticker, year, month, day);
+                    });
+
+                    let longPressTimer = null;
+                    slot.addEventListener('pointerdown', (e) => {
+                        if (!isEditMode) return;
+                        longPressTimer = setTimeout(() => {
+                            openEditModal(sticker, year, month, day, i);
+                            longPressTimer = null;
+                        }, 500);
+                    });
+                    slot.addEventListener('pointerup', () => {
+                        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+                    });
+                    slot.addEventListener('pointerleave', () => {
+                        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+                    });
+
+                } else {
+                    slot.classList.add('empty');
+                    slot.addEventListener('dragover', (e) => {
+                        if (!isEditMode) return;
+                        e.preventDefault();
+                        slot.classList.add('drag-over-slot');
+                    });
+                    slot.addEventListener('dragleave', () => {
+                        slot.classList.remove('drag-over-slot');
+                    });
+                    slot.addEventListener('drop', (e) => {
+                        if (!isEditMode) return;
+                        e.preventDefault();
+                        slot.classList.remove('drag-over-slot');
+                        if (dragSticker) {
+                            const sYear = parseInt(slot.dataset.year);
+                            const sMonth = parseInt(slot.dataset.month);
+                            const sDay = parseInt(slot.dataset.day);
+                            const sIdx = parseInt(slot.dataset.slotIndex);
+                            const existing = getStickerAtSlot(sYear, sMonth, sDay, sIdx);
+                            if (existing) {
+                                showToast('這個格子已經有貼紙了');
+                                return;
+                            }
+                            setStickerAtSlot(sYear, sMonth, sDay, sIdx, dragSticker);
+                            dragSticker = null;
+                        }
+                    });
+                }
+
+                grid.appendChild(slot);
+            }
+
+            cell.appendChild(grid);
+
+            cell.addEventListener('click', (e) => {
+                if (e.target.closest('.sticker-slot')) return;
+                if (!isEditMode) switchToEditMode();
+            });
+
+            cell.addEventListener('dragover', (e) => {
+                if (!isEditMode) return;
+                e.preventDefault();
+                cell.classList.add('drag-over');
+            });
+            cell.addEventListener('dragleave', () => {
+                cell.classList.remove('drag-over');
+            });
+            cell.addEventListener('drop', (e) => {
+                if (!isEditMode) return;
+                e.preventDefault();
+                cell.classList.remove('drag-over');
+                if (dragSticker) {
+                    const stickers = getStickersForDate(year, month, day);
+                    let emptySlot = -1;
+                    for (let i = 0; i < 4; i++) {
+                        if (!stickers[i]) { emptySlot = i; break; }
+                    }
+                    if (emptySlot === -1) {
+                        showToast('這個日期已經有4張貼紙了');
+                        return;
+                    }
+                    setStickerAtSlot(year, month, day, emptySlot, dragSticker);
+                    dragSticker = null;
+                }
+            });
+
+            return cell;
+        }
+
+        // ============================================================
+        // 9. 檢視 Modal
+        // ============================================================
+        function showModal(sticker, year, month, day) {
+            modalEmoji.textContent = sticker.emoji || '📌';
+            modalTitle.textContent = sticker.title || '貼紙';
+            modalDate.textContent = `${year}年${month + 1}月${day}日`;
+            modalDetail.textContent = sticker.detail || '沒有詳細內容';
+            modalOverlay.classList.add('open');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('open');
+        }
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // ============================================================
+        // 10. 編輯 Modal
+        // ============================================================
+        function openEditModal(sticker, year, month, day, slotIndex) {
+            editingStickerInfo = { year, month, day, slotIndex };
+            editModalEmoji.textContent = sticker.emoji || '📌';
+            editModalTitleText.textContent = `編輯貼紙 - ${year}年${month + 1}月${day}日`;
+            editModalTitle.value = sticker.title || '';
+            editModalDetail.value = sticker.detail || '';
+            editModalDate.textContent = `${year}年${month + 1}月${day}日`;
+            editModalOverlay.classList.add('open');
+        }
+
+        function closeEditModal() {
+            editModalOverlay.classList.remove('open');
+            editingStickerInfo = null;
+        }
+
+        editModalSave.addEventListener('click', () => {
+            if (!editingStickerInfo) return;
+            const { year, month, day, slotIndex } = editingStickerInfo;
+            const newTitle = editModalTitle.value.trim() || '貼紙';
+            const newDetail = editModalDetail.value.trim() || '';
+            updateStickerAtSlot(year, month, day, slotIndex, newTitle, newDetail);
+            closeEditModal();
+            showToast('✅ 已更新貼紙');
+        });
+
+        editModalCancel.addEventListener('click', closeEditModal);
+
+        editModalDelete.addEventListener('click', () => {
+            if (!editingStickerInfo) return;
+            const { year, month, day, slotIndex } = editingStickerInfo;
+            if (confirm('確定刪除這張貼紙？')) {
+                removeStickerAtSlot(year, month, day, slotIndex);
+                closeEditModal();
+                showToast('已刪除貼紙');
+            }
+        });
+
+        editModalOverlay.addEventListener('click', (e) => {
+            if (e.target === editModalOverlay) closeEditModal();
+        });
+
+        // ============================================================
+        // 11. 貼紙庫
+        // ============================================================
+        function renderStickerPool() {
+            stickerPoolEl.innerHTML = '';
+            if (stickerPool.length === 0) {
+                const empty = document.createElement('span');
+                empty.style.color = '#bbb';
+                empty.style.fontSize = '14px';
+                empty.textContent = '貼紙庫空空，製作貼紙吧';
+                stickerPoolEl.appendChild(empty);
+                return;
+            }
+
+            stickerPool.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = 'pool-sticker';
+                div.draggable = true;
+
+                if (s.image && s.image.startsWith('data:image')) {
+                    div.style.backgroundImage = `url(${s.image})`;
+                    div.style.backgroundSize = 'cover';
+                    div.style.backgroundPosition = 'center';
+                } else if (s.bgColor) {
+                    div.style.background = s.bgColor;
+                    div.style.backgroundImage = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 60%)`;
+                } else {
+                    div.style.background = '#e8e0d8';
+                }
+
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'pool-emoji';
+                emojiSpan.textContent = s.emoji || '📌';
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'pool-text';
+                textSpan.textContent = s.title || '貼紙';
+                textSpan.style.fontSize = (s.size || 10) + 'px';
+                textSpan.style.color = s.color || '#ffffff';
+
+                const del = document.createElement('span');
+                del.className = 'del-pool';
+                del.textContent = ' ✕';
+                del.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(`刪除「${s.title}」？`)) {
+                        stickerPool.splice(idx, 1);
+                        saveToLocal();
+                        renderAll();
+                    }
+                });
+
+                div.appendChild(emojiSpan);
+                div.appendChild(textSpan);
+                div.appendChild(del);
+
+                div.addEventListener('dragstart', (e) => {
+                    dragSticker = { ...s };
+                    e.dataTransfer.setData('text/plain', s.title);
+                    setTimeout(() => { div.style.opacity = '0.4'; }, 0);
+                });
+                div.addEventListener('dragend', () => {
+                    div.style.opacity = '1';
+                });
+
+                stickerPoolEl.appendChild(div);
+            });
+        }
+
+        // ============================================================
+        // 12. Emoji 面板 + 預覽
+        // ============================================================
+        function renderEmojiPanel() {
+            emojiPanel.innerHTML = '';
+            Object.entries(EMOJI_CATEGORIES).forEach(([catName, emojis]) => {
+                const catDiv = document.createElement('div');
+                catDiv.style.cssText = 'width:100%;font-size:11px;color:#999;margin:2px 0 2px;font-weight:600;';
+                catDiv.textContent = catName;
+                emojiPanel.appendChild(catDiv);
+
+                emojis.forEach(em => {
+                    const btn = document.createElement('button');
+                    btn.className = 'emoji-btn';
+                    btn.textContent = em;
+                    if (em === editorEmoji) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        editorEmoji = em;
+                        emojiToggle.textContent = em;
+                        emojiPanel.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePreview();
+                        emojiPanel.classList.remove('open');
+                        emojiPanelOpen = false;
+                    });
+                    catDiv.appendChild(btn);
+                });
+            });
+        }
+
+        function updatePreview() {
+            if (editorImage && editorImage.startsWith('data:image')) {
+                previewSticker.style.backgroundImage = `url(${editorImage})`;
+                previewSticker.style.backgroundSize = 'cover';
+                previewSticker.style.backgroundPosition = 'center';
+                previewSticker.style.backgroundColor = 'transparent';
+            } else {
+                previewSticker.style.backgroundImage = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 60%)`;
+                previewSticker.style.backgroundColor = editorBgColor || '#e8e0d8';
+            }
+            previewText.textContent = editorEmoji + ' ' + (editorTitle || '標題');
+            previewText.style.fontSize = editorSize + 'px';
+            previewText.style.color = editorColor;
+        }
+
+        function renderAll() {
+            renderCalendar();
+            renderStickerPool();
+            updatePreview();
+        }
+
+        // ============================================================
+        // 13. 模式切換
+        // ============================================================
+        function switchToEditMode() {
+            isEditMode = true;
+            editArea.classList.add('open');
+            viewModeBtn.classList.remove('active');
+            editModeBtn.classList.add('active');
+            renderAll();
+        }
+
+        function switchToViewMode() {
+            isEditMode = false;
+            editArea.classList.remove('open');
+            viewModeBtn.classList.add('active');
+            editModeBtn.classList.remove('active');
+            renderAll();
+        }
+
+        // ============================================================
+        // 14. 製作貼紙
+        // ============================================================
+        function makeSticker() {
+            const title = editorTitle.trim() || '貼紙';
+            const detail = editorDetail.trim() || '';
+
+            if (!editorImage && !editorBgColor) {
+                showToast('請上傳圖片或點「隨機底色」');
+                return;
+            }
+
+            const newSticker = {
+                title: title,
+                detail: detail,
+                size: editorSize,
+                emoji: editorEmoji || '📌',
+                color: editorColor,
+                image: editorImage || undefined,
+                bgColor: editorImage ? undefined : editorBgColor
+            };
+
+            stickerPool.push(newSticker);
+            saveToLocal();
+            renderAll();
+            showToast('✅ 貼紙製作完成');
+        }
+
+        // ============================================================
+        // 15. 隨機底色（修正點：產生隨機色並清空圖片檔，確保底色正確套用）
+        // ============================================================
+        function randomColor() {
+            editorBgColor = randomPastelColor();
+            editorImage = ''; // 清空上傳的圖片背景，確保底色能渲染出來
+            imagePreview.style.backgroundImage = 'none';
+            imageUpload.value = '';
+
+            colorDot.style.background = editorBgColor;
+            updatePreview();
+            showToast('🎨 已隨機換色');
+        }
+
+        randomColorBtn.addEventListener('click', randomColor);
+
+        // ============================================================
+        // 16. 重置 / 月份
+        // ============================================================
+        function resetAllStickers() {
+            if (!confirm('清除所有貼紙？ (貼紙庫保留)')) return;
+            stickerMap.clear();
+            saveToLocal();
+            renderAll();
+            showToast('已清除所有貼紙');
+        }
+
+        function prevMonth() {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else currentMonth--;
+            saveToLocal();
+            renderAll();
+        }
+
+        function nextMonth() {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else currentMonth++;
+            saveToLocal();
+            renderAll();
+        }
+
+        // ============================================================
+        // 17. 初始化
+        // ============================================================
+        function init() {
+            const hasSaved = loadFromLocal();
+
+            if (!hasSaved || stickerPool.length === 0) {
+                const colors = [
+                    randomPastelColor(), randomPastelColor(), randomPastelColor(),
+                    randomPastelColor(), randomPastelColor(), randomPastelColor(),
+                    randomPastelColor(), randomPastelColor(), randomPastelColor()
+                ];
+                const examples = [
+                    { emoji: '🎂', title: '生日', detail: '🎉 吃大餐！', color: '#2d241a', bgColor: colors[0] },
+                    { emoji: '🎉', title: '派對', detail: '晚上8點 朋友聚會', color: '#2d241a', bgColor: colors[1] },
+                    { emoji: '🍣', title: '壽司', detail: '午餐 12:00 爭鮮', color: '#2d241a', bgColor: colors[2] },
+                    { emoji: '☕', title: '咖啡', detail: '下午茶 3點', color: '#2d241a', bgColor: colors[3] },
+                    { emoji: '🎬', title: '電影', detail: '晚上7點 阿凡達', color: '#2d241a', bgColor: colors[4] },
+                    { emoji: '✈️', title: '旅行', detail: '日本東京 5天4夜', color: '#2d241a', bgColor: colors[5] },
+                    { emoji: '👨‍👧', title: '父親節', detail: '回家陪爸爸', color: '#2d241a', bgColor: colors[6] },
+                    { emoji: '🏠', title: '居家', detail: '整理房間', color: '#2d241a', bgColor: colors[7] },
+                    { emoji: '🍜', title: '晚餐', detail: '拉麵 18:30', color: '#2d241a', bgColor: colors[8] },
+                ];
+                examples.forEach(ex => {
+                    stickerPool.push({
+                        title: ex.title,
+                        detail: ex.detail,
+                        size: 12,
+                        emoji: ex.emoji,
+                        color: ex.color,
+                        bgColor: ex.bgColor,
+                        image: undefined
+                    });
+                });
+
+                const demoData = [
+                    { date: [2026, 7, 8], title: '父親節', detail: '回家陪爸爸', slot: 0 },
+                    { date: [2026, 7, 13], title: '學智生日', detail: '🎂 晚上聚餐', slot: 0 },
+                    { date: [2026, 7, 13], title: '會議', detail: '下午3點 線上', slot: 1 },
+                    { date: [2026, 7, 20], title: '慶功宴', detail: '🏆 業績達標！', slot: 0 },
+                    { date: [2026, 7, 22], title: '聚會', detail: '🍻 老同學見面', slot: 0 },
+                    { date: [2026, 7, 29], title: '旅行', detail: '✈️ 出發去日本', slot: 0 },
+                ];
+                demoData.forEach(d => {
+                    const poolItem = stickerPool.find(s => s.title === d.title);
+                    if (poolItem) {
+                        const key = dateKey(d.date[0], d.date[1], d.date[2]);
+                        const list = stickerMap.get(key) || [];
+                        while (list.length < 4) list.push(null);
+                        list[d.slot] = {
+                            title: d.title,
+                            detail: d.detail,
+                            size: 12,
+                            emoji: poolItem.emoji,
+                            color: '#2d241a',
+                            bgColor: poolItem.bgColor,
+                            image: undefined
+                        };
+                        stickerMap.set(key, list);
+                    }
+                });
+                saveToLocal();
+            }
+
+            if (stickerPool.length > 0) {
+                const first = stickerPool[0];
+                editorImage = first.image || '';
+                editorTitle = first.title || '活動';
+                editorDetail = first.detail || '';
+                editorSize = first.size || 12;
+                editorEmoji = first.emoji || '📌';
+                editorColor = first.color || '#2d241a';
+                editorBgColor = first.bgColor || '#e8e0d8';
+            }
+
+            stickerLabel.value = editorTitle;
+            stickerDetail.value = editorDetail;
+            sizeDisplay.textContent = editorSize;
+            textColorInput.value = editorColor;
+            emojiToggle.textContent = editorEmoji;
+            colorDot.style.background = editorBgColor;
+
+            if (editorImage) {
+                imagePreview.style.backgroundImage = `url(${editorImage})`;
+                imagePreview.style.backgroundSize = 'cover';
+            }
+
+            renderEmojiPanel();
+
+            isEditMode = false;
+            editArea.classList.remove('open');
+            viewModeBtn.classList.add('active');
+            editModeBtn.classList.remove('active');
+            renderAll();
+            bindEvents();
+        }
+
+        // ============================================================
+        // 18. 事件綁定
+        // ============================================================
+        function bindEvents() {
+            document.getElementById('prevMonth').addEventListener('click', prevMonth);
+            document.getElementById('nextMonth').addEventListener('click', nextMonth);
+
+            viewModeBtn.addEventListener('click', switchToViewMode);
+            editModeBtn.addEventListener('click', switchToEditMode);
+
+            exportBtn.addEventListener('click', exportData);
+            importBtn.addEventListener('click', () => { importFileInput.click(); });
+            importFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) importData(file);
+                importFileInput.value = '';
+            });
+
+            imageUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    editorImage = ev.target.result;
+                    imagePreview.style.backgroundImage = `url(${editorImage})`;
+                    imagePreview.style.backgroundSize = 'cover';
+                    updatePreview();
+                    addBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('uploadArea').addEventListener('click', () => {
+                imageUpload.click();
+            });
+
+            stickerLabel.addEventListener('input', () => {
+                editorTitle = stickerLabel.value || '貼紙';
+                updatePreview();
+            });
+            stickerDetail.addEventListener('input', () => {
+                editorDetail = stickerDetail.value || '';
+            });
+
+            document.getElementById('sizeDown').addEventListener('click', () => {
+                editorSize = Math.max(8, editorSize - 1);
+                sizeDisplay.textContent = editorSize;
+                updatePreview();
+            });
+            document.getElementById('sizeUp').addEventListener('click', () => {
+                editorSize = Math.min(22, editorSize + 1);
+                sizeDisplay.textContent = editorSize;
+                updatePreview();
+            });
+
+            textColorInput.addEventListener('input', () => {
+                editorColor = textColorInput.value;
+                updatePreview();
+            });
+
+            emojiToggle.addEventListener('click', () => {
+                emojiPanelOpen = !emojiPanelOpen;
+                emojiPanel.classList.toggle('open', emojiPanelOpen);
+                if (emojiPanelOpen) {
+                    emojiPanel.querySelectorAll('.emoji-btn').forEach(b => {
+                        b.classList.toggle('active', b.textContent === editorEmoji);
+                    });
+                }
+            });
+
+            addBtn.addEventListener('click', makeSticker);
+            stickerLabel.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') makeSticker();
+            });
+
+            resetAllBtn.addEventListener('click', resetAllStickers);
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
+
