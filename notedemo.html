@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日曆貼圖日記 Prototype v23 (關鍵字搜尋與跳轉版)</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f7e6d5; margin: 0; padding: 15px; display: flex; justify-content: center; }
+    .phone-container { width: 100%; max-width: 420px; background: #fff2e6; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; min-height: 850px; }
+    
+    .header { 
+      background: #ffe4cc; 
+      padding: 12px; 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem; 
+      font-weight: bold; 
+      color: #d35400; 
+      border-bottom: 2px solid #ffd1a8; 
+    }
+    .month-nav-btn {
+      background: rgba(211, 84, 0, 0.1);
+      border: 1px solid rgba(211, 84, 0, 0.3);
+      color: #d35400;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    .month-nav-btn:hover { background: #d35400; color: #fff; }
+    
+    .calendar-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 1px; 
+      background: #e0d0c0; 
+      padding: 4px; 
+      position: relative; 
+    }
+    .week-header { background: #fbeee6; text-align: center; font-size: 0.8rem; padding: 6px 0; font-weight: bold; color: #555; }
+    .week-header.sun { color: #e74c3c; }
+    .week-header.sat { color: #3498db; }
+    
+    .day-cell { 
+      background: #ffffff; 
+      height: 75px; 
+      padding: 3px; 
+      font-size: 0.8rem; 
+      position: relative; 
+      cursor: pointer; 
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+    .day-cell.other-month { background: #fdfbf7; color: #bbb; cursor: pointer; }
+    .day-cell.selected { background: #e8f8f5; border: 2px solid #16a085; }
+    .day-header-row { display: flex; justify-content: space-between; align-items: center; width: 100%; z-index: 2; min-height: 14px; }
+    .day-num { font-weight: bold; color: #333; font-size: 0.75rem; }
+    .day-cell.other-month .day-num { color: #aaa; }
+    
+    .day-total-cost { font-size: 8px; font-weight: bold; color: #e74c3c; background: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 2px; }
+    .month-total-banner { font-size: 8px; font-weight: bold; color: #27ae60; background: #e8f8f5; border: 1px solid #a3e4d7; padding: 1px 2px; border-radius: 3px; line-height: 1.1; margin-top: 2px; }
+    
+    .badges-wrapper { display: flex; flex-direction: column; gap: 2px; width: 100%; position: relative; z-index: 5; }
+
+    .sticker-badge {
+      font-size: 9px;
+      padding: 1px 3px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      font-weight: 600;
+      color: #2c3e50;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      height: 16px;
+    }
+    .sticker-text-bg { background: rgba(255, 255, 255, 0.85); padding: 0 2px; border-radius: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .gantt-bar-extended {
+      position: absolute;
+      height: 17px;
+      border-radius: 8px;
+      font-size: 9px;
+      font-weight: bold;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      white-space: nowrap;
+      overflow: hidden;
+      z-index: 100;
+      border: 1px solid rgba(0,0,0,0.1);
+      pointer-events: auto;
+    }
+
+    .more-badge-dots {
+      font-size: 8px;
+      font-weight: bold;
+      color: #888;
+      background: #f0f0f0;
+      border-radius: 3px;
+      padding: 0 3px;
+      text-align: center;
+      margin-top: 1px;
+      border: 1px dashed #ccc;
+    }
+
+    .bottom-sheet { background: #ffffff; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 15px; flex-grow: 1; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .nav-tabs { display: flex; gap: 4px; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 12px; }
+    .tab-btn { padding: 6px 10px; border: none; background: #eee; border-radius: 16px; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: #666; flex: 1; text-align: center; }
+    .tab-btn.active { background: #f39c12; color: #fff; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .sub-cat-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+    .sub-cat-btn { padding: 3px 10px; border: 1px solid #f39c12; background: #fff; border-radius: 12px; font-size: 0.75rem; color: #e67e22; cursor: pointer; }
+    .sub-cat-btn.active { background: #f39c12; color: #fff; }
+
+    .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; }
+    .sticker-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 10px;
+      padding: 6px 2px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2c3e50;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      position: relative;
+    }
+    .sticker-card:hover { transform: translateY(-2px); }
+    .sticker-icon { font-size: 1.3rem; display: block; margin-bottom: 2px; }
+    .edit-template-btn { position: absolute; top: 2px; right: 2px; font-size: 8px; background: rgba(0,0,0,0.05); border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .schedule-title { font-size: 0.95rem; font-weight: bold; color: #d35400; }
+    .add-note-btn { background: #27ae60; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+    
+    .schedule-card-grid { display: flex; flex-direction: column; gap: 8px; max-height: 190px; overflow-y: auto; }
+    .schedule-item-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .schedule-left { display: flex; gap: 8px; align-items: center; }
+    .schedule-item-icon { font-size: 1.3rem; }
+    .schedule-item-title { font-size: 0.8rem; font-weight: bold; color: #333; }
+    .schedule-item-desc { font-size: 0.7rem; color: #666; margin-top: 2px; }
+    
+    .map-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: #27ae60;
+      color: white;
+      text-decoration: none;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .map-link-btn:hover { background: #219150; }
+
+    .schedule-action-btns { display: flex; gap: 4px; }
+    .action-btn { border: none; background: rgba(255,255,255,0.8); padding: 4px 6px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; border: 1px solid #ddd; }
+    .action-btn.delete { color: #e74c3c; }
+
+    /* 同步與搜尋樣式 */
+    .sync-box { display: flex; flex-direction: column; gap: 10px; padding: 5px 0; max-height: 210px; overflow-y: auto; }
+    .sync-card { border: 1px solid #e0d0c0; background: #fffcf8; border-radius: 12px; padding: 10px; }
+    .sync-card h4 { margin: 0 0 4px 0; color: #d35400; font-size: 0.85rem; }
+    .sync-card p { margin: 0 0 8px 0; font-size: 0.7rem; color: #666; line-height: 1.3; }
+    .sync-btn { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
+    .sync-btn.import { background: #27ae60; }
+    .file-input-hidden { display: none; }
+
+    .search-input { width: 100%; padding: 6px 10px; border: 1px solid #d35400; border-radius: 8px; font-size: 0.8rem; margin-bottom: 8px; }
+    .search-results-list { display: flex; flex-direction: column; gap: 6px; max-height: 110px; overflow-y: auto; }
+    .search-result-item { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .search-result-item:hover { background: #fbeee6; border-color: #f39c12; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-card {
+      background: #fff; padding: 18px; border-radius: 16px; width: 330px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-title { font-size: 1rem; font-weight: bold; color: #d35400; margin-bottom: 12px; }
+    .form-group { margin-bottom: 8px; display: flex; flex-direction: column; gap: 3px; }
+    .form-group label { font-size: 0.75rem; font-weight: bold; color: #555; }
+    .form-group input { padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8rem; }
+    .modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .modal-btns button { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    .btn-cancel { background: #eee; color: #666; }
+    .btn-save { background: #f39c12; color: #fff; }
+
+    .canvas-container { display: flex; justify-content: center; margin-bottom: 10px; }
+    .canvas-box { width: 120px; height: 120px; border: 2px dashed #f39c12; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; color: #2c3e50; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    .color-palette-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; }
+    .color-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0; }
+    .color-dot.active { transform: scale(1.15); border-color: #f39c12; }
+
+    .canvas-tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .canvas-tools button { padding: 8px; border: 1px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: #444; }
+    .canvas-tools button.primary { background: #f39c12; color: #fff; border: none; grid-column: span 2; }
+  </style>
+</head>
+<body>
+
+<div class="phone-container">
+  <div class="header">
+    <div class="month-nav-btn" onclick="changeMonth(-1)">◀</div>
+    <span id="month-title">2026年 08月</span>
+    <div class="month-nav-btn" onclick="changeMonth(1)">▶</div>
+  </div>
+  
+  <div class="calendar-grid" id="calendar-grid">
+    <div class="week-header">一</div><div class="week-header">二</div><div class="week-header">三</div>
+    <div class="week-header">四</div><div class="week-header">五</div><div class="week-header sat">六</div><div class="week-header sun">日</div>
+  </div>
+
+  <div class="bottom-sheet">
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('stickers', this)">貼圖選擇</button>
+      <button class="tab-btn" onclick="switchTab('schedule', this)">日程/備註</button>
+      <button class="tab-btn" onclick="switchTab('editor', this)">貼圖 DIY</button>
+      <button class="tab-btn" onclick="switchTab('sync', this)">數據與工具</button>
+    </div>
+
+    <!-- Tab 1: 貼圖庫 -->
+    <div id="tab-stickers" class="tab-content active">
+      <div class="sub-cat-bar">
+        <button class="sub-cat-btn active" onclick="filterCategory('all', this)">全部</button>
+        <button class="sub-cat-btn" onclick="filterCategory('life', this)">生活</button>
+        <button class="sub-cat-btn" onclick="filterCategory('work', this)">工作</button>
+        <button class="sub-cat-btn" onclick="filterCategory('food', this)">美食</button>
+      </div>
+
+      <div class="sticker-grid" id="sticker-grid"></div>
+    </div>
+
+    <!-- Tab 2: 日程列表 -->
+    <div id="tab-schedule" class="tab-content">
+      <div class="schedule-header">
+        <span class="schedule-title" id="selected-date-text">2026.08.28 的日程與備註</span>
+        <button class="add-note-btn" onclick="openScheduleModal()">+ 新增行程/記帳</button>
+      </div>
+
+      <div class="schedule-card-grid" id="schedule-list"></div>
+    </div>
+
+    <!-- Tab 3: 貼圖 DIY -->
+    <div id="tab-editor" class="tab-content">
+      <div class="canvas-container">
+        <div class="canvas-box" id="preview-canvas">
+          <span class="sticker-text-bg">☕ 咖啡豆</span>
+        </div>
+      </div>
+
+      <div class="color-palette-bar" id="color-palette"></div>
+
+      <div class="canvas-tools">
+        <button onclick="changeEditorText()">✏️ 修改內容</button>
+        <button onclick="zoomText(1.15)">🔍 放大文字</button>
+        <button onclick="zoomText(0.85)">🔍 縮小文字</button>
+        <button onclick="randomPatternBg()">🎲 隨機換底色</button>
+        <button class="primary" onclick="saveCustomSticker()">✨ 儲存並新增至貼圖庫</button>
+      </div>
+    </div>
+
+    <!-- Tab 4: 搜尋與同步工具 -->
+    <div id="tab-sync" class="tab-content">
+      <div class="sync-box">
+        <!-- 搜尋卡片 -->
+        <div class="sync-card">
+          <h4>🔍 關鍵字行程查詢</h4>
+          <input type="text" class="search-input" id="search-keyword" placeholder="輸入案場名、關鍵字或地圖..." oninput="handleSearch()">
+          <div class="search-results-list" id="search-results-list">
+            <div style="font-size:0.7rem; color:#999; text-align:center; padding:10px;">輸入關鍵字查詢行程...</div>
+          </div>
+        </div>
+
+        <!-- 備份與匯入卡片 -->
+        <div class="sync-card">
+          <h4>📤 備份匯出與匯入 (.json)</h4>
+          <div style="display:flex; gap:6px;">
+            <button class="sync-btn" onclick="exportDataToFile()">匯出備份</button>
+            <button class="sync-btn import" onclick="triggerFileInput()">匯入同步</button>
+          </div>
+          <input type="file" id="import-file-input" class="file-input-hidden" accept=".json" onchange="importDataFromFile(event)">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/編輯行程 Modal -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal-card">
+    <div class="modal-title" id="modal-title-text">新增/編輯行程</div>
+    <input type="hidden" id="edit-item-id">
+    <input type="hidden" id="edit-item-icon">
+    <input type="hidden" id="edit-item-bg">
+
+    <div class="form-group">
+      <label>行程 / 案場名稱</label>
+      <input type="text" id="form-title" placeholder="如：丹源齊植工地丈量">
+    </div>
+    <div class="form-group">
+      <label>📍 Google 地圖連結 (選填)</label>
+      <input type="url" id="form-map-url" placeholder="貼上 Google Maps 網址...">
+    </div>
+    <div class="form-group">
+      <label>起始日期與時間</label>
+      <input type="datetime-local" id="form-start-time">
+    </div>
+    <div class="form-group">
+      <label>結束日期與時間</label>
+      <input type="datetime-local" id="form-end-time">
+    </div>
+    <div class="form-group">
+      <label>備註說明</label>
+      <input type="text" id="form-desc" placeholder="案場備註、聯絡人等...">
+    </div>
+    <div class="form-group">
+      <label>花費金額 ($)</label>
+      <input type="number" id="form-cost" value="0">
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeScheduleModal()">取消</button>
+      <button class="btn-save" onclick="saveScheduleFromModal()">儲存行程</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentYear = 2026;
+  let currentMonth = 7; 
+  let selectedDay = 28;
+  let currentFontSize = 1.1;
+  let currentStyleIndex = 0;
+
+  const patternStyles = [
+    { name: '粉橘細條紋', baseColor: '#ffe5d9', css: 'background-color: #fff5ee; background-image: repeating-linear-gradient(45deg, #fbe3d5 0, #fbe3d5 2px, transparent 0, transparent 8px);' },
+    { name: '薄荷微點', baseColor: '#d8f3dc', css: 'background-color: #f0f9f6; background-image: radial-gradient(#b2e0d3 25%, transparent 25%); background-size: 10px 10px;' },
+    { name: '鵝黃暖格', baseColor: '#fefae0', css: 'background-color: #fffde7; background-image: linear-gradient(#fff59d 1px, transparent 1px), linear-gradient(90deg, #fff59d 1px, transparent 1px); background-size: 12px 12px;' },
+    { name: '薰衣草紫微漸層', baseColor: '#e0aaff', css: 'background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 100%);' },
+    { name: '天晴柔藍細格', baseColor: '#d8e2dc', css: 'background-color: #f1f8fe; background-image: linear-gradient(#bbdefb 1px, transparent 1px), linear-gradient(90deg, #bbdefb 1px, transparent 1px); background-size: 10px 10px;' },
+    { name: '蜜桃粉點點', baseColor: '#fec5bb', css: 'background-color: #fff0f3; background-image: radial-gradient(#ffccd5 30%, transparent 30%); background-size: 8px 8px;' },
+    { name: '抹茶奶綠', baseColor: '#dde5b6', css: 'background-color: #e8f5e9;' },
+    { name: '莫蘭迪暖灰', baseColor: '#e5e5e5', css: 'background-color: #f5f5f5;' }
+  ];
+
+  let stickerTemplates = [
+    { id: 't1', icon: '💰', name: '發薪日', cat: 'work', bgStyle: patternStyles[2].css },
+    { id: 't2', icon: '♨️', name: '溫泉', cat: 'life', bgStyle: patternStyles[0].css },
+    { id: 't3', icon: '🎂', name: '生日', cat: 'life', bgStyle: patternStyles[5].css },
+    { id: 't4', icon: '☕', name: '咖啡館', cat: 'food', bgStyle: patternStyles[1].css },
+    { id: 't5', icon: '🚗', name: '出差專案', cat: 'work', bgStyle: patternStyles[4].css }
+  ];
+
+  let dayNotesDatabase = [
+    { id: 'tw-1', icon: '🎆', title: '元旦', desc: '開國紀念日放假', cost: 0, bgStyle: patternStyles[5].css, startTime: '2026-01-01T00:00', endTime: '2026-01-01T23:59', mapUrl: '' },
+    { id: 'tw-2', icon: '🧧', title: '農曆春節連假', desc: '除夕至初五連休', cost: 0, bgStyle: patternStyles[0].css, startTime: '2026-02-16T00:00', endTime: '2026-02-22T23:59', mapUrl: '' },
+    { id: '101', icon: '💰', title: '發薪日', desc: '圭青玥收入', cost: 0, bgStyle: patternStyles[2].css, startTime: '2026-08-10T09:00', endTime: '2026-08-10T18:00', mapUrl: '' },
+    { id: '104', icon: '♨️', title: '溫泉連休', desc: '連續兩天泡湯專案', cost: 3200, bgStyle: patternStyles[0].css, startTime: '2026-08-28T09:00', endTime: '2026-08-29T18:00', mapUrl: 'https://maps.app.goo.gl/example1' },
+    { id: '105', icon: '🚗', title: '丹源齊植案場丈量', desc: '外牆石材繪圖丈量案場', cost: 1800, bgStyle: patternStyles[4].css, startTime: '2026-08-31T08:00', endTime: '2026-09-05T17:00', mapUrl: 'https://maps.app.goo.gl/example2' }
+  ];
+
+  // 關鍵字搜尋處理
+  function handleSearch() {
+    const keyword = document.getElementById('search-keyword').value.trim().toLowerCase();
+    const resultsContainer = document.getElementById('search-results-list');
+    resultsContainer.innerHTML = '';
+
+    if (!keyword) {
+      resultsContainer.innerHTML = `<div style="font-size:0.7rem; color:#999; text-align:center; padding:10px;">輸入關鍵字查詢行程...</div>`;
+      return;
+    }
+
+    const matchedNotes = dayNotesDatabase.filter(item => {
+      const titleMatch = item.title.toLowerCase().includes(keyword);
+      const descMatch = (item.desc || '').toLowerCase().includes(keyword);
+      const mapMatch = (item.mapUrl || '').toLowerCase().includes(keyword);
+      return titleMatch || descMatch || mapMatch;
+    });
+
+    if (matchedNotes.length === 0) {
+      resultsContainer.innerHTML = `<div style="font-size:0.7rem; color:#999; text-align:center; padding:10px;">未找到符合「${keyword}」的行程</div>`;
+      return;
+    }
+
+    matchedNotes.forEach(item => {
+      const s = new Date(item.startTime);
+      const div = document.createElement('div');
+      div.className = 'search-result-item';
+      
+      const dateText = `${s.getFullYear()}.${s.getMonth()+1}.${s.getDate()}`;
+      div.onclick = () => jumpToDateAndShow(s.getFullYear(), s.getMonth(), s.getDate());
+
+      div.innerHTML = `
+        <div style="display:flex; gap:6px; align-items:center;">
+          <span style="font-size:1.1rem;">${item.icon}</span>
+          <div>
+            <div style="font-size:0.75rem; font-weight:bold; color:#333;">${item.title}</div>
+            <div style="font-size:0.65rem; color:#888;">🗓 ${dateText} | ${item.desc || '無備註'}</div>
+          </div>
+        </div>
+        <span style="font-size:0.65rem; color:#d35400; font-weight:bold;">查看 ▶</span>
+      `;
+      resultsContainer.appendChild(div);
+    });
+  }
+
+  // 點擊搜尋結果一鍵跳轉
+  function jumpToDateAndShow(year, month, day) {
+    currentYear = year;
+    currentMonth = month;
+    selectedDay = day;
+
+    renderCalendarGrid();
+    refreshCalendarUI();
+    renderScheduleList();
+
+    // 自動切換到「日程/備註」頁籤
+    const scheduleTabBtn = document.querySelectorAll('.tab-btn')[1];
+    switchTab('schedule', scheduleTabBtn);
+  }
+
+  function openScheduleModal(editNote = null) {
+    const modal = document.getElementById('schedule-modal');
+    modal.style.display = 'flex';
+
+    if (editNote) {
+      document.getElementById('modal-title-text').innerText = '編輯行程';
+      document.getElementById('edit-item-id').value = editNote.id;
+      document.getElementById('edit-item-icon').value = editNote.icon;
+      document.getElementById('edit-item-bg').value = editNote.bgStyle;
+      document.getElementById('form-title').value = editNote.title;
+      document.getElementById('form-map-url').value = editNote.mapUrl || '';
+      document.getElementById('form-desc').value = editNote.desc || '';
+      document.getElementById('form-cost').value = editNote.cost || 0;
+      document.getElementById('form-start-time').value = editNote.startTime;
+      document.getElementById('form-end-time').value = editNote.endTime;
+    } else {
+      document.getElementById('modal-title-text').innerText = '新增行程';
+      document.getElementById('edit-item-id').value = '';
+      document.getElementById('edit-item-icon').value = '📝';
+      document.getElementById('edit-item-bg').value = patternStyles[1].css;
+      document.getElementById('form-title').value = '';
+      document.getElementById('form-map-url').value = '';
+      document.getElementById('form-desc').value = '';
+      document.getElementById('form-cost').value = '0';
+      
+      const pad = (n) => n.toString().padStart(2, '0');
+      const defaultStart = `${currentYear}-${pad(currentMonth + 1)}-${pad(selectedDay)}T09:00`;
+      const defaultEnd = `${currentYear}-${pad(currentMonth + 1)}-${pad(selectedDay)}T18:00`;
+      document.getElementById('form-start-time').value = defaultStart;
+      document.getElementById('form-end-time').value = defaultEnd;
+    }
+  }
+
+  function closeScheduleModal() {
+    document.getElementById('schedule-modal').style.display = 'none';
+  }
+
+  function saveScheduleFromModal() {
+    const id = document.getElementById('edit-item-id').value;
+    const title = document.getElementById('form-title').value.trim();
+    const mapUrl = document.getElementById('form-map-url').value.trim();
+    const startTime = document.getElementById('form-start-time').value;
+    const endTime = document.getElementById('form-end-time').value;
+    const desc = document.getElementById('form-desc').value.trim();
+    const cost = parseInt(document.getElementById('form-cost').value) || 0;
+    const icon = document.getElementById('edit-item-icon').value || '📝';
+    const bgStyle = document.getElementById('edit-item-bg').value || patternStyles[1].css;
+
+    if (!title) return alert('請輸入行程名稱！');
+    if (!startTime || !endTime) return alert('請選擇起始與結束時間！');
+
+    if (id) {
+      const note = dayNotesDatabase.find(n => n.id === id);
+      if (note) {
+        note.title = title;
+        note.mapUrl = mapUrl;
+        note.startTime = startTime;
+        note.endTime = endTime;
+        note.desc = desc;
+        note.cost = cost;
+      }
+    } else {
+      dayNotesDatabase.push({
+        id: Date.now().toString(),
+        icon: icon,
+        title: title,
+        mapUrl: mapUrl,
+        desc: desc,
+        cost: cost,
+        bgStyle: bgStyle,
+        startTime: startTime,
+        endTime: endTime
+      });
+    }
+
+    closeScheduleModal();
+    refreshCalendarUI();
+    renderScheduleList();
+  }
+
+  function renderScheduleList() {
+    const listContainer = document.getElementById('schedule-list');
+    const displayMonthStr = (currentMonth + 1).toString().padStart(2, '0');
+    const displayDayStr = selectedDay.toString().padStart(2, '0');
+    document.getElementById('selected-date-text').innerText = `${currentYear}.${displayMonthStr}.${displayDayStr} 的日程與備註：`;
+    listContainer.innerHTML = '';
+
+    const targetDate = new Date(currentYear, currentMonth, selectedDay);
+
+    const notes = dayNotesDatabase.filter(item => {
+      const s = new Date(item.startTime);
+      const e = new Date(item.endTime);
+      s.setHours(0,0,0,0);
+      e.setHours(23,59,59,999);
+      return targetDate >= s && targetDate <= e;
+    });
+
+    if (notes.length === 0) {
+      listContainer.innerHTML = `<div style="color:#999; font-size:0.8rem; text-align:center; padding:20px;">今日尚無備註，點擊貼圖或右上角按鈕新增！</div>`;
+      return;
+    }
+
+    notes.forEach(note => {
+      const card = document.createElement('div');
+      card.className = 'schedule-item-card';
+      if (note.bgStyle) card.style.cssText = note.bgStyle;
+
+      const s = new Date(note.startTime);
+      const e = new Date(note.endTime);
+      
+      const sStr = `${s.getMonth()+1}/${s.getDate()} ${s.getHours().toString().padStart(2,'0')}:${s.getMinutes().toString().padStart(2,'0')}`;
+      const eStr = `${e.getMonth()+1}/${e.getDate()} ${e.getHours().toString().padStart(2,'0')}:${e.getMinutes().toString().padStart(2,'0')}`;
+
+      const dateSpanText = `<div style="font-size:0.65rem; color:#d35400;">🗓 ${sStr} ~ ${eStr}</div>`;
+      const costText = note.cost > 0 ? `<div style="font-size:0.7rem; color:#e74c3c; font-weight:bold;">花費: $${note.cost}</div>` : '';
+      const mapBtnHtml = note.mapUrl ? `<div><a href="${note.mapUrl}" target="_blank" class="map-link-btn">📍 開啟 Google 地圖</a></div>` : '';
+
+      card.innerHTML = `
+        <div class="schedule-left">
+          <div class="schedule-item-icon">${note.icon}</div>
+          <div>
+            <div class="schedule-item-title">${note.title}</div>
+            ${dateSpanText}
+            <div class="schedule-item-desc">${note.desc || '無備註'}</div>
+            ${mapBtnHtml}
+            ${costText}
+          </div>
+        </div>
+        <div class="schedule-action-btns">
+          <button class="action-btn" onclick="editNoteById('${note.id}')">✏️ 編輯</button>
+          <button class="action-btn delete" onclick="deleteNote('${note.id}')">🗑️ 刪除</button>
+        </div>
+      `;
+      listContainer.appendChild(card);
+    });
+  }
+
+  function exportDataToFile() {
+    const backupData = {
+      version: 'v23',
+      exportTime: new Date().toISOString(),
+      stickerTemplates: stickerTemplates,
+      dayNotesDatabase: dayNotesDatabase
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    
+    const fileName = `calendar_backup_${new Date().toISOString().slice(0,10)}.json`;
+    downloadAnchor.setAttribute("download", fileName);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+
+    alert(`✅ 已成功產生備份檔案！\n\n匯出內容摘要：\n• 貼圖庫範本：${stickerTemplates.length} 個\n• 日程與案場地圖：${dayNotesDatabase.length} 筆\n• 檔名：${fileName}`);
+  }
+
+  function triggerFileInput() {
+    document.getElementById('import-file-input').click();
+  }
+
+  function importDataFromFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const importedData = JSON.parse(evt.target.result);
+
+        if (importedData.stickerTemplates && importedData.dayNotesDatabase) {
+          stickerTemplates = importedData.stickerTemplates;
+          dayNotesDatabase = importedData.dayNotesDatabase;
+
+          refreshCalendarUI();
+          renderStickers('all');
+          renderScheduleList();
+
+          alert(`🎉 成功同步匯入資料！\n\n已更新：\n• 貼圖庫：${stickerTemplates.length} 個範本\n• 日程與地圖：${dayNotesDatabase.length} 筆備註`);
+        } else {
+          alert('❌ 檔案格式不符合，請確認選擇的是此系統匯出的 .json 備份檔！');
+        }
+      } catch (err) {
+        alert('❌ 解析檔案失敗，請檢查檔案是否損壞！');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function changeMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth < 0) {
+      currentMonth = 11; currentYear--;
+    } else if (currentMonth > 11) {
+      currentMonth = 0; currentYear++;
+    }
+    renderCalendarGrid();
+    refreshCalendarUI();
+    renderScheduleList();
+  }
+
+  function renderCalendarGrid() {
+    const grid = document.getElementById('calendar-grid');
+    const monthTitle = document.getElementById('month-title');
+    
+    const displayMonthStr = (currentMonth + 1).toString().padStart(2, '0');
+    monthTitle.innerText = `${currentYear}年 ${displayMonthStr}月`;
+
+    while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); 
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); 
+    const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate(); 
+
+    let startOffset = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+
+    for (let i = startOffset - 1; i >= 0; i--) {
+      grid.appendChild(createDayCell(prevMonthDays - i, true, -1));
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cell = createDayCell(day, false, 0);
+      if (day === selectedDay) cell.classList.add('selected');
+      grid.appendChild(cell);
+    }
+    const totalCells = grid.children.length - 7;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    for (let day = 1; day <= remainingCells; day++) {
+      grid.appendChild(createDayCell(day, true, 1));
+    }
+  }
+
+  function createDayCell(dayNum, isOtherMonth, monthOffset) {
+    const cell = document.createElement('div');
+    cell.className = `day-cell ${isOtherMonth ? 'other-month' : ''}`;
+    if (!isOtherMonth) cell.id = `day-${dayNum}`;
+
+    const labelStr = (dayNum === 1 && !isOtherMonth) ? `${currentMonth + 1}/1` : `${dayNum}`;
+    cell.innerHTML = `<div class="day-header-row"><span class="day-num">${labelStr}</span></div><div class="badges-wrapper"></div>`;
+
+    cell.onclick = () => {
+      if (monthOffset !== 0) {
+        selectedDay = dayNum;
+        changeMonth(monthOffset);
+      } else {
+        selectDate(dayNum, cell);
+      }
+    };
+    return cell;
+  }
+
+  function refreshCalendarUI() {
+    const calendarGrid = document.getElementById('calendar-grid');
+
+    document.querySelectorAll('.gantt-bar-extended').forEach(el => el.remove());
+    document.querySelectorAll('.day-cell').forEach(cell => {
+      cell.querySelectorAll('.sticker-badge, .day-total-cost, .month-total-banner, .more-badge-dots').forEach(el => el.remove());
+      const wrapper = cell.querySelector('.badges-wrapper');
+      if (wrapper) wrapper.innerHTML = '';
+    });
+
+    let monthTotalCost = 0;
+    const dailyCostMap = {};
+    const multiDayTracksMap = {}; 
+    const singleDayItemsMap = {};
+
+    const monthStart = new Date(currentYear, currentMonth, 1);
+    const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+
+    dayNotesDatabase.forEach(item => {
+      const sDate = new Date(item.startTime);
+      const eDate = new Date(item.endTime);
+
+      if (eDate >= monthStart && sDate <= monthEnd) {
+        if (sDate.toDateString() === eDate.toDateString()) {
+          const day = sDate.getDate();
+          if (sDate.getMonth() === currentMonth) {
+            if (!singleDayItemsMap[day]) singleDayItemsMap[day] = [];
+            singleDayItemsMap[day].push(item);
+            if (item.cost > 0) {
+              monthTotalCost += item.cost;
+              dailyCostMap[day] = (dailyCostMap[day] || 0) + item.cost;
+            }
+          }
+        } else {
+          if (sDate.getMonth() === currentMonth && item.cost > 0) {
+            monthTotalCost += item.cost;
+            dailyCostMap[sDate.getDate()] = (dailyCostMap[sDate.getDate()] || 0) + item.cost;
+          }
+
+          let renderStartDay = (sDate < monthStart) ? 1 : sDate.getDate();
+          let renderEndDay = (eDate > monthEnd) ? monthEnd.getDate() : eDate.getDate();
+
+          let currentSegStart = renderStartDay;
+
+          while (currentSegStart <= renderEndDay) {
+            const startCell = document.getElementById(`day-${currentSegStart}`);
+            if (!startCell) break;
+
+            const startCellIndex = Array.from(calendarGrid.children).indexOf(startCell) - 7;
+            const colIndex = startCellIndex % 7; 
+            const daysToSunday = 6 - colIndex;
+
+            let currentSegEnd = Math.min(currentSegStart + daysToSunday, renderEndDay);
+            const endCell = document.getElementById(`day-${currentSegEnd}`);
+
+            if (startCell && endCell) {
+              for (let d = currentSegStart; d <= currentSegEnd; d++) {
+                multiDayTracksMap[d] = (multiDayTracksMap[d] || 0) + 1;
+              }
+              const currentTrack = multiDayTracksMap[currentSegStart] - 1;
+
+              const bar = document.createElement('div');
+              bar.className = 'gantt-bar-extended';
+              if (item.bgStyle) bar.style.cssText = item.bgStyle;
+
+              const leftPx = startCell.offsetLeft + 2;
+              const rightPx = endCell.offsetLeft + endCell.offsetWidth - 2;
+              bar.style.left = `${leftPx}px`;
+              bar.style.width = `${rightPx - leftPx}px`;
+              bar.style.top = `${startCell.offsetTop + 20 + (currentTrack * 19)}px`;
+
+              const totalDays = Math.ceil((eDate - sDate) / (1000 * 60 * 60 * 24));
+              const isFirstSeg = (currentSegStart === sDate.getDate() && sDate.getMonth() === currentMonth);
+              bar.innerHTML = `<span>${item.icon} ${item.title} ${isFirstSeg ? `(${totalDays}天)` : ''}</span>`;
+              calendarGrid.appendChild(bar);
+            }
+            currentSegStart = currentSegEnd + 1;
+          }
+        }
+      }
+    });
+
+    Object.keys(singleDayItemsMap).forEach(day => {
+      const cell = document.getElementById(`day-${day}`);
+      if (!cell) return;
+
+      let wrapper = cell.querySelector('.badges-wrapper');
+      const items = singleDayItemsMap[day];
+
+      const ganttCount = multiDayTracksMap[day] || 0;
+      wrapper.style.marginTop = `${ganttCount * 19}px`;
+      const maxDisplayCount = ganttCount >= 2 ? 0 : (ganttCount === 1 ? 1 : 2);
+
+      items.forEach((item, index) => {
+        if (index < maxDisplayCount) {
+          const badge = document.createElement('div');
+          badge.className = 'sticker-badge';
+          if (item.bgStyle) badge.style.cssText = item.bgStyle;
+          badge.innerHTML = `<span>${item.icon}</span><span class="sticker-text-bg">${item.title}</span>`;
+          wrapper.appendChild(badge);
+        }
+      });
+
+      if (items.length > maxDisplayCount) {
+        const moreBadge = document.createElement('div');
+        moreBadge.className = 'more-badge-dots';
+        moreBadge.innerText = `... (+${items.length - maxDisplayCount})`;
+        wrapper.appendChild(moreBadge);
+      }
+    });
+
+    Object.keys(dailyCostMap).forEach(day => {
+      const cell = document.getElementById(`day-${day}`);
+      if (cell) {
+        const headerRow = cell.querySelector('.day-header-row');
+        if (headerRow && !headerRow.querySelector('.day-total-cost')) {
+          const costTag = document.createElement('span');
+          costTag.className = 'day-total-cost';
+          costTag.innerText = `$${dailyCostMap[day]}`;
+          headerRow.appendChild(costTag);
+        }
+      }
+    });
+
+    const firstCell = document.getElementById('day-1');
+    if (firstCell && monthTotalCost > 0) {
+      const monthBanner = document.createElement('div');
+      monthBanner.className = 'month-total-banner';
+      monthBanner.innerText = `💰${currentMonth + 1}月總支出:\n$${monthTotalCost.toLocaleString()}`;
+      firstCell.appendChild(monthBanner);
+    }
+  }
+
+  function addStickerWithPrompt(icon, name, bgStyle = '') {
+    if (!selectedDay) return alert('請先點選一個日期！');
+    openScheduleModal();
+    document.getElementById('edit-item-icon').value = icon;
+    document.getElementById('edit-item-bg').value = bgStyle;
+    document.getElementById('form-title').value = name;
+  }
+
+  function editNoteById(id) {
+    const note = dayNotesDatabase.find(n => n.id === id);
+    if (note) openScheduleModal(note);
+  }
+
+  function deleteNote(id) {
+    if (confirm('確定要刪除這張貼圖/行程嗎？')) {
+      dayNotesDatabase = dayNotesDatabase.filter(n => n.id !== id);
+      refreshCalendarUI();
+      renderScheduleList();
+    }
+  }
+
+  function selectDate(day, el) {
+    document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDay = day;
+    renderScheduleList();
+  }
+
+  function renderStickers(filter = 'all') {
+    const grid = document.getElementById('sticker-grid');
+    grid.innerHTML = '';
+    const items = filter === 'all' ? stickerTemplates : stickerTemplates.filter(s => s.cat === filter);
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'sticker-card';
+      if(item.bgStyle) card.style.cssText = item.bgStyle;
+      card.onclick = () => addStickerWithPrompt(item.icon, item.name, item.bgStyle);
+      card.innerHTML = `
+        <span class="edit-template-btn" onclick="editTemplate(event, '${item.id}')">⚙️</span>
+        <span class="sticker-icon">${item.icon}</span>
+        <span class="sticker-text-bg">${item.name}</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function editTemplate(e, templateId) {
+    e.stopPropagation();
+    const t = stickerTemplates.find(item => item.id === templateId);
+    if (!t) return;
+    const action = prompt(`修改貼圖庫範本【${t.icon} ${t.name}】\n輸入 1：修改名稱\n輸入 2：刪除此範本`, '1');
+    if (action === '1') {
+      const newName = prompt('請輸入新的貼圖名稱：', t.name);
+      if (newName) t.name = newName;
+    } else if (action === '2') {
+      if (confirm('確定從貼圖庫刪除這個範本嗎？')) {
+        stickerTemplates = stickerTemplates.filter(item => item.id !== templateId);
+      }
+    }
+    renderStickers('all');
+  }
+
+  function renderPalette() {
+    const palette = document.getElementById('color-palette');
+    palette.innerHTML = '';
+    patternStyles.forEach((style, index) => {
+      const dot = document.createElement('div');
+      dot.className = `color-dot ${index === currentStyleIndex ? 'active' : ''}`;
+      dot.style.backgroundColor = style.baseColor;
+      dot.title = style.name;
+      dot.onclick = () => applyPatternStyle(index);
+      palette.appendChild(dot);
+    });
+  }
+
+  function applyPatternStyle(index) {
+    currentStyleIndex = index;
+    const canvas = document.getElementById('preview-canvas');
+    const currentText = canvas.innerText;
+    canvas.style.cssText = patternStyles[index].css + ` font-size: ${currentFontSize}rem;`;
+    canvas.innerHTML = `<span class="sticker-text-bg">${currentText}</span>`;
+    renderPalette();
+  }
+
+  function randomPatternBg() {
+    applyPatternStyle(Math.floor(Math.random() * patternStyles.length));
+  }
+
+  function switchTab(tabName, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    if (tabName === 'schedule') renderScheduleList();
+  }
+
+  function filterCategory(cat, btn) {
+    document.querySelectorAll('.sub-cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderStickers(cat);
+  }
+
+  function changeEditorText() {
+    const text = prompt('請輸入貼圖內容（例如：🍵 抹茶）：', '🍵 抹茶');
+    if(text) document.getElementById('preview-canvas').innerHTML = `<span class="sticker-text-bg">${text}</span>`;
+  }
+
+  function zoomText(factor) {
+    currentFontSize *= factor;
+    document.getElementById('preview-canvas').style.fontSize = currentFontSize + 'rem';
+  }
+
+  function saveCustomSticker() {
+    const rawText = document.getElementById('preview-canvas').innerText.trim();
+    const emojiMatch = rawText.match(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/);
+    
+    let icon = '✨';
+    let name = rawText;
+
+    if (emojiMatch) {
+      icon = emojiMatch[0];
+      name = rawText.replace(icon, '').trim();
+    }
+    if (!name) name = '自訂貼圖';
+
+    stickerTemplates.unshift({ id: Date.now().toString(), icon: icon, name: name, cat: 'life', bgStyle: patternStyles[currentStyleIndex].css });
+    renderStickers('all');
+    alert(`已成功儲存「${icon} ${name}」貼圖！`);
+    switchTab('stickers', document.querySelectorAll('.tab-btn')[0]);
+  }
+
+  renderCalendarGrid();
+  renderPalette();
+  applyPatternStyle(0);
+  renderStickers('all');
+  refreshCalendarUI();
+  renderScheduleList();
+</script>
+
+</body>
+</html>
