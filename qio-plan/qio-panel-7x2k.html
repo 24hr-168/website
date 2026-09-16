@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q-IO 私人工作區</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1A56DB">
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
+    body { background-color: #FFFFFF; color: #333333; line-height: 1.75; margin: 0; padding: 20px 16px 80px; -webkit-tap-highlight-color: transparent; }
+    .container { max-width: 820px; margin: 0 auto; }
+    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .back-link { color: #666; text-decoration: none; font-size: 0.9rem; }
+    h1 { font-size: 1.6rem; font-weight: 700; color: #1A1A1A; margin-bottom: 8px; }
+    .subtitle { color: #666; font-size: 0.92rem; margin-bottom: 24px; }
+    .mission-card { background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; font-size: 0.92rem; }
+    .mission-card b { color: #1A56DB; }
+    h2.section-title { font-size: 1.2rem; font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 10px; margin-top: 32px; margin-bottom: 16px; }
+    h2.section-title::before { content: ""; display: inline-block; width: 4px; height: 1.1em; background-color: #1A56DB; }
+    h3.sub-title { font-size: 1.05rem; font-weight: 700; color: #1A56DB; margin-top: 28px; margin-bottom: 12px; padding-left: 4px; }
+    .period-label { font-size: 0.85rem; color: #666; font-weight: 400; margin-left: 6px; }
+    ul.check-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
+    ul.check-list li { background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.15s ease; user-select: none; font-size: 0.95rem; }
+    ul.check-list li:hover { border-color: #1A56DB; }
+    ul.check-list li.done { background-color: #DCFCE7; border-color: #86EFAC; color: #15803D; text-decoration: line-through; text-decoration-color: #86EFAC; }
+    .checkbox { width: 20px; height: 20px; min-width: 20px; border: 2px solid #CBD5E1; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; margin-top: 2px; transition: all 0.15s ease; }
+    ul.check-list li.done .checkbox { background-color: #22C55E; border-color: #22C55E; color: #FFFFFF; }
+    ul.check-list.mj-list li { border-left: 4px solid #A855F7; }
+    ul.check-list.mj-list li.done { background-color: #F3E8FF; border-color: #D8B4FE; color: #6B21A8; text-decoration-color: #D8B4FE; }
+    ul.check-list.photo-list li { border-left: 4px solid #F59E0B; }
+    ul.check-list.photo-list li.done { background-color: #FEF3C7; border-color: #FCD34D; color: #92400E; text-decoration-color: #FCD34D; }
+    .hint-text { font-size: 0.82rem; color: #94A3B8; margin: -12px 0 16px 4px; line-height: 1.5; }
+    .prompt-box { background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .prompt-version { font-size: 0.85rem; font-weight: 700; color: #A855F7; margin-bottom: 6px; }
+    .prompt-en { font-family: "SF Mono", Monaco, "Courier New", monospace; font-size: 0.82rem; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 12px; color: #1E293B; word-break: break-word; line-height: 1.5; margin-bottom: 8px; cursor: pointer; position: relative; white-space: pre-wrap; }
+    .prompt-en:hover { border-color: #A855F7; }
+    .prompt-en::after { content: "點我複製"; position: absolute; top: 6px; right: 8px; font-size: 0.65rem; color: #94A3B8; background: #FFF; padding: 0 4px; }
+    .prompt-zh { font-size: 0.82rem; color: #666; line-height: 1.6; }
+    .text-box { width: 100%; min-height: 160px; padding: 14px 16px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 0.92rem; font-family: inherit; line-height: 1.7; color: #333; background: #FFFFFF; resize: vertical; }
+    .text-box:focus { outline: none; border-color: #1A56DB; box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1); }
+    .sync-box { background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 20px; margin-top: 32px; }
+    .sync-box h3 { margin: 0 0 8px 0; font-size: 1rem; color: #1A56DB; }
+    .sync-box p { margin: 0 0 14px 0; font-size: 0.85rem; color: #666; line-height: 1.5; }
+    .sync-btn-row { display: flex; flex-direction: column; gap: 8px; }
+    .sync-btn { background: #E67E22; color: #FFF; border: none; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s ease; }
+    .sync-btn:hover { background: #D35400; }
+    .sync-btn.import { background: #27AE60; }
+    .sync-btn.import:hover { background: #1E8449; }
+    .sync-btn.notify { background: #1A56DB; }
+    .sync-btn.notify:hover { background: #1E40AF; }
+    .file-input-hidden { display: none; }
+    .btn-reset { background-color: #FFF5F5; border: 1px solid #FECDD3; color: #9F1239; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 24px; transition: background-color 0.15s ease; }
+    .btn-reset:hover { background-color: #FEE2E2; }
+    .footer-notice { font-size: 0.82rem; color: #94A3B8; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #E2E8F0; }
+    .saved-hint { position: fixed; bottom: 16px; right: 16px; background-color: #22C55E; color: #FFFFFF; padding: 8px 16px; border-radius: 50px; font-size: 0.82rem; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+    .saved-hint.show { opacity: 1; }
+    .copy-hint { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background-color: #A855F7; color: #FFF; padding: 8px 20px; border-radius: 50px; font-size: 0.82rem; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+    .copy-hint.show { opacity: 1; }
+    .status-badge { display: inline-block; font-size: 0.75rem; padding: 4px 12px; border-radius: 50px; font-weight: 600; margin-left: 8px; }
+    .status-online { background: #DCFCE7; color: #15803D; }
+    .status-offline { background: #FEE2E2; color: #991B1B; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <div class="top-nav">
+      <a href="https://24hr-168.com/" class="back-link">← 返回首頁</a>
+      <span id="statusBadge" class="status-badge status-online">✓ 已連線</span>
+    </div>
+
+    <h1>Q-IO 私人工作區</h1>
+    <div class="subtitle">追蹤表、素材庫、草稿、Prompt，全部在這裡。</div>
+
+    <div class="mission-card">
+      <b>我的核心任務：</b>用台灣角度拆解國際新聞，做成內容，導流到網站，接顧問／約稿／合作。
+    </div>
+
+    <h2 class="section-title">每天必做<span class="period-label">（1-2 小時）</span></h2>
+    <ul class="check-list" id="daily-list">
+      <li data-key="daily-1">看 1-2 則國際新聞</li>
+      <li data-key="daily-2">看 1 則產業新聞（石材、建材、AI）</li>
+      <li data-key="daily-3">用 AI 查背景</li>
+      <li data-key="daily-4">寫 100-200 字觀察（存草稿區）</li>
+      <li data-key="daily-5">整理素材、寫文章</li>
+      <li data-key="daily-6">學一項技能（Voicebox、剪輯、Canva）</li>
+      <li data-key="daily-7">更新客戶名單（顧問相關）</li>
+      <li data-key="daily-8">回留言、更新網站</li>
+      <li data-key="daily-9">記錄今天的進度</li>
+    </ul>
+
+    <h2 class="section-title">每週必做<span class="period-label">（3-5 小時）</span></h2>
+    <ul class="check-list" id="weekly-list">
+      <li data-key="weekly-1">寫 1-2 篇文章（中文 + 英文）</li>
+      <li data-key="weekly-2">做 1 支影片</li>
+      <li data-key="weekly-3">整理 1 個案例</li>
+      <li data-key="weekly-4">拍 1 組照片</li>
+      <li data-key="weekly-5">寫 1 篇趨勢簡報</li>
+      <li data-key="weekly-6">接觸 1 個潛在客戶</li>
+    </ul>
+
+    <h2 class="section-title">每月必做<span class="period-label">（5-10 小時）</span></h2>
+    <ul class="check-list" id="monthly-list">
+      <li data-key="monthly-1">寫 4-8 篇文章</li>
+      <li data-key="monthly-2">做 4 支影片</li>
+      <li data-key="monthly-3">產出一份完整趨勢簡報</li>
+      <li data-key="monthly-4">接觸 3-5 個潛在客戶</li>
+      <li data-key="monthly-5">更新網站</li>
+      <li data-key="monthly-6">檢視收入與支出</li>
+      <li data-key="monthly-7">做一個新嘗試</li>
+    </ul>
+
+    <h2 class="section-title">🎨 今日 MJ 待做清單<span class="period-label">（AI 生圖）</span></h2>
+    <div class="hint-text">用 Midjourney Relax 模式出圖，每張先出 20 張，挑 1 張定稿。</div>
+    <ul class="check-list mj-list" id="mj-list">
+      <li data-key="mj-1">開場圖：地球 + 數據流 + 台灣高亮</li>
+      <li data-key="mj-2">新聞圖：數位盾牌 + 程式碼碎片</li>
+      <li data-key="mj-3">國際圖：紅色與藍色兩股力量對峙</li>
+      <li data-key="mj-4">台灣圖：半導體工廠無塵室</li>
+      <li data-key="mj-5">注意圖：零信任架構示意圖</li>
+      <li data-key="mj-6">結尾圖：數位與實體融合</li>
+      <li data-key="mj-7">縮圖用圖：從上面 6 張挑 1 張改構圖</li>
+    </ul>
+
+    <h2 class="section-title">📚 Midjourney 提示詞庫</h2>
+    <div class="hint-text">每個項目 5 個版本，點英文提示詞即可複製。</div>
+
+    <h3 class="sub-title">mj-1 開場圖：地球 + 數據流 + 台灣高亮</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（寫實電影感）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">planet earth from space, glowing data streams connecting continents, taiwan highlighted with subtle warm light, dark blue tones, cinematic, 16:9 --ar 16:9 --style raw</div>
+      <div class="prompt-zh">寫實地球，資料流連接各大洲，台灣用暖光標示。適合開場。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（抽象留白）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract globe made of network lines, dark background, large negative space on right side, minimalist, clean, 16:9 --ar 16:9 --style raw</div>
+      <div class="prompt-zh">抽象地球，網路線條組成，右側留白放標題。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（夜空台灣）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">night sky over taiwan island, glowing dots marking major cities, data lines flowing outward to the world, deep blue and teal, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">台灣夜空，城市光點，資料流向外流動。台灣主體感強。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（地球俯視亞洲）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">top-down view of earth showing asia region, taiwan glowing with warm light, subtle data streams, dark space background, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">地球俯視，亞洲區域，台灣暖光。視角獨特。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（極簡幾何）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">minimalist geometric globe, thin white lines, one glowing point marking taiwan, dark navy background, clean tech aesthetic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">極簡幾何地球，細白線條，一個光點標示台灣。</div>
+    </div>
+
+    <h3 class="sub-title">mj-2 新聞圖：數位盾牌 + 程式碼碎片</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（紅藍對峙）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract cybersecurity visualization, two glowing forces facing each other, one red one blue, digital shield and code fragments, dark background, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">紅藍兩股力量對峙，數位盾牌與程式碼碎片。適合資安新聞。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（盾牌特寫）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">close-up of a glowing digital shield, surrounded by floating code fragments, dark background, blue and cyan tones, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">數位盾牌特寫，周圍程式碼碎片。強調防禦。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（漏洞視覺化）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract visualization of software vulnerabilities, cracks in glowing code walls, red warning light seeping through, dark background, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">程式碼牆裂縫，紅光滲透。強調「漏洞」概念。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（AI 對抗）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">two AI entities facing off in cyberspace, one attacking one defending, streams of code, dark blue and red tones, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">兩個 AI 在網路空間對抗，一攻一守。強調 AI 對 AI。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（極簡圖示）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">minimalist cybersecurity icon, shield and broken code, clean lines, dark navy background, flat design, subtle glow --ar 16:9 --style raw</div>
+      <div class="prompt-zh">極簡資安圖示，盾牌與斷裂程式碼。適合當背景板。</div>
+    </div>
+
+    <h3 class="sub-title">mj-3 國際圖：紅色與藍色兩股力量對峙</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（抽象對峙）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">two abstract forces facing each other, red and blue energy streams, dark background, cinematic tension, 16:9 --ar 16:9 --style raw</div>
+      <div class="prompt-zh">紅藍兩股能量對峙，抽象、有張力。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（地緣政治隱喻）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract world map split into red and blue halves, glowing border line, dark background, geopolitical tension, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">世界地圖分紅藍兩半，中間發光邊界。地緣政治隱喻。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（棋盤對弈）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract chess board with glowing red and blue pieces, dark background, strategic tension, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">抽象棋盤，紅藍棋子對弈。戰略感強。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（光束交會）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">two beams of light, one red one blue, crossing in dark space, particles scattering, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">紅藍光束在黑暗中交會，粒子飛散。純抽象。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（極簡幾何）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">two minimalist geometric shapes, one red one blue, facing each other, dark navy background, clean composition --ar 16:9 --style raw</div>
+      <div class="prompt-zh">兩個極簡幾何形狀對峙。最乾淨的版本。</div>
+    </div>
+
+    <h3 class="sub-title">mj-4 台灣圖：半導體工廠無塵室</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（無塵室全景）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">modern semiconductor factory interior, clean room, blue and white lighting, no people, cinematic wide shot --ar 16:9 --style raw</div>
+      <div class="prompt-zh">半導體無塵室全景，藍白燈光，無人。經典科技感。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（晶圓特寫）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">close-up of silicon wafer held by robotic arm, clean room environment, blue lighting, high detail, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">機器手臂拿著晶圓特寫。強調「晶片」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（設備管線）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">interior of semiconductor fabrication plant, complex machinery and pipes, blue and white lighting, no people, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">半導體廠設備與管線。強調「精密製造」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（俯瞰產線）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">aerial view of semiconductor production line, rows of machines, clean room lighting, no people, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">俯瞰產線，一排排機器。強調規模。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（極簡科技）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">minimalist representation of semiconductor manufacturing, clean geometric shapes, blue and white, dark background, tech aesthetic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">極簡半導體製造意象，幾何形狀。適合當背景。</div>
+    </div>
+
+    <h3 class="sub-title">mj-5 注意圖：零信任架構示意圖</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（層層防護）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">minimalist diagram of zero trust security architecture, layered glowing barriers, clean infographic style, dark navy background --ar 16:9 --style raw</div>
+      <div class="prompt-zh">零信任架構示意圖，層層發光屏障。適合解釋「零信任」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（驗證節點）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract network diagram, nodes with checkmark verification, glowing lines connecting, dark background, clean tech aesthetic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">網路節點圖，每個節點有驗證勾選。強調「每次存取都要驗證」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（鎖與鑰匙）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract digital lock and key, surrounded by verification layers, dark background, blue and cyan tones, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">數位鎖與鑰匙，周圍有多層驗證。直觀的「安全」意象。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（同心圓）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">concentric circles representing security layers, glowing center, dark background, minimalist infographic style --ar 16:9 --style raw</div>
+      <div class="prompt-zh">同心圓象徵安全層級，中心發光。極簡、易讀。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（門與通行證）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract digital doors with access cards, one door opening with verified light, dark background, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">數位門與通行證，一扇門被驗證開啟。強調「存取控制」。</div>
+    </div>
+
+    <h3 class="sub-title">mj-6 結尾圖：數位與實體融合</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（數據流入實體）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract visualization of digital and physical worlds merging, glowing data lines flowing into real objects, dark background, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">數位與實體融合，資料流流入實體物件。呼應「AI 與實體產業深度融合」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（齒輪與電路）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract gears merging with circuit board patterns, half mechanical half digital, dark background, blue and orange tones, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">齒輪與電路板融合，半機械半數位。強調「傳統產業 + 新技術」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（建築與數據）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">modern building silhouette with data streams flowing through it, dark background, blue and warm light mix, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">現代建築輪廓，資料流貫穿其中。呼應建材、營建產業。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（雙手交握）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract handshake between a human hand and a digital hand, glowing particles, dark background, warm and cool light mix, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">人的手與數位的手交握，粒子飛散。象徵「人與 AI 協作」。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（極簡融合）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">minimalist composition, half solid geometric shape half glowing wireframe, dark navy background, clean tech aesthetic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">極簡構圖，一半實體幾何、一半發光線框。最抽象的版本。</div>
+    </div>
+
+    <h3 class="sub-title">mj-7 縮圖用圖：留白放標題</h3>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 A（左圖右白）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract cybersecurity visualization on left side, large empty white space on right side for text, dark blue tones, clean composition --ar 16:9 --style raw</div>
+      <div class="prompt-zh">左側資安意象，右側大面積留白放標題。最實用的縮圖版型。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 B（上圖下白）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract tech visualization on top half, large empty white space on bottom half for text, dark blue and cyan tones, clean composition --ar 16:9 --style raw</div>
+      <div class="prompt-zh">上方科技意象，下方留白放標題。適合直式標題。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 C（中央留白）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">abstract glowing frame around the edges, large empty center space for text, dark background, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">邊緣發光，中央大面積留白。適合放超大標題。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 D（台灣地圖留白）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">taiwan island silhouette on left side, glowing data lines, large negative space on right side for text, dark blue tones, minimalist --ar 16:9 --style raw</div>
+      <div class="prompt-zh">左側台灣輪廓，右側留白。台灣主題的縮圖首選。</div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-version">版本 E（晶片留白）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">close-up of microchip on left side, large empty dark space on right side for text, blue lighting, cinematic --ar 16:9 --style raw</div>
+      <div class="prompt-zh">左側晶片特寫，右側留白。半導體主題的縮圖。</div>
+    </div>
+
+    <h2 class="section-title">📷 今日拍照清單<span class="period-label">（自己拍）</span></h2>
+    <div class="hint-text">用你的手機拍，這些是真實素材，不能取代。</div>
+    <ul class="check-list photo-list" id="photo-list">
+      <li data-key="photo-1">工地現場全景（至少 3 張，不同角度）</li>
+      <li data-key="photo-2">石材紋理特寫（對花、結晶、紋路）</li>
+      <li data-key="photo-3">工具特寫（拉尺、水平尺、切割工具）</li>
+      <li data-key="photo-4">你的手在做事的樣子（拉尺、摸石材）</li>
+      <li data-key="photo-5">工地光影（早晨、黃昏、雨後）</li>
+      <li data-key="photo-6">周邊環境（街景、市場、騎樓）</li>
+      <li data-key="photo-7">今天日記用的照片（挑 1-3 張最有感的）</li>
+    </ul>
+
+    <h2 class="section-title">📝 草稿區</h2>
+    <div class="hint-text">文章草稿、靈感筆記、想寫的東西，全部丟這裡。自動儲存。</div>
+    <textarea class="text-box" id="drafts-box" placeholder="在這裡寫草稿、靈感、想法…"></textarea>
+
+    <h2 class="section-title">📄 網頁排版 Prompt<span class="period-label">（貼給 Gemini）</span></h2>
+    <div class="hint-text">複製這段，加上草稿，貼給 Gemini，就會產出漂亮的文章 HTML。</div>
+    <div class="prompt-box">
+      <div class="prompt-version">網頁排版指令（點一下複製）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">你現在是 24hr-168.com「數位診斷室」的專屬網頁前端設計師。
+請將我提供的文章草稿，轉換為符合 GitHub Pages 靜態網站標準的「白底商務診斷報告風」純 HTML 原始碼，並提供標準的英文 URL Slug 檔名。
+
+【1. URL Slug 檔名與資料夾目錄規範】
+請根據文章屬性，生成簡短（3~5個英文單字）、小寫、用連字號（-）分隔的 .html 檔名：
+- 🌅 早上（雜誌簡讀/觀點）：前綴 mag- (例：mag-natgeo-2026-09.html)
+- ☀️ 中午（生活小妙招/修護）：前綴 hack- (例：hack-rubber-band-screw.html)
+- 🌙 晚上（國際新聞/趨勢解析）：前綴 global- (例：global-tech-5.html)
+- 檔名公式：前綴-核心主題關鍵字.html（必須包含具體物件或主題，切勿使用無意義流水號）。
+- 語系與目錄：
+  * 中文版：存放於根目錄 (例：24hr-168.com/global-tech-5.html)
+  * 英文版：存放於 /en/ 資料夾內 (例：24hr-168.com/en/global-tech-5.html)
+  * 中英同檔名，靠資料夾區分語言。
+
+【2. 頂部導航、語言切換與下一篇/聯絡連結規範】
+1. 頂部導航列（左右兩側）：
+   * 中文版：
+     - 左側：← 返回首頁 → https://24hr-168.com/
+     - 左側：✉️ 聯絡研究室 → https://24hr-168.com/contact.html
+     - 右側：👉 閱讀下一篇文章 → 若草稿有提供下一篇網址則帶入 href，否則 href="#"
+   * 英文版：
+     - 左側：← Back to Home → https://24hr-168.com/en/
+     - 左側：✉️ Contact Us → https://24hr-168.com/en/contact.html
+     - 右側：👉 Next Article → 若草稿有提供下一篇網址則帶入 href，否則 href="#"
+
+2. 語言切換列 (.lang-bar)：
+   * 中文版：顯示「繁體中文 (Current)」+「English Version →」連結至英文版對應文章（href 先設 #，待英文版上線後替換）。
+   * 英文版：顯示「繁體中文 →」連結至中文版對應文章（href 先設 #，待中文版上線後替換）+「English (Current)」。
+
+3. 頁尾 (.footer-notice)：
+   * 附上專欄聲明、24hr-168.com 出處，並加上 ✉️ 聯絡連結。
+   * 中文版：✉️ 聯絡研究室 → https://24hr-168.com/contact.html
+   * 英文版：✉️ Contact Us → https://24hr-168.com/en/contact.html
+
+【2.5 英文版內容改寫規範（僅適用英文草稿）】
+若草稿為英文版，請勿逐句直譯中文原稿，必須按以下規則改寫：
+1. 語氣定位：英文版是「對外解釋台灣」，不是「對台灣人說話」。
+   - 中文版「對台灣的好處」→ 英文版 Why this matters
+   - 中文版「我們該注意的地方」→ 英文版 What to watch
+2. 句子長度：每句控制在 15-20 字內，避免從句套從句。
+3. 專有名詞：保留英文原名，不翻譯。
+4. 台灣視角保留：仍從「為什麼台灣重要」切入，但用對外解釋的口吻。
+5. 段落開頭：中文版「一、電腦資訊：修復近千項漏洞……」→ 英文版「1. Cybersecurity: Nearly 1,000 Vulnerabilities Patched...」
+6. 結尾 CTA：中文版「如果喜歡我們的分享，請訂閱我們的 YT 頻道！」→ 英文版「If you enjoyed this, please subscribe to our YouTube channel.」
+
+【草稿處理流程】
+- 若標註「中文版」：直接套用視覺樣式產出中文 HTML。
+- 若標註「英文版」：先按【2.5】改寫為英文版本，再套用【3】產出英文 HTML。
+
+【3. 視覺樣式與卡片邏輯規範】
+1. 基礎風格：全白背景 (#FFFFFF)、深灰內文 (#333333)、最大寬度 820px 置中、行高 1.85。
+2. 馬卡龍圓角橢圓標籤：.tags-container 與 border-radius: 50px 的 .tag，3~4 個粉嫩配色。
+3. 雜誌專屬簡介卡片（僅限 mag- 系列自動觸發）。
+4. 診斷室焦點摘要卡片 (Summary Dashboard)：背景 #F8FAFC 的 2 欄對比卡片與下方時間軸。
+   - 妙招類 (hack-)：左欄 ❌ 傳統錯誤操作 vs 右欄 🎯 Q-IO 硬核解法。
+   - 新聞類 (global-)：左欄 ❌ 傳統舊思維 vs 右欄 🎯 Q-IO 戰略解法。
+   - 雜誌類 (mag-)：左欄 🌿 本期雜誌核心主題 vs 右欄 💡 Q-IO 實用延伸。
+5. 藍色豎線章節標題：h2.section-title 左側帶 4px 藍色豎線 (#1A56DB)。
+6. 螢光筆效果：關鍵字使用 <mark> 標籤，背景 #FEF3C7，文字 #92400E。
+7. 新聞來源連結 (.source-link)：放在每則新聞分析後。
+8. 影片導流卡片 (.video-cta)：藍色系，放在結論卡片後、收藏卡片前。href 先設 #。
+9. 灰色結論卡片 (.conclusion-card)。
+10. 收藏 Call to Action 卡片 (.cta-card)。
+11. 頁尾 (.footer-notice)。
+
+【4. 輸出格式要求】
+1. 先印出【建議網頁檔案路徑】。
+2. 再印出完整可執行的 HTML 原始碼（包在 ```html 代碼塊中），文字需 100% 完整保留。
+
+以下是我這次要排版的文章草稿：
+---
+[在此貼上草稿]
+
+語系：[中文版 / 英文版]
+下一篇網址：[若無則留空]</div>
+    </div>
+
+    <h2 class="section-title">🎬 YouTube 分鏡 Prompt<span class="period-label">（貼給 AI）</span></h2>
+    <div class="hint-text">複製這段，加上草稿，貼給 AI，就會產出分鏡腳本（哪段配哪張圖、哪裡轉場）。</div>
+    <div class="prompt-box">
+      <div class="prompt-version">分鏡腳本指令（點一下複製）</div>
+      <div class="prompt-en" onclick="copyPrompt(this)">請根據以下文字稿，幫我寫出 YouTube 影片的分鏡腳本。
+
+我已經有 7 個 MJ 提示詞庫：
+- mj-1：地球 + 數據流 + 台灣高亮（開場圖）
+- mj-2：數位盾牌 + 程式碼碎片（新聞圖）
+- mj-3：紅色與藍色兩股力量對峙（國際圖）
+- mj-4：半導體工廠無塵室（台灣圖）
+- mj-5：零信任架構示意圖（注意圖）
+- mj-6：數位與實體融合（結尾圖）
+- mj-7：縮圖用圖（留白放標題）
+
+請幫我：
+1. 把文字稿拆成適合口播的段落
+2. 每段標註：
+   - 時間長度（秒）
+   - 口播內容
+   - 建議配圖（標註 mj 編號 / 自己拍 / 文字卡）
+   - 建議的視覺變化（轉場、放大、縮小、切換）
+3. 段落之間要有節奏感，不要太平
+4. 標註哪幾段適合用 MJ 出圖，哪幾段適合用真實照片（工地現場、石材紋理）
+
+輸出格式：
+【段落編號】
+時間：00:00-00:30
+口播：（文字）
+配圖：（mj-X / 自己拍 / 文字卡）
+變化：（轉場 / 放大 / 切換）
+
+文字稿如下：
+---
+[在此貼上文字稿]</div>
+    </div>
+
+    <h2 class="section-title">👥 客戶名單</h2>
+    <div class="hint-text">記錄潛在客戶、聯絡進度、報價、備註。自動儲存。</div>
+    <textarea class="text-box" id="clients-box" placeholder="客戶名稱、聯絡方式、進度、報價、備註…"></textarea>
+
+    <h2 class="section-title">📚 素材庫</h2>
+    <div class="hint-text">記錄照片、MJ 圖、靈感素材的索引。自動儲存。</div>
+    <textarea class="text-box" id="materials-box" placeholder="素材名稱、用途、備註、存放位置…"></textarea>
+
+    <div class="sync-box">
+      <h3>🔔 每日提醒</h3>
+      <p>開啟後，每天提醒你打勾、寫草稿。</p>
+      <div class="sync-btn-row">
+        <button class="sync-btn notify" onclick="enableNotification()">開啟提醒</button>
+        <button class="sync-btn notify" onclick="testNotification()">測試通知</button>
+      </div>
+    </div>
+
+    <div class="sync-box">
+      <h3>💾 跨裝置同步備份</h3>
+      <p>在平板打勾或寫完後，下載 JSON 備份檔傳到另一端匯入，即可同步所有內容！</p>
+      <div class="sync-btn-row">
+        <button class="sync-btn" onclick="exportDataToFile()">📥 下載 JSON 備份檔</button>
+        <button class="sync-btn import" onclick="triggerFileInput()">📤 匯入 JSON 資料</button>
+      </div>
+      <input type="file" id="import-file-input" class="file-input-hidden" accept=".json" onchange="importDataFromFile(event)">
+    </div>
+
+    <button class="btn-reset" onclick="resetAll()">重置全部進度</button>
+
+    <div class="footer-notice">
+      Q-IO 研究室｜私人工作區<br>
+      <a href="https://24hr-168.com/" style="color: #94A3B8; text-decoration: none;">24hr-168.com</a>
+    </div>
+
+  </div>
+
+  <div class="saved-hint" id="savedHint">✓ 已儲存</div>
+  <div class="copy-hint" id="copyHint">✓ 已複製</div>
+
+  <script>
+    const STORAGE_KEY = 'qio-panel-tracker';
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) { return {}; }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    let currentData = loadData();
+
+    document.querySelectorAll('ul.check-list li').forEach(function(li) {
+      const key = li.dataset.key;
+      const cb = document.createElement('div');
+      cb.className = 'checkbox';
+      cb.textContent = '✓';
+      li.insertBefore(cb, li.firstChild);
+
+      if (currentData[key]) {
+        li.classList.add('done');
+      }
+
+      li.addEventListener('click', function() {
+        li.classList.toggle('done');
+        currentData[key] = li.classList.contains('done');
+        saveData(currentData);
+        showSaved();
+      });
+    });
+
+    document.querySelectorAll('.text-box').forEach(function(box) {
+      const key = 'box-' + box.id;
+      if (currentData[key]) {
+        box.value = currentData[key];
+      }
+      box.addEventListener('input', function() {
+        currentData[key] = box.value;
+        saveData(currentData);
+        showSaved();
+      });
+    });
+
+    let savedTimer;
+    function showSaved() {
+      const hint = document.getElementById('savedHint');
+      hint.classList.add('show');
+      clearTimeout(savedTimer);
+      savedTimer = setTimeout(function() {
+        hint.classList.remove('show');
+      }, 1000);
+    }
+
+    let copyTimer;
+    function copyPrompt(el) {
+      const text = el.textContent.replace('點我複製', '').trim();
+      navigator.clipboard.writeText(text).then(function() {
+        const hint = document.getElementById('copyHint');
+        hint.classList.add('show');
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(function() {
+          hint.classList.remove('show');
+        }, 1200);
+      }).catch(function() {
+        alert('複製失敗，請手動選取文字。');
+      });
+    }
+
+    function exportDataToFile() {
+      const backup = {
+        version: '1.0',
+        type: 'qio-panel-tracker',
+        exportTime: new Date().toISOString(),
+        data: currentData
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `qio-panel-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      alert('✅ 已下載 JSON 備份檔！');
+    }
+
+    function triggerFileInput() {
+      document.getElementById('import-file-input').click();
+    }
+
+    function importDataFromFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (imported.data && typeof imported.data === 'object') {
+            currentData = imported.data;
+            saveData(currentData);
+
+            document.querySelectorAll('ul.check-list li').forEach(function(li) {
+              const key = li.dataset.key;
+              if (currentData[key]) {
+                li.classList.add('done');
+              } else {
+                li.classList.remove('done');
+              }
+            });
+
+            document.querySelectorAll('.text-box').forEach(function(box) {
+              const key = 'box-' + box.id;
+              box.value = currentData[key] || '';
+            });
+
+            alert('🎉 資料同步成功！');
+          } else {
+            alert('❌ 檔案格式不對，請確認是 qio-panel 的備份檔。');
+          }
+        } catch (err) {
+          alert('❌ 解析檔案失敗！');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    function resetAll() {
+      if (!confirm('確定要重置全部進度嗎？此動作無法復原。')) return;
+      currentData = {};
+      saveData(currentData);
+      document.querySelectorAll('ul.check-list li').forEach(function(li) {
+        li.classList.remove('done');
+      });
+      document.querySelectorAll('.text-box').forEach(function(box) {
+        box.value = '';
+      });
+      alert('已重置。');
+    }
+
+    // 通知功能
+    function enableNotification() {
+      if (!('Notification' in window)) {
+        alert('你的瀏覽器不支援通知功能。');
+        return;
+      }
+
+      Notification.requestPermission().then(function(permission) {
+        if (permission === 'granted') {
+          alert('✅ 已開啟提醒！每天會提醒你打勾。');
+          localStorage.setItem('notification-enabled', 'true');
+          scheduleDailyReminder();
+        } else {
+          alert('❌ 你拒絕了通知權限。');
+        }
+      });
+    }
+
+    function testNotification() {
+      if (Notification.permission === 'granted') {
+        new Notification('Q-IO 工作區', {
+          body: '這是一則測試通知。今天打勾了嗎？'
+        });
+      } else {
+        alert('請先開啟提醒權限。');
+      }
+    }
+
+    function scheduleDailyReminder() {
+      setInterval(function() {
+        if (Notification.permission === 'granted') {
+          new Notification('Q-IO 工作區', {
+            body: '今天打勾了嗎？打開工作區，記錄今天的進度。'
+          });
+        }
+      }, 24 * 60 * 60 * 1000);
+    }
+
+    if (localStorage.getItem('notification-enabled') === 'true') {
+      scheduleDailyReminder();
+    }
+
+    // 離線狀態顯示
+    function updateStatus() {
+      const badge = document.getElementById('statusBadge');
+      if (navigator.onLine) {
+        badge.className = 'status-badge status-online';
+        badge.textContent = '✓ 已連線';
+      } else {
+        badge.className = 'status-badge status-offline';
+        badge.textContent = '⚡ 離線模式';
+      }
+    }
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+
+    // 註冊 Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker 已註冊'))
+        .catch(err => console.log('Service Worker 註冊失敗', err));
+    }
+  </script>
+
+</body>
+</html>
