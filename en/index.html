@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24hr-168.com - Q-io Micro-Landscape Field Observations & Narrative Archives</title>
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="24hr-168.com - Q-io Micro-Landscape Field Observations & Narrative Archives. Dedicated to field investigations, spatial notes, and flash fiction on Taiwan's borderland landscapes and living spaces.">
+    <link rel="canonical" href="https://24hr-168.com/en/" />
+    
+    <!-- Structured Data for Author Identity -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Q-io",
+      "url": "https://24hr-168.com/en/",
+      "description": "Independent landscape observer and micro-literature creator, specializing in Taiwanese field investigations and cultural memory archives."
+    }
+    </script>
+    
+    <style>
+        :root {
+            --primary-color: #0d2847;
+            --text-color: #333333;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            /* Macaron Color Tag Styles */
+            --tag-pink-bg: #fde8ed; --tag-pink-text: #d81b60;
+            --tag-blue-bg: #e1f5fe; --tag-blue-text: #0288d1;
+            --tag-green-bg: #e8f5e9; --tag-green-text: #2e7d32;
+            --tag-yellow-bg: #fffde7; --tag-yellow-text: #f57f17;
+            --tag-purple-bg: #f3e5f5; --tag-purple-text: #7b1fa2;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.7; color: var(--text-color); background-color: var(--bg-color); margin: 0; padding: 0; }
+
+        /* Top Navigation Bar */
+        .nav-bar { background-color: var(--primary-color); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .nav-brand { color: #ffffff; font-weight: bold; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; }
+        .lang-switch { font-size: 0.85rem; padding: 4px 12px; border: 1px solid #ffffff; border-radius: 20px; color: #ffffff; text-decoration: none; transition: all 0.2s ease; }
+        .lang-switch:hover { background-color: #ffffff; color: var(--primary-color); }
+
+        /* Hero Banner */
+        .hero-banner { background-color: var(--primary-color); color: #ffffff; text-align: center; padding: 45px 20px; border-bottom: 3px solid #1a3a60; }
+        .hero-banner h1 { margin: 0; font-size: 2.2em; letter-spacing: 1px; }
+        .hero-banner p { margin: 12px 0 0 0; font-size: 1em; color: #c5cae9; font-weight: 300; }
+
+        .container { max-width: 800px; margin: 25px auto; padding: 0 15px; }
+
+        /* Profile Card */
+        .profile-card { background: var(--card-bg); border-radius: 8px; padding: 25px; margin-bottom: 30px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .profile-card h2 { margin: 0 0 12px 0; color: var(--primary-color); font-size: 1.3em; border-bottom: 2px solid var(--bg-color); padding-bottom: 8px; }
+        .profile-card p { margin: 0; color: #555; font-size: 0.95em; line-height: 1.7; text-align: justify; }
+
+        .section-title { font-size: 1.2em; color: var(--primary-color); margin-bottom: 20px; border-left: 4px solid var(--primary-color); padding-left: 10px; font-weight: bold; }
+
+        /* Article Card */
+        .article-card { background: var(--card-bg); border-radius: 8px; padding: 22px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: block; color: inherit; }
+        .article-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        /* Macaron Tags Container */
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .tag { font-size: 0.78em; font-weight: 600; padding: 3px 10px; border-radius: 12px; display: inline-block; }
+        .tag-pink { background: var(--tag-pink-bg); color: var(--tag-pink-text); }
+        .tag-blue { background: var(--tag-blue-bg); color: var(--tag-blue-text); }
+        .tag-green { background: var(--tag-green-bg); color: var(--tag-green-text); }
+        .tag-yellow { background: var(--tag-yellow-bg); color: var(--tag-yellow-text); }
+        .tag-purple { background: var(--tag-purple-bg); color: var(--tag-purple-text); }
+
+        .card-title { margin: 0 0 10px 0; font-size: 1.25em; color: var(--primary-color); line-height: 1.4; }
+        .card-description { margin: 0 0 15px 0; color: #555; font-size: 0.93em; text-align: justify; line-height: 1.6; }
+        .card-more { font-size: 0.88em; color: #0288d1; font-weight: bold; display: flex; align-items: center; }
+
+        .footer { text-align: center; padding: 30px 20px; color: #888; font-size: 0.85em; border-top: 1px solid var(--border-color); margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="nav-bar">
+        <a href="/en/" class="nav-brand">24hr-168.com | Q-io</a>
+        <a href="/" class="lang-switch" onclick="localStorage.setItem('user_lang', 'zh')">中文 (Chinese)</a>
+    </nav>
+
+    <!-- Main Banner -->
+    <div class="hero-banner">
+        <h1>24hr-168.com</h1>
+        <p>Q-io Micro-Landscape Field Observations & Narrative Archives</p>
+    </div>
+
+    <div class="container">
+        <!-- About Q-io Section -->
+        <div class="profile-card">
+            <h2>About Q-io | 主理人 24hr-168</h2>
+            <p>Q-io is an independent landscape observer and creator of micro-literature. This site, 24hr-168, serves as a pure textual field archive dedicated to on-site investigations of Taiwan's borderland landscapes, historical trails, and community living spaces. Rejecting algorithm-driven platforms, we document memories through a structured three-part framework: geographical coordinates, field essays, spatial notes, and flash fiction.</p>
+        </div>
+
+        <div class="section-title">Latest Field Reports</div>
+
+        <!-- Shigang Dam Card -->
+        <a href="/en/shigang-dam.html" class="article-card">
+            <div class="tags-container">
+                <span class="tag tag-pink">#ShigangDistrict</span>
+                <span class="tag tag-blue">#ShigangDam</span>
+                <span class="tag tag-green">#HydraulicEngineering</span>
+                <span class="tag tag-yellow">#CommunityBackyard</span>
+                <span class="tag tag-purple">#IntergenerationalSoundscape</span>
+            </div>
+            <h3 class="card-title">【Shigang Field Notes】Chorus Beneath the Giant Dam: Shigang Dam & Everyday Backyard</h3>
+            <p class="card-description">Documenting the symbiotic relationship between Shigang Dam (completed in 1977) and contemporary community leisure spaces. Interweaving three generations of memories—watching typhoon waves, post-earthquake static-shock handrails, and karaoke singing under the shade.</p>
+            <div class="card-more">Read Full Report & Flash Fiction →</div>
+        </a>
+
+    </div>
+
+    <div class="footer">
+        &copy; 2026 24hr-168.com. All Rights Reserved.
+    </div>
+</body>
+</html>
