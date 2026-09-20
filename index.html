@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24hr-168.com - Q-io 微觀地景采風與現場觀察檔案庫</title>
+    <!-- SEO 優化標籤 -->
+    <meta name="description" content="24hr-168.com - Q-io 的微觀地景采風與現場觀察檔案庫。專注於臺灣邊界地景、歷史古道、客家聚落與常民場域之實地踏查、田野筆記與微型小說創作。">
+    <link rel="canonical" href="https://24hr-168.com" />
+    
+    <!-- 結構化資料：標記人文創作者身分 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Q-io",
+      "url": "https://24hr-168.com",
+      "description": "獨立地景觀察者與微觀文學創作者，專注於臺灣田野采風與文化資產檔案紀錄。"
+    }
+    </script>
+    
+    <style>
+        :root {
+            --primary-color: #0d2847;
+            --text-color: #333333;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            /* 馬卡龍色系標籤 */
+            --tag-pink-bg: #fde8ed; --tag-pink-text: #d81b60;
+            --tag-blue-bg: #e1f5fe; --tag-blue-text: #0288d1;
+            --tag-green-bg: #e8f5e9; --tag-green-text: #2e7d32;
+            --tag-yellow-bg: #fffde7; --tag-yellow-text: #f57f17;
+            --tag-purple-bg: #f3e5f5; --tag-purple-text: #7b1fa2;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.7; color: var(--text-color); background-color: var(--bg-color); margin: 0; padding: 0; }
+
+        /* 頂部導航列 */
+        .nav-bar { background-color: var(--primary-color); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .nav-brand { color: #ffffff; font-weight: bold; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; }
+        .lang-switch { font-size: 0.85rem; padding: 4px 12px; border: 1px solid #ffffff; border-radius: 20px; color: #ffffff; text-decoration: none; transition: all 0.2s ease; }
+        .lang-switch:hover { background-color: #ffffff; color: var(--primary-color); }
+
+        /* 主主視覺 Banner */
+        .hero-banner { background-color: var(--primary-color); color: #ffffff; text-align: center; padding: 45px 20px; border-bottom: 3px solid #1a3a60; }
+        .hero-banner h1 { margin: 0; font-size: 2.2em; letter-spacing: 1px; }
+        .hero-banner p { margin: 12px 0 0 0; font-size: 1em; color: #c5cae9; font-weight: 300; }
+
+        .container { max-width: 800px; margin: 25px auto; padding: 0 15px; }
+
+        /* 個人簡介卡片 */
+        .profile-card { background: var(--card-bg); border-radius: 8px; padding: 25px; margin-bottom: 30px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .profile-card h2 { margin: 0 0 12px 0; color: var(--primary-color); font-size: 1.3em; border-bottom: 2px solid var(--bg-color); padding-bottom: 8px; }
+        .profile-card p { margin: 0; color: #555; font-size: 0.95em; line-height: 1.7; text-align: justify; }
+
+        .section-title { font-size: 1.2em; color: var(--primary-color); margin-bottom: 20px; border-left: 4px solid var(--primary-color); padding-left: 10px; font-weight: bold; }
+
+        /* 文章卡片樣式 */
+        .article-card { background: var(--card-bg); border-radius: 8px; padding: 22px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: block; color: inherit; }
+        .article-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        /* 馬卡龍標籤 */
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .tag { font-size: 0.78em; font-weight: 600; padding: 3px 10px; border-radius: 12px; display: inline-block; }
+        .tag-pink { background: var(--tag-pink-bg); color: var(--tag-pink-text); }
+        .tag-blue { background: var(--tag-blue-bg); color: var(--tag-blue-text); }
+        .tag-green { background: var(--tag-green-bg); color: var(--tag-green-text); }
+        .tag-yellow { background: var(--tag-yellow-bg); color: var(--tag-yellow-text); }
+        .tag-purple { background: var(--tag-purple-bg); color: var(--tag-purple-text); }
+
+        .card-title { margin: 0 0 10px 0; font-size: 1.25em; color: var(--primary-color); line-height: 1.4; }
+        .card-description { margin: 0 0 15px 0; color: #555; font-size: 0.93em; text-align: justify; line-height: 1.6; }
+        .card-more { font-size: 0.88em; color: #0288d1; font-weight: bold; display: flex; align-items: center; }
+
+        .footer { text-align: center; padding: 30px 20px; color: #888; font-size: 0.85em; border-top: 1px solid var(--border-color); margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <!-- 最上方簡潔導航列 -->
+    <nav class="nav-bar">
+        <a href="/" class="nav-brand">24hr-168.com | Q-io</a>
+        <a href="/en/" class="lang-switch" onclick="localStorage.setItem('user_lang', 'en')">EN (English)</a>
+    </nav>
+
+    <!-- 主標題 Banner -->
+    <div class="hero-banner">
+        <h1>24hr-168.com</h1>
+        <p>Q-io 微觀地景采風與現場觀察檔案庫</p>
+    </div>
+
+    <div class="container">
+        <!-- 關於 Q-io 區塊 -->
+        <div class="profile-card">
+            <h2>關於 Q-io｜24hr-168 隨筆主理人</h2>
+            <p>Q-io，獨立地景觀察者與微觀文學創作者。本站《24hr-168》為一處純粹的文字田野檔案庫，專注於臺灣邊界地景、歷史古道與常民場域之實地踏查。我們捨棄演算法引流，堅持以「地理座標、實地采風散文、現場微觀筆記、微型小說」三段式結構，紀錄土地與人的深層記憶。</p>
+        </div>
+
+        <div class="section-title">最新地景采風檔案 / Latest Field Reports</div>
+
+        <!-- 石岡水壩卡片 -->
+        <a href="shigang-dam.html" class="article-card">
+            <div class="tags-container">
+                <span class="tag tag-pink">#石岡區</span>
+                <span class="tag tag-blue">#石岡水壩</span>
+                <span class="tag tag-green">#大甲溪水利工程</span>
+                <span class="tag tag-yellow">#常民後花園</span>
+                <span class="tag tag-purple">#世代聲景對話</span>
+            </div>
+            <h3 class="card-title">【石岡采風輯】巨壩下的歡歌日常：石岡水壩與常民後花園</h3>
+            <p class="card-description">紀錄 1977 年完工之石岡水壩巨型工程與當代常民休閒空間的共生關係。透過三代人對話交織建壩觀浪、九二一靜電扶手與樹蔭下行動卡拉OK的歡歌日常，展現水利地景的時代記憶轉化。</p>
+            <div class="card-more">閱讀完整采風報告與微型小說 / Read Full Report →</div>
+        </a>
+
+    </div>
+
+    <div class="footer">
+        &copy; 2026 24hr-168.com. All Rights Reserved.
+    </div>
+</body>
+</html>
