@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日曆貼圖日記 (工地照片與錄音備忘版 v58)</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f7e6d5; margin: 0; padding: 10px; display: flex; justify-content: center; }
+    .phone-container { width: 100%; max-width: 420px; background: #fff2e6; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; min-height: 820px; }
+
+    /* 電腦版加大 */
+    @media (min-width: 768px) {
+      .phone-container {
+        max-width: 900px;
+        min-height: 90vh;
+      }
+      .day-cell {
+        height: 110px;
+      }
+      .sticker-grid {
+        grid-template-columns: repeat(6, 1fr);
+        max-height: 200px;
+      }
+      .calendar-grid {
+        gap: 2px;
+      }
+    }
+
+    /* 大螢幕再大一點 */
+    @media (min-width: 1280px) {
+      .phone-container {
+        max-width: 1100px;
+      }
+      .day-cell {
+        height: 130px;
+      }
+    }    
+    .header { 
+      background: #ffe4cc; 
+      padding: 10px 12px; 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.05rem; 
+      font-weight: bold; 
+      color: #d35400; 
+      border-bottom: 2px solid #ffd1a8; 
+    }
+    .month-nav-btn {
+      background: rgba(211, 84, 0, 0.1);
+      border: 1px solid rgba(211, 84, 0, 0.3);
+      color: #d35400;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    .month-nav-btn:hover { background: #d35400; color: #fff; }
+    
+    .calendar-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 1px; 
+      background: #e0d0c0; 
+      padding: 3px; 
+      position: relative; 
+    }
+    .week-header { background: #fbeee6; text-align: center; font-size: 0.75rem; padding: 5px 0; font-weight: bold; color: #555; }
+    .week-header.sun { color: #e74c3c; }
+    .week-header.sat { color: #3498db; }
+    
+    .day-cell { 
+      background: #ffffff; 
+      height: 84px; 
+      padding: 2px; 
+      font-size: 0.75rem; 
+      position: relative; 
+      cursor: pointer; 
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .day-cell.other-month { background: #fdfbf7; color: #bbb; cursor: pointer; }
+    .day-cell.selected { background: #e8f8f5; border: 2px solid #16a085; }
+    .day-header-row { display: flex; justify-content: space-between; align-items: center; width: 100%; z-index: 2; min-height: 12px; }
+    .day-num { font-weight: bold; color: #333; font-size: 0.65rem; }
+    .day-cell.other-month .day-num { color: #aaa; }
+    
+    .badges-wrapper { 
+      display: flex; 
+      flex-direction: column;
+      gap: 2px; 
+      width: 100%; 
+      height: calc(100% - 13px);
+      margin-top: 1px;
+      overflow: hidden;
+      justify-content: flex-start;
+    }
+
+    /* 基礎卡片設定 */
+    .sticker-badge {
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0,0,0,0.15);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      background-size: cover !important;
+      background-repeat: repeat !important;
+      background-position: center !important;
+      position: relative;
+      width: 100%;
+      padding: 0 1px;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .sticker-badge .badge-icon { flex-shrink: 0; line-height: 1; }
+    
+    .sticker-badge .badge-text-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sticker-badge .badge-text { 
+      font-weight: bold;
+      color: #111;
+      background: rgba(255, 255, 255, 0.92); 
+      padding: 1px 2px; 
+      border-radius: 2px; 
+      white-space: nowrap !important;
+      line-height: 1.1;
+      text-align: center;
+      display: block;
+      width: 100%;
+      letter-spacing: -0.3px;
+    }
+
+    /* 1 張貼紙：顯示 Icon + 大文字卡片 */
+    .badges-wrapper.count-1 .sticker-badge {
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
+    }
+    .badges-wrapper.count-1 .sticker-badge .badge-icon { display: inline-block; font-size: 1.3rem; }
+    .badges-wrapper.count-1 .sticker-badge .badge-text { font-size: 10px; padding: 2px 4px; }
+
+    /* 2~4 張貼紙：全寬純文字膠囊模式 */
+    .badges-wrapper:not(.count-1) .sticker-badge .badge-icon { 
+      display: none !important; 
+    }
+
+    .badges-wrapper.count-2 .sticker-badge { height: calc(50% - 1px); }
+    .badges-wrapper.count-2 .sticker-badge .badge-text { font-size: 9px; }
+
+    .badges-wrapper.count-3 .sticker-badge { height: calc(33.3% - 1.5px); }
+    .badges-wrapper.count-3 .sticker-badge .badge-text { font-size: 8.5px; }
+
+    .badges-wrapper.count-4 .sticker-badge { height: calc(25% - 1.5px); }
+    .badges-wrapper.count-4 .sticker-badge .badge-text { font-size: 8px; padding: 0 1px; }
+
+    .bottom-sheet { background: #ffffff; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 12px; flex-grow: 1; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .nav-tabs { display: flex; gap: 4px; border-bottom: 2px solid #f0f0f0; padding-bottom: 6px; margin-bottom: 8px; }
+    .tab-btn { padding: 6px 8px; border: none; background: #eee; border-radius: 14px; cursor: pointer; font-size: 0.72rem; font-weight: bold; color: #666; flex: 1; text-align: center; }
+    .tab-btn.active { background: #f39c12; color: #fff; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .sub-cat-bar { display: flex; gap: 6px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; align-items: center; }
+    .sub-cat-btn { padding: 3px 8px; border: 1px solid #f39c12; background: #fff; border-radius: 12px; font-size: 0.72rem; color: #e67e22; cursor: pointer; flex-shrink: 0; }
+    .sub-cat-btn.active { background: #f39c12; color: #fff; }
+    .add-cat-btn { padding: 3px 8px; border: 1px dashed #27ae60; background: #e8f8f5; border-radius: 12px; font-size: 0.72rem; color: #27ae60; cursor: pointer; flex-shrink: 0; font-weight: bold; }
+
+    .schedule-section-title { font-size: 0.78rem; font-weight: bold; color: #d35400; margin: 8px 0 4px 0; border-left: 3px solid #f39c12; padding-left: 6px; }
+
+    .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; }
+    .sticker-card {
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 4px 2px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #2c3e50;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      position: relative;
+      background-repeat: repeat !important;
+      background-position: center !important;
+      min-height: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .sticker-card:hover { transform: translateY(-2px); }
+    .sticker-icon { font-size: 1rem; display: block; margin-bottom: 2px; }
+
+    .card-action-bar {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      display: flex;
+      gap: 2px;
+      z-index: 10;
+    }
+    .card-action-btn {
+      font-size: 8px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0 2px;
+      cursor: pointer;
+      line-height: 1.1;
+    }
+
+    .schedule-card-grid { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; margin-top: 4px; }
+    .schedule-item-card {
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      background-repeat: repeat !important;
+      background-position: center !important;
+    }
+    .schedule-left { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 0; }
+    .schedule-item-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .schedule-item-title { font-size: 0.78rem; font-weight: bold; color: #333; }
+    .schedule-item-desc { font-size: 0.65rem; color: #555; margin-top: 1px; }
+
+    .map-link-btn {
+      display: inline-block;
+      margin-top: 2px;
+      font-size: 0.65rem;
+      color: #2980b9;
+      font-weight: bold;
+      text-decoration: none;
+      background: rgba(255,255,255,0.9);
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #a3d8f4;
+    }
+
+    .site-stats-tag {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: 0.62rem;
+      color: #27ae60;
+      font-weight: bold;
+      background: #e8f8f5;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #a3e4d7;
+    }
+
+    .media-badges-wrapper { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+    .media-badge { font-size: 0.62rem; background: rgba(255,255,255,0.9); padding: 1px 4px; border-radius: 4px; border: 1px solid #ddd; }
+
+    .schedule-action-btns { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+    .action-btn { border: none; background: rgba(255,255,255,0.9); padding: 3px 6px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; border: 1px solid #ddd; font-weight: bold; }
+    .action-btn.copy { color: #27ae60; border-color: #a3e4d7; }
+    .action-btn.delete { color: #e74c3c; }
+
+    .canvas-container { display: flex; justify-content: center; margin-bottom: 8px; }
+    .canvas-box { 
+      width: 100px; 
+      height: 100px; 
+      border: 2px dashed #f39c12; 
+      border-radius: 14px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 1rem; 
+      font-weight: bold; 
+      color: #2c3e50; 
+      position: relative; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      background-repeat: repeat !important;
+      background-position: center !important;
+      overflow: hidden;
+    }
+    
+    .color-picker-wrapper { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+    .color-picker-wrapper label { font-size: 0.72rem; font-weight: bold; color: #d35400; }
+    .color-picker-input { width: 28px; height: 28px; border: none; border-radius: 50%; cursor: pointer; background: none; }
+    .hex-input { flex: 1; padding: 4px 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.72rem; text-transform: uppercase; }
+
+    .control-slider-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; background: #fffcf8; padding: 4px 8px; border-radius: 8px; border: 1px solid #ffe4cc; }
+    .control-slider-wrapper label { font-size: 0.72rem; font-weight: bold; color: #d35400; white-space: nowrap; }
+    .control-slider-wrapper input { flex: 1; }
+
+    .canvas-tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .canvas-tools button, .upload-img-label { 
+      padding: 5px; 
+      border: 1px solid #ddd; 
+      background: #fff; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 0.72rem; 
+      font-weight: bold; 
+      color: #444; 
+      text-align: center;
+      display: block;
+    }
+    .canvas-tools button.primary { background: #f39c12; color: #fff; border: none; grid-column: span 2; padding: 7px; }
+    
+    .category-select-wrapper { margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .category-select-wrapper label { font-size: 0.72rem; font-weight: bold; color: #d35400; }
+    .category-select-wrapper select { flex: 1; padding: 3px; border-radius: 6px; border: 1px solid #f39c12; font-size: 0.72rem; }
+
+    .sync-box { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; max-height: 180px; overflow-y: auto; }
+    .sync-card { border: 1px solid #e0d0c0; background: #fffcf8; border-radius: 12px; padding: 8px; }
+    .sync-card h4 { margin: 0 0 4px 0; color: #d35400; font-size: 0.8rem; }
+    .sync-card p { margin: 0 0 6px 0; font-size: 0.68rem; color: #666; line-height: 1.3; }
+    .sync-btn { background: #e67e22; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
+    .sync-btn.import { background: #27ae60; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-card {
+      background: #fff; padding: 16px; border-radius: 16px; width: 330px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-title { font-size: 0.95rem; font-weight: bold; color: #d35400; margin-bottom: 10px; }
+    .form-group { margin-bottom: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .form-group label { font-size: 0.72rem; font-weight: bold; color: #555; }
+    .form-group input, .form-group select, .form-group textarea { padding: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.75rem; }
+    
+    .media-upload-box { border: 1px dashed #d35400; background: #fffaf5; border-radius: 8px; padding: 6px; margin-top: 4px; }
+    .media-preview-grid { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; }
+    .thumb-img { width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+    .record-btn { background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+    .record-btn.recording { animation: pulse 1s infinite; background: #c0392b; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    .modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .modal-btns button { padding: 5px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+    .btn-cancel { background: #eee; color: #666; }
+    .btn-save { background: #f39c12; color: #fff; }
+    .file-input-hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="phone-container">
+  <div class="header">
+    <div class="month-nav-btn" onclick="changeMonth(-1)">◀</div>
+    <span id="month-title">2026年 09月</span>
+    <div class="month-nav-btn" onclick="changeMonth(1)">▶</div>
+    <div class="month-nav-btn" onclick="jumpToToday()" style="width:auto; padding:0 10px; border-radius:14px; font-size:0.75rem;">📅 今天</div>
+  </div>
+  
+  <div class="calendar-grid" id="calendar-grid">
+    <div class="week-header">一</div><div class="week-header">二</div><div class="week-header">三</div>
+    <div class="week-header">四</div><div class="week-header">五</div><div class="week-header sat">六</div><div class="week-header sun">日</div>
+  </div>
+
+  <div class="bottom-sheet">
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('main', this)">貼紙標記與日程</button>
+      <button class="tab-btn" onclick="switchTab('editor', this)">貼圖 DIY</button>
+      <button class="tab-btn" onclick="switchTab('sync', this)">同步備份</button>
+    </div>
+
+    <div id="tab-main" class="tab-content active">
+      <div class="sub-cat-bar" id="sub-cat-bar"></div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+
+      <div class="schedule-section-title" id="selected-date-title">已安排的日程：</div>
+      <div class="schedule-card-grid" id="schedule-list"></div>
+    </div>
+
+    <div id="tab-editor" class="tab-content">
+      <input type="hidden" id="editing-template-id" value="">
+      <div class="canvas-container">
+        <div class="canvas-box" id="preview-canvas">
+          <span style="background:rgba(255,255,255,0.85); padding:1px 5px; border-radius:3px;">🍰 甜點時間</span>
+        </div>
+      </div>
+
+      <div class="color-picker-wrapper">
+        <label>選取底色：</label>
+        <input type="color" class="color-picker-input" id="native-color-picker" value="#ffe5d9" onchange="updateCanvasColor(this.value)">
+        <input type="text" class="hex-input" id="hex-color-input" value="#FFE5D9">
+        <button onclick="applyHexColor()" style="padding:3px 6px; border-radius:6px; border:1px solid #ccc; font-size:0.72rem;">套用</button>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <label style="font-size:0.72rem; font-weight:bold; color:#d35400; display:block; margin-bottom:6px;">🎨 常用馬卡龍色：</label>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div onclick="updateCanvasColor('#FFE5D9')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#FFE5D9;" title="蜜桃"></div>
+          <div onclick="updateCanvasColor('#FFD6E0')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#FFD6E0;" title="櫻花"></div>
+          <div onclick="updateCanvasColor('#FFF5BA')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#FFF5BA;" title="檸檬"></div>
+          <div onclick="updateCanvasColor('#D4F0F0')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#D4F0F0;" title="薄荷"></div>
+          <div onclick="updateCanvasColor('#E0D4F7')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#E0D4F7;" title="薰衣草"></div>
+          <div onclick="updateCanvasColor('#D4E8FF')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#D4E8FF;" title="天空藍"></div>
+          <div onclick="updateCanvasColor('#FFE0CC')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#FFE0CC;" title="杏桃"></div>
+          <div onclick="updateCanvasColor('#D4F7DC')" style="width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid #E2E8F0; background:#D4F7DC;" title="嫩綠"></div>
+        </div>
+      </div>
+
+      <div class="category-select-wrapper">
+        <label>生活白透明花紋：</label>
+        <select id="pattern-select" onchange="selectPattern(this.value)"></select>
+      </div>
+
+      <div class="control-slider-wrapper">
+        <label>花紋大小/密度：</label>
+        <input type="range" id="pattern-size-slider" min="12" max="60" value="24" oninput="updatePatternSize(this.value)">
+        <span id="size-val-text" style="font-size:0.68rem; font-weight:bold; color:#666;">24px</span>
+      </div>
+
+      <div class="category-select-wrapper">
+        <label>放進分類：</label>
+        <select id="diy-category-select"></select>
+      </div>
+
+      <div class="canvas-tools">
+        <label class="upload-img-label" style="background:#e8f8f5; color:#27ae60; border-color:#27ae60;">
+          🖼️ 上傳相片底圖
+          <input type="file" id="bg-photo-input" accept="image/*" class="file-input-hidden" onchange="handlePhotoUpload(event)">
+        </label>
+        <button onclick="clearPhotoBg()">❌ 清除相片</button>
+
+        <button onclick="changeEditorText()">✏️ 修改文字</button>
+        <button onclick="zoomText(1.15)">🔍 放大文字</button>
+        <button onclick="zoomText(0.85)">🔍 縮小文字</button>
+        <button class="primary" id="save-sticker-btn" onclick="saveCustomSticker()">✨ 儲存手帳貼圖</button>
+      </div>
+    </div>
+
+    <div id="tab-sync" class="tab-content">
+      <div class="sync-box">
+        <div class="sync-card">
+          <h4>💾 跨裝置 JSON 與媒體資料備份</h4>
+          <p>電腦或手機安排完成後，下載 JSON 備份檔傳到另一端匯入，即可同步日曆紀錄、照片與錄音！</p>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+            <button class="sync-btn" onclick="exportDataToFile()">📥 下載日曆 JSON 備份檔</button>
+            <button class="sync-btn import" onclick="triggerFileInput()">📤 匯入 JSON 資料</button>
+          </div>
+          <input type="file" id="import-file-input" class="file-input-hidden" accept=".json" onchange="importDataFromFile(event)">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal-card">
+    <div class="modal-title" id="modal-header-title">修改/補充日程細節</div>
+    <input type="hidden" id="edit-item-id">
+
+    <div class="form-group">
+      <label>行程名稱</label>
+      <input type="text" id="form-title" placeholder="如：創基石材丈量">
+    </div>
+
+    <div class="form-group">
+      <label>替換貼圖樣式 (選填)</label>
+      <select id="form-sticker-select"></select>
+    </div>
+
+    <div class="form-group">
+      <label>行程時間 (選填)</label>
+      <input type="time" id="form-time">
+    </div>
+
+    <div class="form-group">
+      <label>地點 / 地圖連結 (選填)</label>
+      <input type="text" id="form-location" placeholder="可輸入地址或貼上 Google 地圖連結">
+    </div>
+
+    <!-- 工地現場照片與錄音模組 -->
+    <div class="media-upload-box">
+      <label style="font-size:0.72rem; font-weight:bold; color:#d35400;">📷 現場照片 / 🎙️ 語音備忘 (電腦二次處理用)</label>
+      <div style="display:flex; gap:6px; margin-top:4px;">
+        <label class="action-btn" style="background:#e8f8f5; color:#27ae60; border-color:#27ae60; padding:4px 8px; font-weight:bold;">
+          📷 拍照/上傳照片
+          <input type="file" id="site-photo-input" accept="image/*" multiple class="file-input-hidden" onchange="handleSitePhotosUpload(event)">
+        </label>
+        <button type="button" class="record-btn" id="record-audio-btn" onclick="toggleAudioRecording()">🎙️ 開始錄音</button>
+      </div>
+      <div class="media-preview-grid" id="media-preview-container"></div>
+    </div>
+
+    <div class="form-group" style="margin-top:6px;">
+      <label>起始日期</label>
+      <input type="date" id="form-start-date">
+    </div>
+    <div class="form-group">
+      <label>結束日期 (設不同日期會自動連續發放貼紙)</label>
+      <input type="date" id="form-end-date">
+    </div>
+
+    <div class="form-group">
+      <label>備註說明 (選填)</label>
+      <textarea id="form-desc" placeholder="輸入現場注意事項、聯絡人等..."></textarea>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeScheduleModal()">取消</button>
+      <button class="btn-save" onclick="saveScheduleFromModal()">儲存變更</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const today = new Date();
+  let currentYear = today.getFullYear();
+  let currentMonth = today.getMonth();
+  let selectedDay = today.getDate();
+  let currentFontSize = 1.0;
+  let currentCategory = 'all';
+
+  let currentColor = '#ffe5d9';
+  let uploadedPhotoBase64 = '';
+  let currentPatternIndex = 0;
+  let currentPatternSize = 24;
+
+  // 暫存當前編輯彈窗中的媒體檔
+  let currentModalPhotos = [];
+  let currentModalAudios = [];
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecording = false;
+
+  // 初始化 IndexedDB
+  let db;
+  const dbRequest = indexedDB.open("SiteCalendarMediaDB", 1);
+  dbRequest.onupgradeneeded = function(e) {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains("media")) {
+      db.createObjectStore("media", { keyPath: "id" });
+    }
+  };
+  dbRequest.onsuccess = function(e) { db = e.target.result; };
+
+  function saveMediaToDB(mediaObj) {
+    if (!db) return;
+    const tx = db.transaction("media", "readwrite");
+    tx.objectStore("media").put(mediaObj);
+  }
+
+  function getMediaFromDB(id, callback) {
+    if (!db) return;
+    const tx = db.transaction("media", "readonly");
+    const req = tx.objectStore("media").get(id);
+    req.onsuccess = function() { callback(req.result); };
+  }
+
+  function makeSvgBg(svgStr, color, size) {
+    const encodedSvg = encodeURIComponent(svgStr);
+    return `background-color: ${color}; background-image: url("data:image/svg+xml,${encodedSvg}"); background-size: ${size}px ${size}px;`;
+  }
+
+  const patternList = [
+    { name: '1. 無 (純底色)', gen: (c, s) => `background-color: ${c};` },
+    { name: '2. 🤍 [純白] 溫暖愛心 (Hearts)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>`, c, s) },
+    { name: '3. 🍰 [純白] 可愛蛋糕 (Cake)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm7 6H5v-2h14v2zm1 2H4v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7z'/></svg>`, c, s) },
+    { name: '4. 🍎 [純白] 水果蘋果 (Apple)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M12 4a3 3 0 0 0 3-2h-2a2 2 0 0 1-1 2zm6 4c-1.3 0-2.4.8-3.5.8-1.1 0-2-.8-3.5-.8-2.2 0-4 1.8-4 4 0 3.5 3 8 5.5 8 1 0 1.6-.6 2-.6s1 .6 2 .6c2.5 0 5.5-4.5 5.5-8 0-2.2-1.8-4-4-4z'/></svg>`, c, s) },
+    { name: '5. ☕ [純白] 咖啡飲料 (Coffee)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M2 19h18v2H2v-2zm2-6h13v3a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-3zm15-2a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1v6h1z'/></svg>`, c, s) },
+    { name: '6. 🍃 [純白] 自然樹葉 (Leaves)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M17 8C8 10 5 16 3 21c5-2 11-5 13-14zm0 0c1 3 0 7-3 10'/></svg>`, c, s) },
+    { name: '7. 🎵 [純白] 躍動音符 (Notes)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z'/></svg>`, c, s) },
+    { name: '8. 🏠 [純白] 溫馨小屋 (House)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z'/></svg>`, c, s) },
+    { name: '9. 🚗 [純白] 小汽車 (Car)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z'/></svg>`, c, s) },
+    { name: '10. 👶 [純白] 可愛微笑 (Child)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-3 6a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 9 8zm6 0a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 15 8zm-3 9a4 4 0 0 1-3.46-2h6.92A4 4 0 0 1 12 17z'/></svg>`, c, s) },
+    { name: '11. 👕 [純白] 衣服上衣 (Clothes)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M16 2l-4 2-4-2-5 3 2 4 3-1v12h12V10l3 1 2-4z'/></svg>`, c, s) },
+    { name: '12. 🔧 [純白] 修理工具 (Tools)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.75)' d='M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.4-2.4c.4-.4.4-1 0-1.3z'/></svg>`, c, s) },
+    { name: '13. 🐾 [純白] 貓爪肉墊 (Paw)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><ellipse fill='rgba(255,255,255,0.75)' cx='12' cy='15' rx='5' ry='4'/><circle fill='rgba(255,255,255,0.75)' cx='6' cy='9' r='2'/><circle fill='rgba(255,255,255,0.75)' cx='10' cy='6' r='2'/><circle fill='rgba(255,255,255,0.75)' cx='14' cy='6' r='2'/><circle fill='rgba(255,255,255,0.75)' cx='18' cy='9' r='2'/></svg>`, c, s) },
+    { name: '14. ✨ [純白] 閃爍芒星 (Stars)', gen: (c, s) => makeSvgBg(`<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='rgba(255,255,255,0.8)' d='M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z'/></svg>`, c, s) },
+    { name: '15. 📐 [純白] 日系微格子 (Grid)', gen: (c, s) => `background-color: ${c}; background-image: linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px); background-size: ${s}px ${s}px;` }
+  ];
+
+  const defaultCategories = [
+    { id: 'holiday', name: '國定連假' },
+    { id: 'life', name: '生活' },
+    { id: 'work', name: '工作案場' },
+    { id: 'food', name: '美食' }
+  ];
+
+  const defaultStickers = [
+    { id: 't0', icon: '🏮', name: '連假', cat: 'holiday', bgStyle: patternList[0].gen('#fefae0', 24) },
+    { id: 't1', icon: '🍰', name: '下午茶', cat: 'food', bgStyle: patternList[2].gen('#ffe5d9', 24) },
+    { id: 't2', icon: '☕', name: '咖啡館', cat: 'food', bgStyle: patternList[4].gen('#fff8e7', 24) },
+    { id: 't3', icon: '🔧', name: '工地丈量', cat: 'work', bgStyle: patternList[11].gen('#d8f3dc', 24) }
+  ];
+
+  const taiwan2026Holidays = [
+    { id: 'h1', icon: '🎆', title: '元旦', startDate: '2026-01-01', endDate: '2026-01-01', bgStyle: patternList[0].gen('#fefae0', 24), desc: '元旦放假 1 天' },
+    { id: 'h2', icon: '🧧', title: '春節', startDate: '2026-02-14', endDate: '2026-02-22', bgStyle: patternList[1].gen('#ffccd5', 24), desc: '農曆春節連假共 9 天' },
+    { id: 'h3', icon: '🕊️', title: '228連假', startDate: '2026-02-27', endDate: '2026-03-01', bgStyle: patternList[0].gen('#e8f8f5', 24), desc: '和平紀念日連假 3 天' },
+    { id: 'h4', icon: '🧸', title: '兒童清明', startDate: '2026-04-03', endDate: '2026-04-06', bgStyle: patternList[0].gen('#d8f3dc', 24), desc: '兒童節與清明節連假 4 天' },
+    { id: 'h5', icon: '🚣', title: '端午節', startDate: '2026-06-19', endDate: '2026-06-21', bgStyle: patternList[0].gen('#e0f7fa', 24), desc: '端午節連假 3 天' },
+    { id: 'h6', icon: '🌕', title: '中秋連假', startDate: '2026-09-25', endDate: '2026-09-27', bgStyle: patternList[1].gen('#fefae0', 24), desc: '中秋節連假 3 天' },
+    { id: 'h7', icon: '🇹🇼', title: '國慶連假', startDate: '2026-10-09', endDate: '2026-10-11', bgStyle: patternList[0].gen('#ffe5d9', 24), desc: '雙十國慶連假 3 天' }
+  ];
+
+  let categoriesDatabase = JSON.parse(localStorage.getItem('cal_categories')) || defaultCategories;
+  let stickerTemplates = JSON.parse(localStorage.getItem('cal_stickers')) || defaultStickers;
+  let dayNotesDatabase = JSON.parse(localStorage.getItem('cal_notes')) || [];
+
+  function autoEnsureHolidaysExist() {
+    taiwan2026Holidays.forEach(h => {
+      const exists = dayNotesDatabase.some(item => item.id === h.id || item.title === h.title);
+      if (!exists) dayNotesDatabase.push(h);
+    });
+  }
+
+  function autoSaveToStorage() {
+    localStorage.setItem('cal_categories', JSON.stringify(categoriesDatabase));
+    localStorage.setItem('cal_stickers', JSON.stringify(stickerTemplates));
+    localStorage.setItem('cal_notes', JSON.stringify(dayNotesDatabase));
+  }
+
+  function manageCategoriesPrompt() {
+    const action = prompt('請選擇操作：\n1. 輸入新分類名稱 (新增)\n2. 輸入【刪除:分類名稱】(如 刪除:美食)');
+    if (!action) return;
+
+    if (action.startsWith('刪除:')) {
+      const catNameToDelete = action.replace('刪除:', '').trim();
+      categoriesDatabase = categoriesDatabase.filter(c => c.name !== catNameToDelete);
+      alert(`已刪除分類「${catNameToDelete}」`);
+    } else {
+      const newCatName = action.trim();
+      if (newCatName) {
+        const newCatId = 'cat_' + Date.now();
+        categoriesDatabase.push({ id: newCatId, name: newCatName });
+        alert(`已新增分類「${newCatName}」`);
+      }
+    }
+    autoSaveToStorage();
+    renderCategoriesUI();
+  }
+
+  function editStickerTemplate(e, stickerId) {
+    e.stopPropagation();
+    const st = stickerTemplates.find(item => item.id === stickerId);
+    if (!st) return;
+
+    document.getElementById('editing-template-id').value = st.id;
+    document.getElementById('preview-canvas').innerHTML = `<span style="background:rgba(255,255,255,0.85); padding:1px 5px; border-radius:3px;">${st.icon} ${st.name}</span>`;
+    document.getElementById('diy-category-select').value = st.cat || 'life';
+    document.getElementById('save-sticker-btn').innerText = '✨ 更新貼圖內容';
+
+    switchTab('editor', document.querySelectorAll('.tab-btn')[1]);
+  }
+
+  function deleteStickerTemplate(e, stickerId) {
+    e.stopPropagation();
+    if (confirm('確定刪除這張貼紙模板嗎？（日曆上已貼上的不受影響）')) {
+      stickerTemplates = stickerTemplates.filter(item => item.id !== stickerId);
+      autoSaveToStorage();
+      renderStickers(currentCategory);
+    }
+  }
+
+  function saveCustomSticker() {
+    const rawText = document.getElementById('preview-canvas').innerText.trim();
+    const targetCat = document.getElementById('diy-category-select').value || 'life';
+    const editingId = document.getElementById('editing-template-id').value;
+    const emojiMatch = rawText.match(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/);
+    
+    let icon = '✨', name = rawText;
+    if (emojiMatch) { icon = emojiMatch[0]; name = rawText.replace(icon, '').trim(); }
+    if (!name) name = '自訂貼圖';
+
+    let finalBgStyle = uploadedPhotoBase64 ? `background-image: url('${uploadedPhotoBase64}'); background-size: cover;` : patternList[currentPatternIndex].gen(currentColor, currentPatternSize);
+
+    if (editingId) {
+      const st = stickerTemplates.find(item => item.id === editingId);
+      if (st) {
+        st.icon = icon;
+        st.name = name;
+        st.cat = targetCat;
+        st.bgStyle = finalBgStyle;
+      }
+      document.getElementById('editing-template-id').value = '';
+      document.getElementById('save-sticker-btn').innerText = '✨ 儲存手帳貼圖';
+      alert(`已成功更新貼圖「${name}」！`);
+    } else {
+      stickerTemplates.unshift({ id: Date.now().toString(), icon, name, cat: targetCat, bgStyle: finalBgStyle });
+      alert(`已成功新增貼圖「${name}」！`);
+    }
+
+    autoSaveToStorage(); 
+    currentCategory = targetCat;
+    renderCategoriesUI(); 
+    renderStickers(targetCat);
+    switchTab('main', document.querySelectorAll('.tab-btn')[0]);
+  }
+
+  function quickAddStickerToDate(sticker) {
+    if (!selectedDay) return alert('請先點選一個日期！');
+    const pad = (n) => n.toString().padStart(2, '0');
+    const dateStr = `${currentYear}-${pad(currentMonth + 1)}-${pad(selectedDay)}`;
+
+    dayNotesDatabase.push({
+      id: Date.now().toString(),
+      icon: sticker.icon,
+      title: sticker.name,
+      time: '',
+      location: '',
+      desc: '',
+      photos: [],
+      audios: [],
+      bgStyle: sticker.bgStyle,
+      startDate: dateStr,
+      endDate: dateStr
+    });
+
+    autoSaveToStorage();
+    refreshCalendarUI();
+    renderScheduleList();
+  }
+
+  function renderCategoriesUI() {
+    const bar = document.getElementById('sub-cat-bar');
+    const select = document.getElementById('diy-category-select');
+    bar.innerHTML = ''; select.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = `sub-cat-btn ${currentCategory === 'all' ? 'active' : ''}`;
+    allBtn.innerText = '全部貼紙';
+    allBtn.onclick = () => filterCategory('all', allBtn);
+    bar.appendChild(allBtn);
+
+    categoriesDatabase.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = `sub-cat-btn ${currentCategory === cat.id ? 'active' : ''}`;
+      btn.innerText = cat.name;
+      btn.onclick = () => filterCategory(cat.id, btn);
+      bar.appendChild(btn);
+
+      const opt = document.createElement('option');
+      opt.value = cat.id; opt.innerText = cat.name;
+      select.appendChild(opt);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-cat-btn';
+    addBtn.innerText = '+ 管理分類';
+    addBtn.onclick = manageCategoriesPrompt;
+    bar.appendChild(addBtn);
+  }
+
+  function renderStickers(filter = 'all') {
+    const grid = document.getElementById('sticker-grid');
+    grid.innerHTML = '';
+    const items = filter === 'all' ? stickerTemplates : stickerTemplates.filter(s => s.cat === filter);
+
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'sticker-card';
+      if(item.bgStyle) card.style.cssText = item.bgStyle;
+      card.onclick = () => quickAddStickerToDate(item);
+
+      card.innerHTML = `
+        <div class="card-action-bar">
+          <span class="card-action-btn" onclick="editStickerTemplate(event, '${item.id}')">✏️</span>
+          <span class="card-action-btn" onclick="deleteStickerTemplate(event, '${item.id}')">🗑️</span>
+        </div>
+        <span class="sticker-icon">${item.icon}</span>
+        <span style="background:rgba(255,255,255,0.85); padding:0 2px; border-radius:2px; font-size:10px;">${item.name}</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function filterCategory(catId, btn) {
+    currentCategory = catId;
+    document.querySelectorAll('.sub-cat-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderStickers(catId);
+  }
+
+  function changeMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendarGrid(); refreshCalendarUI(); renderScheduleList();
+  }
+    function jumpToToday() {
+    const t = new Date();
+    currentYear = t.getFullYear();
+    currentMonth = t.getMonth();
+    selectedDay = t.getDate();
+    renderCalendarGrid();
+    refreshCalendarUI();
+    renderScheduleList();
+    const cell = document.getElementById(`day-${selectedDay}`);
+    if (cell) {
+      document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+    }
+  }
+  function renderCalendarGrid() {
+    const grid = document.getElementById('calendar-grid');
+    document.getElementById('month-title').innerText = `${currentYear}年 ${(currentMonth + 1).toString().padStart(2, '0')}月`;
+    while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); 
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); 
+    const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate(); 
+    let startOffset = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+
+    for (let i = startOffset - 1; i >= 0; i--) grid.appendChild(createDayCell(prevMonthDays - i, true, -1));
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cell = createDayCell(day, false, 0);
+      if (day === selectedDay) cell.classList.add('selected');
+      grid.appendChild(cell);
+    }
+  }
+
+  function createDayCell(dayNum, isOtherMonth, monthOffset) {
+    const cell = document.createElement('div');
+    cell.className = `day-cell ${isOtherMonth ? 'other-month' : ''}`;
+    if (!isOtherMonth) cell.id = `day-${dayNum}`;
+    const labelStr = (dayNum === 1 && !isOtherMonth) ? `${currentMonth + 1}/1` : `${dayNum}`;
+    cell.innerHTML = `<div class="day-header-row"><span class="day-num">${labelStr}</span></div><div class="badges-wrapper"></div>`;
+
+    cell.onclick = () => {
+      if (monthOffset !== 0) { selectedDay = dayNum; changeMonth(monthOffset); }
+      else { selectDate(dayNum, cell); }
+    };
+    return cell;
+  }
+
+  function refreshCalendarUI() {
+    document.querySelectorAll('.day-cell').forEach(cell => {
+      const wrapper = cell.querySelector('.badges-wrapper');
+      if (wrapper) {
+        wrapper.innerHTML = '';
+        wrapper.className = 'badges-wrapper';
+      }
+    });
+
+    dayNotesDatabase.forEach(item => {
+      let sDate = item.startDate ? new Date(item.startDate) : (item.date ? new Date(item.date) : null);
+      let eDate = item.endDate ? new Date(item.endDate) : sDate;
+
+      if (!sDate) return;
+
+      let cur = new Date(sDate);
+      while (cur <= eDate) {
+        if (cur.getFullYear() === currentYear && cur.getMonth() === currentMonth) {
+          const dayNum = cur.getDate();
+          const cell = document.getElementById(`day-${dayNum}`);
+          if (cell) {
+            const wrapper = cell.querySelector('.badges-wrapper');
+            if (wrapper && wrapper.children.length < 4) {
+              const badge = document.createElement('div');
+              badge.className = 'sticker-badge';
+              if (item.bgStyle) badge.style.cssText = item.bgStyle;
+              
+              badge.innerHTML = `
+                <span class="badge-icon">${item.icon}</span>
+                <div class="badge-text-wrap"><span class="badge-text">${item.title}</span></div>
+              `;
+              wrapper.appendChild(badge);
+
+              const count = wrapper.children.length;
+              wrapper.className = `badges-wrapper count-${count}`;
+
+              const textSpan = badge.querySelector('.badge-text');
+              if (textSpan) {
+                const len = item.title.length;
+                if (count === 1) {
+                  if (len >= 5) textSpan.style.fontSize = '8.5px';
+                  else if (len === 4) textSpan.style.fontSize = '9.5px';
+                } else {
+                  if (len >= 5) textSpan.style.fontSize = '7.5px';
+                  else if (len === 4) textSpan.style.fontSize = '8.5px';
+                  else if (len === 3) textSpan.style.fontSize = '9px';
+                }
+              }
+            }
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+    });
+  }
+
+  function selectDate(day, el) {
+    document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDay = day;
+    renderScheduleList();
+  }
+
+  function getSiteHistory(locationStr) {
+    if (!locationStr) return { totalDays: 0, dateListStr: '' };
+    const locKey = locationStr.trim().toLowerCase();
+    
+    let datesSet = new Set();
+    dayNotesDatabase.forEach(item => {
+      if (item.location && item.location.trim().toLowerCase() === locKey) {
+        let sDate = item.startDate ? new Date(item.startDate) : (item.date ? new Date(item.date) : null);
+        let eDate = item.endDate ? new Date(item.endDate) : sDate;
+        if (sDate) {
+          let cur = new Date(sDate);
+          while (cur <= eDate) {
+            let monthDayStr = `${cur.getMonth() + 1}/${cur.getDate()}`;
+            datesSet.add(monthDayStr);
+            cur.setDate(cur.getDate() + 1);
+          }
+        }
+      }
+    });
+
+    const datesArray = Array.from(datesSet);
+    return {
+      totalDays: datesArray.length,
+      dateListStr: datesArray.join(', ')
+    };
+  }
+
+  function renderScheduleList() {
+    const listContainer = document.getElementById('schedule-list');
+    document.getElementById('selected-date-title').innerText = `${currentYear}.${currentMonth + 1}.${selectedDay} 已安排的行程：`;
+    listContainer.innerHTML = '';
+
+    const targetDate = new Date(currentYear, currentMonth, selectedDay);
+    targetDate.setHours(0,0,0,0);
+
+    const notes = dayNotesDatabase.filter(item => {
+      let sDate = item.startDate ? new Date(item.startDate) : (item.date ? new Date(item.date) : null);
+      let eDate = item.endDate ? new Date(item.endDate) : sDate;
+      if (!sDate) return false;
+      sDate.setHours(0,0,0,0);
+      eDate.setHours(23,59,59,999);
+      return targetDate >= sDate && targetDate <= eDate;
+    });
+
+    if (notes.length === 0) {
+      listContainer.innerHTML = `<div style="color:#999; font-size:0.75rem; text-align:center; padding:15px;">今天還沒有行程，點擊貼紙即可放置！</div>`;
+      return;
+    }
+
+    notes.sort((a, b) => (a.time || '23:59').localeCompare(b.time || '23:59'));
+
+    notes.forEach(note => {
+      const card = document.createElement('div');
+      card.className = 'schedule-item-card';
+      if (note.bgStyle) card.style.cssText = note.bgStyle;
+
+      let timeText = note.time ? ` 🕒 ${note.time}` : '';
+      let dateRangeText = note.startDate && note.endDate && note.startDate !== note.endDate ? ` 📅 ${note.startDate} ~ ${note.endDate}` : '';
+
+      let mapBtnHtml = '';
+      if (note.location) {
+        let loc = note.location.trim();
+        if (loc.startsWith('http://') || loc.startsWith('https://')) {
+          mapBtnHtml = `<a href="${loc}" target="_blank" class="map-link-btn">📍 開啟 Google 地圖</a>`;
+        } else {
+          let googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`;
+          mapBtnHtml = `<a href="${googleMapUrl}" target="_blank" class="map-link-btn">📍 導航：${loc}</a>`;
+        }
+      }
+
+      let siteStatsHtml = '';
+      if (note.location) {
+        let history = getSiteHistory(note.location);
+        if (history.totalDays > 0) {
+          siteStatsHtml = `<div class="site-stats-tag">📊 此地點已排 ${history.totalDays} 天 (${history.dateListStr})</div>`;
+        }
+      }
+
+      let mediaBadgesHtml = '';
+      const photoCount = note.photos ? note.photos.length : 0;
+      const audioCount = note.audios ? note.audios.length : 0;
+      if (photoCount > 0 || audioCount > 0) {
+        mediaBadgesHtml = `<div class="media-badges-wrapper">
+          ${photoCount > 0 ? `<span class="media-badge">📷 ${photoCount} 張照片</span>` : ''}
+          ${audioCount > 0 ? `<span class="media-badge">🎙️ ${audioCount} 個錄音</span>` : ''}
+        </div>`;
+      }
+
+      card.innerHTML = `
+        <div class="schedule-left">
+          <div class="schedule-item-icon">${note.icon}</div>
+          <div>
+            <div class="schedule-item-title">${timeText ? `<b style="color:#d35400;">${timeText}</b> | ` : ''}${note.title}${dateRangeText}</div>
+            ${mapBtnHtml ? `<div>${mapBtnHtml}</div>` : ''}
+            ${siteStatsHtml}
+            ${mediaBadgesHtml}
+            <div class="schedule-item-desc">${note.desc || '暫無詳細備註'}</div>
+          </div>
+        </div>
+        <div class="schedule-action-btns">
+          <button class="action-btn copy" onclick="copyScheduleToCurrentDate('${note.id}')">📋 複製</button>
+          <button class="action-btn" onclick="openEditScheduleModal('${note.id}')">✏️ 編輯</button>
+          <button class="action-btn delete" onclick="deleteNote('${note.id}')">🗑️ 刪除</button>
+        </div>
+      `;
+      listContainer.appendChild(card);
+    });
+  }
+
+  // 現場照片上傳處理 (壓縮縮圖)
+  function handleSitePhotosUpload(e) {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800; // 電腦二次處理夠用，且大幅節省空間
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+          else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          
+          const mediaId = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+          saveMediaToDB({ id: mediaId, data: compressedDataUrl });
+          currentModalPhotos.push(mediaId);
+          renderMediaPreviewGrid();
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 語音錄音控制
+  function toggleAudioRecording() {
+    const btn = document.getElementById('record-audio-btn');
+    if (!isRecording) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            const mediaId = 'audio_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+            saveMediaToDB({ id: mediaId, data: evt.target.result });
+            currentModalAudios.push(mediaId);
+            renderMediaPreviewGrid();
+          };
+          reader.readAsDataURL(audioBlob);
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        btn.innerText = '⏹️ 停止錄音';
+        btn.classList.add('recording');
+      }).catch(err => alert('無法取得錄音權限！'));
+    } else {
+      mediaRecorder.stop();
+      isRecording = false;
+      btn.innerText = '🎙️ 開始錄音';
+      btn.classList.remove('recording');
+    }
+  }
+
+  function renderMediaPreviewGrid() {
+    const container = document.getElementById('media-preview-container');
+    container.innerHTML = '';
+
+    currentModalPhotos.forEach((pId, idx) => {
+      getMediaFromDB(pId, res => {
+        if (res) {
+          const div = document.createElement('div');
+          div.style.position = 'relative';
+          div.innerHTML = `<img src="${res.data}" class="thumb-img"><span style="position:absolute; top:-4px; right:-4px; background:#e74c3c; color:#fff; border-radius:50%; width:14px; height:14px; font-size:10px; text-align:center; cursor:pointer;" onclick="removePhoto(${idx})">×</span>`;
+          container.appendChild(div);
+        }
+      });
+    });
+
+    currentModalAudios.forEach((aId, idx) => {
+      getMediaFromDB(aId, res => {
+        if (res) {
+          const div = document.createElement('div');
+          div.style.position = 'relative'; div.style.display = 'flex'; div.style.alignItems = 'center';
+          div.innerHTML = `<audio src="${res.data}" controls style="height:28px; width:140px;"></audio><span style="background:#e74c3c; color:#fff; border-radius:50%; width:14px; height:14px; font-size:10px; text-align:center; cursor:pointer; margin-left:2px;" onclick="removeAudio(${idx})">×</span>`;
+          container.appendChild(div);
+        }
+      });
+    });
+  }
+
+  function removePhoto(idx) { currentModalPhotos.splice(idx, 1); renderMediaPreviewGrid(); }
+  function removeAudio(idx) { currentModalAudios.splice(idx, 1); renderMediaPreviewGrid(); }
+
+  function copyScheduleToCurrentDate(id) {
+    const note = dayNotesDatabase.find(n => n.id === id);
+    if (!note) return;
+
+    const pad = (n) => n.toString().padStart(2, '0');
+    const targetDateStr = `${currentYear}-${pad(currentMonth + 1)}-${pad(selectedDay)}`;
+
+    document.getElementById('edit-item-id').value = ''; 
+    document.getElementById('modal-header-title').innerText = `複製行程至 ${targetDateStr}`;
+    document.getElementById('form-title').value = note.title;
+    document.getElementById('form-time').value = note.time || '';
+    document.getElementById('form-location').value = note.location || '';
+    document.getElementById('form-start-date').value = targetDateStr;
+    document.getElementById('form-end-date').value = targetDateStr;
+    document.getElementById('form-desc').value = note.desc || '';
+
+    currentModalPhotos = note.photos ? [...note.photos] : [];
+    currentModalAudios = note.audios ? [...note.audios] : [];
+    renderMediaPreviewGrid();
+
+    const stickerSelect = document.getElementById('form-sticker-select');
+    stickerSelect.innerHTML = '';
+    stickerTemplates.forEach(st => {
+      const opt = document.createElement('option');
+      opt.value = st.id; opt.innerText = `${st.icon} ${st.name}`;
+      if (st.name === note.title) opt.selected = true;
+      stickerSelect.appendChild(opt);
+    });
+
+    document.getElementById('schedule-modal').style.display = 'flex';
+  }
+
+  function openEditScheduleModal(id) {
+    const note = dayNotesDatabase.find(n => n.id === id);
+    if (!note) return;
+
+    const pad = (n) => n.toString().padStart(2, '0');
+    const defaultDateStr = `${currentYear}-${pad(currentMonth + 1)}-${pad(selectedDay)}`;
+
+    document.getElementById('edit-item-id').value = note.id;
+    document.getElementById('modal-header-title').innerText = '修改/補充日程細節';
+    document.getElementById('form-title').value = note.title;
+    document.getElementById('form-time').value = note.time || '';
+    document.getElementById('form-location').value = note.location || '';
+    document.getElementById('form-start-date').value = note.startDate || note.date || defaultDateStr;
+    document.getElementById('form-end-date').value = note.endDate || note.date || defaultDateStr;
+    document.getElementById('form-desc').value = note.desc || '';
+
+    currentModalPhotos = note.photos ? [...note.photos] : [];
+    currentModalAudios = note.audios ? [...note.audios] : [];
+    renderMediaPreviewGrid();
+
+    const stickerSelect = document.getElementById('form-sticker-select');
+    stickerSelect.innerHTML = '';
+    stickerTemplates.forEach(st => {
+      const opt = document.createElement('option');
+      opt.value = st.id; opt.innerText = `${st.icon} ${st.name}`;
+      if (st.name === note.title) opt.selected = true;
+      stickerSelect.appendChild(opt);
+    });
+
+    document.getElementById('schedule-modal').style.display = 'flex';
+  }
+
+  function saveScheduleFromModal() {
+    const id = document.getElementById('edit-item-id').value;
+    let note;
+
+    if (id) { note = dayNotesDatabase.find(n => n.id === id); }
+    else { note = { id: Date.now().toString() }; dayNotesDatabase.push(note); }
+
+    if (!note) return;
+
+    const newStickerId = document.getElementById('form-sticker-select').value;
+    const selectedSticker = stickerTemplates.find(s => s.id === newStickerId);
+
+    if (selectedSticker) {
+      note.icon = selectedSticker.icon;
+      note.title = document.getElementById('form-title').value.trim() || selectedSticker.name;
+      note.bgStyle = selectedSticker.bgStyle;
+    } else {
+      note.title = document.getElementById('form-title').value.trim();
+    }
+
+    note.time = document.getElementById('form-time').value;
+    note.location = document.getElementById('form-location').value.trim();
+    note.startDate = document.getElementById('form-start-date').value;
+    note.endDate = document.getElementById('form-end-date').value;
+    note.desc = document.getElementById('form-desc').value.trim();
+    note.photos = [...currentModalPhotos];
+    note.audios = [...currentModalAudios];
+
+    autoSaveToStorage();
+    closeScheduleModal();
+    refreshCalendarUI();
+    renderScheduleList();
+  }
+
+  function closeScheduleModal() { document.getElementById('schedule-modal').style.display = 'none'; }
+
+  function deleteNote(id) {
+    if (confirm('確定要刪除這張日程標記嗎？')) {
+      dayNotesDatabase = dayNotesDatabase.filter(n => n.id !== id);
+      autoSaveToStorage();
+      refreshCalendarUI();
+      renderScheduleList();
+    }
+  }
+
+  function exportDataToFile() {
+    const backupData = { version: 'v58', exportTime: new Date().toISOString(), categoriesDatabase, stickerTemplates, dayNotesDatabase };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+    const a = document.createElement('a'); a.href = dataStr;
+    a.download = `my_calendar_data_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    alert('✅ 已下載 JSON 備份檔！');
+  }
+
+  function triggerFileInput() { document.getElementById('import-file-input').click(); }
+
+  function importDataFromFile(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const imported = JSON.parse(evt.target.result);
+        if (imported.stickerTemplates && imported.dayNotesDatabase) {
+          if (imported.categoriesDatabase) categoriesDatabase = imported.categoriesDatabase;
+          stickerTemplates = imported.stickerTemplates;
+          dayNotesDatabase = imported.dayNotesDatabase;
+          autoEnsureHolidaysExist();
+          autoSaveToStorage();
+          renderCategoriesUI();
+          refreshCalendarUI();
+          renderStickers('all');
+          renderScheduleList();
+          alert('🎉 資料同步成功！');
+        }
+      } catch (err) { alert('❌ 解析檔案失敗！'); }
+    };
+    reader.readAsText(file);
+  }
+
+  function initPatternSelectOptions() {
+    const pSelect = document.getElementById('pattern-select');
+    pSelect.innerHTML = '';
+    patternList.forEach((p, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx; opt.innerText = p.name;
+      pSelect.appendChild(opt);
+    });
+  }
+
+  function handlePhotoUpload(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => { uploadedPhotoBase64 = evt.target.result; updateCanvasStyle(); };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhotoBg() {
+    uploadedPhotoBase64 = '';
+    document.getElementById('bg-photo-input').value = '';
+    updateCanvasStyle();
+  }
+
+  function updateCanvasStyle() {
+    const canvas = document.getElementById('preview-canvas');
+    const currentText = canvas.innerText;
+    let bgCss = uploadedPhotoBase64 ? `background-image: url('${uploadedPhotoBase64}'); background-size: cover;` : patternList[currentPatternIndex].gen(currentColor, currentPatternSize);
+    canvas.style.cssText = bgCss + ` font-size: ${currentFontSize}rem;`;
+    canvas.innerHTML = `<span style="background:rgba(255,255,255,0.85); padding:1px 5px; border-radius:3px;">${currentText}</span>`;
+  }
+
+  function selectPattern(index) { uploadedPhotoBase64 = ''; currentPatternIndex = parseInt(index); updateCanvasStyle(); }
+  function updatePatternSize(sizeVal) { currentPatternSize = parseInt(sizeVal); document.getElementById('size-val-text').innerText = `${sizeVal}px`; updateCanvasStyle(); }
+  function updateCanvasColor(colorHex) { currentColor = colorHex; uploadedPhotoBase64 = ''; document.getElementById('hex-color-input').value = colorHex.toUpperCase(); updateCanvasStyle(); }
+
+  function applyHexColor() {
+    let hex = document.getElementById('hex-color-input').value.trim();
+    if (!hex.startsWith('#')) hex = '#' + hex;
+    if (/^#[0-9A-F]{6}$/i.test(hex)) { currentColor = hex; uploadedPhotoBase64 = ''; document.getElementById('native-color-picker').value = hex; updateCanvasStyle(); }
+  }
+
+  function switchTab(tabName, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+  }
+
+  function changeEditorText() {
+    const text = prompt('請輸入貼圖文字：', '🍰 甜點');
+    if(text) document.getElementById('preview-canvas').innerHTML = `<span style="background:rgba(255,255,255,0.85); padding:1px 5px; border-radius:3px;">${text}</span>`;
+  }
+
+  function zoomText(factor) {
+    currentFontSize *= factor;
+    document.getElementById('preview-canvas').style.fontSize = currentFontSize + 'rem';
+  }
+
+  autoEnsureHolidaysExist();
+  initPatternSelectOptions();
+  autoSaveToStorage();
+  renderCalendarGrid();
+  updateCanvasStyle();
+  renderCategoriesUI();
+  renderStickers('all');
+  refreshCalendarUI();
+  renderScheduleList();
+</script>
+
+</body>
+</html>
